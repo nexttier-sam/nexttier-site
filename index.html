@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Player Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --nt-black: #08090C;
+  --nt-ice: #F0F4F8;
+  --nt-white: #FFFFFF;
+  --nt-green: #1DBC7A;
+  --nt-green-d: #0E8A57;
+  --nt-green-l: #E3F9EE;
+  --nt-red: #E8344A;
+  --nt-red-l: #FDEAEC;
+  --nt-amber: #F59E0B;
+  --nt-amber-l: #FEF3C7;
+  --nt-blue: #2D7DD2;
+  --nt-blue-l: #E8F2FC;
+  --nt-slate: #3D4A5C;
+  --nt-muted: #8896A8;
+  --nt-border: rgba(61,74,92,0.12);
+  --nt-border-strong: rgba(61,74,92,0.22);
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--nt-ice);
+  color: var(--nt-black);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--nt-black);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 56px;
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 26px; letter-spacing: .04em;
+  color: var(--nt-white);
+}
+.nav-logo span { color: var(--nt-green); }
+.nav-links { display: flex; gap: 24px; align-items: center; }
+.nav-links a {
+  font-size: 13px; font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  text-decoration: none; letter-spacing: .03em;
+  transition: color .15s;
+}
+.nav-links a:hover { color: var(--nt-white); }
+.nav-cta {
+  background: var(--nt-green) !important;
+  color: var(--nt-black) !important;
+  font-weight: 500 !important;
+  padding: 6px 16px !important;
+  border-radius: 6px;
+}
+
+/* ── HERO ── */
+.hero {
+  background: var(--nt-black);
+  padding: 96px 32px 88px;
+  position: relative; overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 39px,
+      rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px,
+      rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  right: -120px; top: -60px;
+  width: 520px; height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(29,188,122,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner {
+  max-width: 960px; margin: 0 auto;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 64px; align-items: center;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: .1em;
+  color: var(--nt-green);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 20px; height: 1px;
+  background: var(--nt-green);
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 8vw, 86px);
+  line-height: .95; letter-spacing: .02em;
+  color: var(--nt-white);
+  margin-bottom: 24px;
+}
+.hero h1 em { color: var(--nt-green); font-style: normal; }
+.hero-sub {
+  font-size: 17px; font-weight: 300;
+  color: rgba(255,255,255,0.5);
+  max-width: 480px; line-height: 1.7;
+  margin-bottom: 40px;
+}
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.btn-primary {
+  background: var(--nt-green);
+  color: var(--nt-black);
+  font-weight: 500; font-size: 14px;
+  padding: 13px 28px; border-radius: 6px;
+  border: none; cursor: pointer;
+  font-family: var(--font-body);
+  transition: background .15s;
+  text-decoration: none; display: inline-block;
+}
+.btn-primary:hover { background: #23D98C; }
+.btn-outline {
+  background: transparent;
+  color: rgba(255,255,255,0.65);
+  font-weight: 400; font-size: 14px;
+  padding: 13px 28px; border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.18);
+  cursor: pointer; font-family: var(--font-body);
+  transition: border-color .15s, color .15s;
+  text-decoration: none; display: inline-block;
+}
+.btn-outline:hover { border-color: rgba(255,255,255,0.4); color: var(--nt-white); }
+
+/* Hero score card */
+.hero-score-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 28px 24px;
+  position: relative;
+}
+.hsc-label {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: .1em;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase; margin-bottom: 16px;
+}
+.hsc-score-row {
+  display: flex; align-items: baseline; gap: 8px;
+  margin-bottom: 6px;
+}
+.hsc-num {
+  font-family: var(--font-display);
+  font-size: 72px; line-height: 1;
+  color: var(--nt-green);
+}
+.hsc-max {
+  font-family: var(--font-display);
+  font-size: 28px; color: rgba(255,255,255,0.2);
+}
+.hsc-tier {
+  font-size: 12px; font-weight: 300;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 24px;
+}
+.hsc-bars { display: flex; flex-direction: column; gap: 10px; }
+.hsc-bar-row { display: flex; flex-direction: column; gap: 4px; }
+.hsc-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 11px;
+}
+.hsc-bar-name { color: rgba(255,255,255,0.45); }
+.hsc-bar-val { font-family: var(--font-mono); color: rgba(255,255,255,0.3); font-size: 10px; }
+.hsc-track {
+  height: 3px; background: rgba(255,255,255,0.06);
+  border-radius: 2px; overflow: hidden;
+}
+.hsc-fill {
+  height: 100%; border-radius: 2px;
+  background: var(--nt-green);
+  transition: width 1s ease;
+}
+.hsc-fill.amber { background: var(--nt-amber); }
+.hsc-fill.red { background: var(--nt-red); }
+
+/* ── STAT STRIP ── */
+.stat-strip {
+  background: var(--nt-green);
+  padding: 22px 32px;
+  display: flex; justify-content: center; gap: 56px; flex-wrap: wrap;
+}
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 34px; line-height: 1;
+  color: var(--nt-black); letter-spacing: .02em;
+}
+.stat-label {
+  font-size: 11px; font-weight: 500;
+  color: rgba(0,0,0,0.5);
+  letter-spacing: .06em; text-transform: uppercase;
+  margin-top: 3px; font-family: var(--font-mono);
+}
+
+/* ── LAYOUT ── */
+.page { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+.section { padding: 64px 0; }
+.section-tag {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--nt-green);
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.section-tag::before {
+  content: '';
+  width: 16px; height: 1px;
+  background: var(--nt-green);
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 50px);
+  line-height: 1.0; letter-spacing: .02em;
+  color: var(--nt-black);
+  margin-bottom: 10px;
+}
+.section-sub {
+  font-size: 15px; font-weight: 300;
+  color: var(--nt-muted); max-width: 520px;
+  margin-bottom: 40px; line-height: 1.65;
+}
+
+/* ── HOW IT WORKS ── */
+#how { background: var(--nt-white); border-top: 1px solid var(--nt-border); border-bottom: 1px solid var(--nt-border); }
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+.step {
+  padding: 32px 28px;
+  position: relative;
+}
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute; right: 0; top: 32px; bottom: 32px;
+  width: 1px; background: var(--nt-border);
+}
+.step-num {
+  font-family: var(--font-display);
+  font-size: 56px; line-height: 1;
+  color: var(--nt-green); opacity: .25;
+  margin-bottom: 16px;
+}
+.step-title {
+  font-family: var(--font-display);
+  font-size: 22px; letter-spacing: .02em;
+  color: var(--nt-black); margin-bottom: 8px;
+}
+.step-body {
+  font-size: 13px; font-weight: 300;
+  color: var(--nt-muted); line-height: 1.65;
+}
+
+/* ── FEATURES ── */
+#features { background: var(--nt-ice); }
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.feat-card {
+  background: var(--nt-white);
+  border: 1px solid var(--nt-border);
+  border-radius: 12px;
+  padding: 28px 24px;
+  transition: box-shadow .2s, transform .2s;
+}
+.feat-card:hover {
+  box-shadow: 0 6px 28px rgba(0,0,0,0.07);
+  transform: translateY(-2px);
+}
+.feat-icon {
+  width: 40px; height: 40px;
+  background: var(--nt-green-l);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+}
+.feat-icon svg { width: 18px; height: 18px; }
+.feat-title {
+  font-family: var(--font-display);
+  font-size: 20px; letter-spacing: .02em;
+  color: var(--nt-black); margin-bottom: 8px;
+}
+.feat-body {
+  font-size: 13px; font-weight: 300;
+  color: var(--nt-muted); line-height: 1.65;
+}
+.feat-card.dark {
+  background: var(--nt-black);
+  border-color: var(--nt-black);
+}
+.feat-card.dark .feat-icon { background: rgba(29,188,122,0.12); }
+.feat-card.dark .feat-title { color: var(--nt-white); }
+.feat-card.dark .feat-body { color: rgba(255,255,255,0.4); }
+
+/* ── TIERS ── */
+#tiers { background: var(--nt-white); border-top: 1px solid var(--nt-border); }
+.tier-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.tier-card {
+  background: var(--nt-ice);
+  border: 1px solid var(--nt-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.tier-card.featured {
+  border: 2px solid var(--nt-green);
+}
+.tier-top {
+  background: var(--nt-black);
+  padding: 22px 22px 18px;
+}
+.tier-card.featured .tier-top { background: var(--nt-green); }
+.tier-badge {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px;
+  display: inline-block; margin-bottom: 10px;
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.6);
+}
+.tier-card.featured .tier-badge {
+  background: rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.5);
+}
+.tier-name {
+  font-family: var(--font-display);
+  font-size: 28px; letter-spacing: .03em;
+  color: var(--nt-white); line-height: 1;
+}
+.tier-card.featured .tier-name { color: var(--nt-black); }
+.tier-tagline {
+  font-size: 12px; font-weight: 300;
+  color: rgba(255,255,255,0.45); margin-top: 4px;
+}
+.tier-card.featured .tier-tagline { color: rgba(0,0,0,0.45); }
+.tier-price-row {
+  display: flex; align-items: baseline; gap: 4px;
+  margin-top: 14px;
+}
+.tier-price {
+  font-family: var(--font-display);
+  font-size: 40px; line-height: 1;
+  color: var(--nt-white);
+}
+.tier-card.featured .tier-price { color: var(--nt-black); }
+.tier-per {
+  font-size: 12px; font-weight: 300;
+  color: rgba(255,255,255,0.4);
+}
+.tier-card.featured .tier-per { color: rgba(0,0,0,0.4); }
+.tier-features { padding: 16px 22px 6px; }
+.tier-feat {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--nt-slate);
+  margin-bottom: 10px; line-height: 1.4;
+}
+.feat-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 5px;
+}
+.feat-dot.yes { background: var(--nt-green); }
+.feat-dot.no { background: var(--nt-border-strong); }
+.feat-text.muted { color: var(--nt-muted); }
+.tier-cta {
+  margin: 8px 22px 22px;
+  display: block; text-align: center;
+  padding: 11px; border-radius: 7px;
+  font-size: 13px; font-weight: 500;
+  font-family: var(--font-body);
+  cursor: pointer; border: none;
+  text-decoration: none;
+  transition: background .15s;
+}
+.tier-cta.primary { background: var(--nt-green); color: var(--nt-black); }
+.tier-cta.primary:hover { background: #23D98C; }
+.tier-cta.secondary { background: var(--nt-black); color: var(--nt-white); }
+.tier-cta.secondary:hover { background: var(--nt-slate); }
+.tier-cta.outline {
+  background: transparent; color: var(--nt-slate);
+  border: 1px solid var(--nt-border-strong);
+}
+.tier-cta.outline:hover { background: var(--nt-white); }
+
+
+
+/* ── FAQ ── */
+#faq { background: var(--nt-white); border-top: 1px solid var(--nt-border); }
+.faq-list { max-width: 680px; }
+.faq-item {
+  border-bottom: 1px solid var(--nt-border);
+  padding: 20px 0;
+}
+.faq-item:first-child { border-top: 1px solid var(--nt-border); }
+.faq-q {
+  font-weight: 500; font-size: 15px;
+  color: var(--nt-black); cursor: pointer;
+  display: flex; justify-content: space-between;
+  align-items: center; gap: 16px;
+  user-select: none;
+}
+.faq-q svg {
+  flex-shrink: 0; transition: transform .2s;
+}
+.faq-item.open .faq-q svg { transform: rotate(45deg); }
+.faq-a {
+  font-size: 13px; font-weight: 300;
+  color: var(--nt-muted); line-height: 1.7;
+  margin-top: 12px; display: none;
+}
+.faq-item.open .faq-a { display: block; }
+
+/* ── FINAL CTA ── */
+.final-cta {
+  background: var(--nt-black);
+  padding: 96px 32px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.final-cta::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 39px,
+      rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px,
+      rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px);
+  pointer-events: none;
+}
+.final-cta-inner { position: relative; max-width: 560px; margin: 0 auto; }
+.final-cta h2 {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 7vw, 72px);
+  line-height: .95; letter-spacing: .02em;
+  color: var(--nt-white); margin-bottom: 16px;
+}
+.final-cta h2 em { color: var(--nt-green); font-style: normal; }
+.final-cta p {
+  font-size: 15px; font-weight: 300;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 36px; line-height: 1.65;
+}
+.final-cta-actions {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--nt-black);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 28px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+.footer-logo {
+  font-family: var(--font-display);
+  font-size: 22px; letter-spacing: .04em;
+  color: var(--nt-white);
+}
+.footer-logo span { color: var(--nt-green); }
+.footer-links {
+  display: flex; gap: 20px;
+}
+.footer-links a {
+  font-size: 12px; color: rgba(255,255,255,0.3);
+  text-decoration: none; transition: color .15s;
+}
+.footer-links a:hover { color: rgba(255,255,255,0.6); }
+.footer-sub {
+  font-size: 11px; color: rgba(255,255,255,0.2);
+  font-family: var(--font-mono); letter-spacing: .04em;
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-left > * {
+  animation: fadeUp .6s ease both;
+}
+.hero-eyebrow { animation-delay: 0s; }
+.hero h1 { animation-delay: .1s; }
+.hero-sub { animation-delay: .2s; }
+.hero-actions { animation-delay: .3s; }
+.hero-score-card { animation: fadeUp .6s .2s ease both; }
+
+@media (max-width: 768px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+  .hero-score-card { display: none; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .step:not(:last-child)::after { display: none; }
+  .features-grid { grid-template-columns: 1fr; }
+  .tier-grid { grid-template-columns: 1fr; }
+  .proof-grid { grid-template-columns: 1fr; }
+  .proof-banner { flex-direction: column; text-align: center; }
+  nav { padding: 0 16px; }
+  .nav-links { gap: 12px; }
+  .hero { padding: 64px 24px 56px; }
+  .stat-strip { gap: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-logo">NEXT<span>TIER</span></div>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#tiers">Pricing</a>
+    <a href="intake.html" class="nav-cta">Get started</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Player intelligence platform</div>
+      <h1>YOUR PLAYER.<br>THEIR <em>NEXT</em><br>LEVEL.</h1>
+      <p class="hero-sub">Next Tier turns raw stats, game film, and league data into a single Player Development Score — with a personalized roadmap to reach the next level of hockey.</p>
+      <div class="hero-actions">
+        <a href="intake.html" class="btn-primary">Build your player profile →</a>
+        <a href="#how" class="btn-outline">See how it works</a>
+      </div>
+    </div>
+    <div class="hero-score-card">
+      <div class="hsc-label">Player development score</div>
+      <div class="hsc-score-row">
+        <div class="hsc-num">71</div>
+        <div class="hsc-max">/100</div>
+      </div>
+      <div class="hsc-tier">Tier B — High-Upside Alberta Prospect</div>
+      <div class="hsc-bars">
+        <div class="hsc-bar-row">
+          <div class="hsc-bar-label"><span class="hsc-bar-name">Production output</span><span class="hsc-bar-val">81</span></div>
+          <div class="hsc-track"><div class="hsc-fill" style="width:81%"></div></div>
+        </div>
+        <div class="hsc-bar-row">
+          <div class="hsc-bar-label"><span class="hsc-bar-name">Trajectory / improvement</span><span class="hsc-bar-val">88</span></div>
+          <div class="hsc-track"><div class="hsc-fill" style="width:88%"></div></div>
+        </div>
+        <div class="hsc-bar-row">
+          <div class="hsc-bar-label"><span class="hsc-bar-name">Offensive efficiency</span><span class="hsc-bar-val">74</span></div>
+          <div class="hsc-track"><div class="hsc-fill" style="width:74%"></div></div>
+        </div>
+        <div class="hsc-bar-row">
+          <div class="hsc-bar-label"><span class="hsc-bar-name">Hockey IQ / reads</span><span class="hsc-bar-val">72</span></div>
+          <div class="hsc-track"><div class="hsc-fill" style="width:72%"></div></div>
+        </div>
+        <div class="hsc-bar-row">
+          <div class="hsc-bar-label"><span class="hsc-bar-name">Physical compete</span><span class="hsc-bar-val">62</span></div>
+          <div class="hsc-track"><div class="hsc-fill amber" style="width:62%"></div></div>
+        </div>
+        <div class="hsc-bar-row">
+          <div class="hsc-bar-label"><span class="hsc-bar-name">Two-way reliability</span><span class="hsc-bar-val">58</span></div>
+          <div class="hsc-track"><div class="hsc-fill amber" style="width:58%"></div></div>
+        </div>
+        <div class="hsc-bar-row">
+          <div class="hsc-bar-label"><span class="hsc-bar-name">PIM management</span><span class="hsc-bar-val">38</span></div>
+          <div class="hsc-track"><div class="hsc-fill red" style="width:38%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── STAT STRIP ── -->
+<div class="stat-strip">
+  <div class="stat-item">
+    <div class="stat-num">4,200+</div>
+    <div class="stat-label">Players tracked</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">38</div>
+    <div class="stat-label">Leagues covered</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">92%</div>
+    <div class="stat-label">Pathway accuracy</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">48h</div>
+    <div class="stat-label">Evaluation turnaround</div>
+  </div>
+</div>
+
+<!-- ── HOW IT WORKS ── -->
+<div id="how">
+<div class="page">
+<div class="section">
+  <div class="section-tag">Process</div>
+  <div class="section-title">DATA IN.<br>DIRECTION OUT.</div>
+  <p class="section-sub">Three steps from raw information to a clear, scout-validated development roadmap.</p>
+
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">BUILD YOUR PROFILE</div>
+      <p class="step-body">Enter your player's stats, league history, position, and goals. Our intake form takes under five minutes and feeds directly into the scoring engine.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">GET YOUR PDS</div>
+      <p class="step-body">We cross-reference your data against 4,200+ players across 38 leagues. Within 48 hours you receive a full Player Development Score with metric-by-metric breakdown.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">FOLLOW THE ROADMAP</div>
+      <p class="step-body">Your personalized development plan identifies the exact gaps between where your player is now and where they need to be — with scout-verified milestones and timelines.</p>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ── FEATURES ── -->
+<div id="features">
+<div class="page">
+<div class="section">
+  <div class="section-tag">Features</div>
+  <div class="section-title">EVERYTHING SCOUTS<br>WANT TO SEE.</div>
+  <p class="section-sub">Next Tier isn't a stat tracker. It's an intelligence platform built for players who want to move up.</p>
+
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9" cy="9" r="7.5" stroke="#1DBC7A" stroke-width="1.5"/>
+          <path d="M9 5v4l2.5 2.5" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">PLAYER DEVELOPMENT SCORE</div>
+      <p class="feat-body">A single composite score built from 14 weighted metrics. Updated every evaluation cycle so coaches and scouts see progress in real time.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 14l4-4 3 3 4-5 3 2" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">TRAJECTORY TRACKING</div>
+      <p class="feat-body">Season-over-season improvement is the strongest predictor of junior success. We track it automatically across your league history.</p>
+    </div>
+    <div class="feat-card dark">
+      <div class="feat-icon">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="4" width="14" height="10" rx="2" stroke="#1DBC7A" stroke-width="1.5"/>
+          <path d="M6 8h6M6 11h4" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">FILM ANALYSIS</div>
+      <p class="feat-body">Upload game footage and our AI engine extracts positional reads, compete level, and coachability flags that raw stats can't reveal.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 2L2 7v9h4v-4h6v4h4V7L9 2z" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">PATHWAY PROBABILITY</div>
+      <p class="feat-body">A data-driven probability score for AJHL, prep school, NCAA, and beyond — based on where comparable players are now, not where they were three years ago.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="7" cy="7" r="4.5" stroke="#1DBC7A" stroke-width="1.5"/>
+          <path d="M10.5 10.5L16 16" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feat-title">SCOUT MATCHING</div>
+      <p class="feat-body">Elite tier members get their live recruiting profile matched to credentialed scouts actively looking at your player's position, age, and target league.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 2v4M9 12v4M2 9h4M12 9h4" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="9" cy="9" r="3" stroke="#1DBC7A" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="feat-title">DEVELOPMENT ROADMAP</div>
+      <p class="feat-body">A 12-month milestone plan with specific physical, technical, and competitive targets. Built for the player's current trajectory, not a generic template.</p>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ── TIERS ── -->
+<div id="tiers">
+<div class="page">
+<div class="section">
+  <div class="section-tag">Pricing</div>
+  <div class="section-title">CHOOSE YOUR<br>LEVEL OF INTEL.</div>
+  <p class="section-sub">Cancel anytime. No long-term contracts. Every plan includes a baseline Player Development Score.</p>
+
+  <div class="tier-grid">
+   
+    <!-- Scout (featured) -->
+    <div class="tier-card featured">
+      <div class="tier-top">
+        <div class="tier-badge">Most popular</div>
+        <div class="tier-name">SCOUT</div>
+        <div class="tier-tagline">Monthly roadmap for serious players</div>
+        <div class="tier-price-row">
+          <div class="tier-price">$75</div>
+        </div>
+      </div>
+      <div class="tier-features">
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>Everything in Starter</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>Monthly PDS evaluations</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>Full 14-metric breakdown</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>12-month development roadmap</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>1 film evaluation / mo</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>Pathway probability report</span></div>
+        <div class="tier-feat"><div class="feat-dot no"></div><span class="feat-text muted">Live scout matching</span></div>
+      </div>
+      <a href="intake.html" class="tier-cta primary">Get started</a>
+    </div>
+
+    <!-- Elite -->
+    <div class="tier-card">
+      <div class="tier-top">
+        <div class="tier-badge">For college & pro track</div>
+        <div class="tier-name">ELITE</div>
+        <div class="tier-tagline">Live recruiting profile + scout access</div>
+        <div class="tier-price-row">
+          <div class="tier-price">$299</div>
+        </div>
+      </div>
+      <div class="tier-features">
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>Everything in Scout</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>Live recruiting profile</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>Active scout matching</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>Unlimited film evaluations</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>Advisor call (30 min / mo)</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>Priority 24h PDS turnaround</span></div>
+        <div class="tier-feat"><div class="feat-dot yes"></div><span>NCAA / USHL data benchmarks</span></div>
+      </div>
+      <a href="intake.html" class="tier-cta secondary">Get started</a>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ── FAQ ── -->
+<div id="faq">
+<div class="page">
+<div class="section">
+  <div class="section-tag">Questions</div>
+  <div class="section-title">COMMON<br>QUESTIONS.</div>
+
+  <div class="faq-list">
+    <div class="faq-item open">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        What leagues does Next Tier cover?
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="faq-a">We cover 38 leagues including AEHL, AJHL, BCHL, USHL, NAHL, OJHL, NCAA D1/D2/D3, and ACHA. If your player's league isn't listed in the intake form, reach out and we'll add it within 24 hours.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        How is the PDS different from a regular scouting report?
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="faq-a">A traditional scouting report is a snapshot in time from a single observer. The PDS is a composite score built from verified stats, film analysis, and trajectory data — compared against 4,200+ players. It updates every evaluation cycle, so it reflects current momentum, not a one-day impression.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        What does the 48-hour film evaluation include?
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="faq-a">After you submit footage (MP4, MOV, YouTube, or Google Drive link), our AI engine produces a full PDS update plus a coachable metric breakdown covering offensive reads, defensive positioning, physical compete, two-way reliability, and puck management. A credentialed scout reviews the AI output before it's delivered.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Can I switch plans or cancel at any time?
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="faq-a">Yes. You can upgrade, downgrade, or cancel your subscription at any time from your account dashboard. There are no long-term commitments or cancellation fees. Your player's profile and historical PDS data is retained for 12 months after cancellation.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        Is Next Tier available for female hockey players?
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="faq-a">Yes. Next Tier covers PWHL, NWHL, ACHA Women's, and all provincial female leagues. Benchmarks and pathway scores are calculated against gender-appropriate comparison groups.</div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ── FINAL CTA ── -->
+<div class="final-cta">
+  <div class="final-cta-inner">
+    <h2>STOP GUESSING.<br>START <em>ADVANCING.</em></h2>
+    <p>Five minutes of intake. 48 hours to a full Player Development Score, metric breakdown, and personalized roadmap. Your player's next level starts here.</p>
+    <div class="final-cta-actions">
+      <a href="intake.html" class="btn-primary">Build your player profile →</a>
+      <a href="#tiers" class="btn-outline">See pricing</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-logo">NEXT<span>TIER</span></div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Terms</a>
+    <a href="#">Contact</a>
+  </div>
+  <div class="footer-sub">A Signal Stax Inc. product · North Vancouver, BC · signalstax.com</div>
+</footer>
+
+<script>
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  item.classList.toggle('open');
+}
+</script>
+</body>
+</html>
