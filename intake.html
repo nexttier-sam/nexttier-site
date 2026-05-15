@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Next Tier — Player Profile Intake</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
 <style>
 :root {
   --nt-black: #08090C;
@@ -15,13 +14,8 @@
   --nt-green-d: #0E8A57;
   --nt-green-l: #E3F9EE;
   --nt-red: #E8344A;
-  --nt-red-l: #FDEAEC;
-  --nt-amber: #F59E0B;
-  --nt-amber-l: #FEF3C7;
   --nt-blue: #2D7DD2;
   --nt-blue-l: #E8F2FC;
-  --nt-purple: #7C3AED;
-  --nt-purple-l: #EDE9FE;
   --nt-slate: #3D4A5C;
   --nt-muted: #8896A8;
   --nt-border: rgba(61,74,92,0.12);
@@ -65,26 +59,22 @@ nav {
 .nav-back:hover { color: rgba(255,255,255,0.7); }
 .nav-back svg { width: 14px; height: 14px; }
 
-/* ── INTAKE HEADER ── */
+/* ── HEADER ── */
 .intake-header {
   background: var(--nt-black);
-  padding: 52px 32px 48px;
+  padding: 48px 32px 44px;
   position: relative; overflow: hidden;
 }
 .intake-header::before {
   content: '';
   position: absolute; inset: 0;
   background:
-    repeating-linear-gradient(0deg, transparent, transparent 39px,
-      rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px),
-    repeating-linear-gradient(90deg, transparent, transparent 39px,
-      rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px);
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px);
   pointer-events: none;
 }
 .intake-header-inner {
-  max-width: 880px; margin: 0 auto;
-  position: relative;
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 32px;
+  max-width: 680px; margin: 0 auto; position: relative;
 }
 .intake-eyebrow {
   font-family: var(--font-mono);
@@ -93,81 +83,26 @@ nav {
   margin-bottom: 12px;
   display: flex; align-items: center; gap: 10px;
 }
-.intake-eyebrow::before {
-  content: ''; width: 16px; height: 1px; background: var(--nt-green);
-}
+.intake-eyebrow::before { content: ''; width: 16px; height: 1px; background: var(--nt-green); }
 .intake-header h1 {
   font-family: var(--font-display);
-  font-size: clamp(40px, 6vw, 64px);
+  font-size: clamp(38px, 5vw, 58px);
   line-height: .95; letter-spacing: .02em;
   color: var(--nt-white);
 }
 .intake-header h1 em { color: var(--nt-green); font-style: normal; }
-.intake-header-right {
-  flex-shrink: 0; text-align: right;
-}
-.intake-time {
-  font-family: var(--font-mono);
-  font-size: 11px; letter-spacing: .08em;
-  color: rgba(255,255,255,0.25); text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.intake-time-val {
-  font-family: var(--font-display);
-  font-size: 36px; color: var(--nt-green);
-  line-height: 1;
-}
-.intake-time-label {
-  font-size: 11px; color: rgba(255,255,255,0.3);
-  margin-top: 2px;
+.intake-header-sub {
+  margin-top: 14px;
+  font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.4);
 }
 
-/* ── PROGRESS BAR ── */
-.progress-bar-wrap {
-  background: var(--nt-black);
-  border-top: 1px solid rgba(255,255,255,0.06);
-  padding: 0 32px;
-}
-.progress-bar-inner {
-  max-width: 880px; margin: 0 auto;
-  display: flex; gap: 0;
-}
-.prog-step {
-  flex: 1; padding: 14px 0 12px;
-  border-bottom: 2px solid transparent;
-  transition: border-color .2s;
-  cursor: pointer;
-}
-.prog-step.active { border-bottom-color: var(--nt-green); }
-.prog-step.done { border-bottom-color: rgba(29,188,122,0.3); }
-.prog-step-num {
-  font-family: var(--font-mono);
-  font-size: 10px; letter-spacing: .08em;
-  color: rgba(255,255,255,0.2); text-transform: uppercase;
-  margin-bottom: 2px;
-}
-.prog-step.active .prog-step-num { color: var(--nt-green); }
-.prog-step.done .prog-step-num { color: rgba(29,188,122,0.5); }
-.prog-step-label {
-  font-size: 12px; font-weight: 500;
-  color: rgba(255,255,255,0.25);
-}
-.prog-step.active .prog-step-label { color: var(--nt-white); }
-.prog-step.done .prog-step-label { color: rgba(255,255,255,0.4); }
-
-/* ── LAYOUT ── */
+/* ── BODY ── */
 .intake-body {
-  max-width: 880px; margin: 0 auto;
-  padding: 40px 24px 80px;
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 24px; align-items: start;
+  max-width: 680px; margin: 0 auto;
+  padding: 36px 24px 80px;
 }
 
-/* ── FORM SECTIONS ── */
-.form-section { display: none; }
-.form-section.active { display: block; }
-
+/* ── FORM BLOCKS ── */
 .form-block {
   background: var(--nt-white);
   border: 1px solid var(--nt-border);
@@ -176,49 +111,39 @@ nav {
   margin-bottom: 16px;
 }
 .form-block-header {
-  padding: 22px 28px 18px;
+  padding: 20px 26px 16px;
   border-bottom: 1px solid var(--nt-border);
   display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
 }
 .form-block-title {
   font-family: var(--font-display);
-  font-size: 22px; letter-spacing: .02em;
-  color: var(--nt-black);
+  font-size: 20px; letter-spacing: .02em; color: var(--nt-black);
 }
 .form-block-sub {
-  font-size: 12px; font-weight: 300;
-  color: var(--nt-muted); margin-top: 2px;
+  font-size: 12px; font-weight: 300; color: var(--nt-muted); margin-top: 2px;
 }
 .form-block-tag {
   font-family: var(--font-mono);
-  font-size: 9px; letter-spacing: .08em;
-  text-transform: uppercase;
+  font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
   padding: 3px 9px; border-radius: 4px;
   background: var(--nt-green-l); color: var(--nt-green-d);
   flex-shrink: 0; margin-top: 4px;
 }
-.form-block-tag.optional {
-  background: var(--nt-blue-l); color: var(--nt-blue);
-}
-.form-block-tag.recruiting {
-  background: var(--nt-purple-l); color: var(--nt-purple);
-}
-.form-block-tag.playoff {
-  background: var(--nt-amber-l); color: var(--nt-amber);
-}
-.form-block-body { padding: 24px 28px; }
+.form-block-tag.optional { background: var(--nt-blue-l); color: var(--nt-blue); }
+.form-block-body { padding: 22px 26px; }
 
-.form-group { margin-bottom: 18px; }
+/* ── FIELDS ── */
+.form-group { margin-bottom: 16px; }
 .form-group:last-child { margin-bottom: 0; }
 .form-group label {
   display: block;
   font-size: 11px; font-weight: 500;
   letter-spacing: .06em; text-transform: uppercase;
-  color: var(--nt-muted);
-  margin-bottom: 7px; font-family: var(--font-mono);
+  color: var(--nt-muted); margin-bottom: 7px;
+  font-family: var(--font-mono);
 }
 .form-group label .req { color: var(--nt-green); margin-left: 2px; }
-.form-group label .opt { color: var(--nt-muted); margin-left: 4px; font-weight: 300; text-transform: none; letter-spacing: 0; font-family: var(--font-body); font-size: 11px; }
+.form-group label .opt { color: var(--nt-muted); font-weight: 300; text-transform: none; letter-spacing: 0; font-family: var(--font-body); font-size: 11px; margin-left: 4px; }
 .form-group input,
 .form-group select,
 .form-group textarea {
@@ -241,9 +166,6 @@ nav {
   border-color: var(--nt-green);
   background: var(--nt-white);
 }
-.form-group textarea {
-  resize: vertical; min-height: 90px;
-}
 .form-group select {
   cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238896A8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -253,401 +175,104 @@ nav {
 }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-.form-row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
-.form-row-5 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 10px; }
 
-/* Radio / checkbox group */
-.radio-group, .check-group {
-  display: flex; flex-wrap: wrap; gap: 8px;
-}
-.radio-opt, .check-opt {
-  position: relative;
-}
-.radio-opt input, .check-opt input {
-  position: absolute; opacity: 0; width: 0; height: 0;
-}
-.radio-label, .check-label {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 14px;
-  border: 1px solid var(--nt-border-strong);
-  border-radius: 7px;
-  font-size: 13px; font-weight: 300;
-  color: var(--nt-slate);
-  cursor: pointer; transition: all .15s;
-  background: var(--nt-ice);
-  user-select: none;
-}
-.radio-opt input:checked + .radio-label,
-.check-opt input:checked + .check-label {
-  background: var(--nt-black);
-  border-color: var(--nt-black);
-  color: var(--nt-white);
-}
-.radio-opt input:checked + .radio-label .radio-dot,
-.check-opt input:checked + .check-label .check-dot {
-  background: var(--nt-green);
-}
-.radio-dot, .check-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--nt-border-strong);
-  flex-shrink: 0;
-  transition: background .15s;
-}
-
-/* Stat input row */
-.stat-row {
+/* ── RADIO / PLAN ── */
+.plan-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-.stat-row-5 {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
 }
-.stat-row-6 {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
-}
-.stat-input-group { display: flex; flex-direction: column; gap: 5px; }
-.stat-input-group label {
-  font-family: var(--font-mono);
-  font-size: 10px; letter-spacing: .08em;
-  text-transform: uppercase; color: var(--nt-muted);
-  font-weight: 500; margin-bottom: 0;
-}
-.stat-input-group input {
+.plan-opt { display: none; }
+.plan-opt + label {
+  display: block;
+  border: 1px solid var(--nt-border-strong);
+  border-radius: 10px;
+  padding: 14px 12px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
   text-align: center;
+}
+.plan-opt + label:hover { border-color: var(--nt-green); background: var(--nt-green-l); }
+.plan-opt:checked + label {
+  border-color: var(--nt-green);
+  background: var(--nt-green-l);
+}
+.plan-name {
   font-family: var(--font-display);
-  font-size: 22px; letter-spacing: .02em;
-  padding: 12px 8px;
+  font-size: 18px; letter-spacing: .02em;
+  color: var(--nt-black); display: block; margin-bottom: 2px;
 }
-
-/* Stat divider */
-.stat-section-label {
+.plan-price {
   font-family: var(--font-mono);
-  font-size: 10px; letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--nt-muted);
-  margin: 18px 0 10px;
-  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; color: var(--nt-green);
+  letter-spacing: .04em;
 }
-.stat-section-label::after {
-  content: ''; flex: 1; height: 1px; background: var(--nt-border);
+.plan-desc {
+  font-size: 11px; color: var(--nt-muted);
+  font-weight: 300; margin-top: 4px; line-height: 1.4;
 }
 
-/* Upload zone */
-.upload-zone {
-  border: 1.5px dashed var(--nt-border-strong);
-  border-radius: 10px;
-  padding: 28px 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: border-color .15s, background .15s;
-  background: var(--nt-ice);
-}
-.upload-zone:hover {
-  border-color: var(--nt-green);
-  background: var(--nt-green-l);
-}
-.upload-icon {
-  width: 36px; height: 36px;
-  background: var(--nt-border);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 10px;
-}
-.upload-text {
-  font-weight: 500; font-size: 14px; color: var(--nt-slate);
-  margin-bottom: 4px;
-}
-.upload-hint {
-  font-size: 12px; font-weight: 300; color: var(--nt-muted);
-}
-
-/* Photo upload zone */
+/* ── PHOTO UPLOAD ── */
 .photo-upload-zone {
-  border: 1.5px dashed var(--nt-border-strong);
-  border-radius: 10px;
-  padding: 0;
-  cursor: pointer;
-  transition: border-color .15s, background .15s;
-  background: var(--nt-ice);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  gap: 0;
+  display: flex; align-items: center; gap: 20px;
+  border: 1px dashed var(--nt-border-strong);
+  border-radius: 10px; padding: 18px 20px;
+  cursor: pointer; transition: border-color .15s, background .15s;
 }
-.photo-upload-zone:hover {
-  border-color: var(--nt-green);
-  background: var(--nt-green-l);
-}
+.photo-upload-zone:hover { border-color: var(--nt-green); background: var(--nt-green-l); }
 .photo-preview-area {
-  width: 110px; height: 110px; flex-shrink: 0;
-  background: var(--nt-border);
+  width: 64px; height: 64px; border-radius: 8px;
+  background: var(--nt-ice); border: 1px solid var(--nt-border);
   display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
+  overflow: hidden; flex-shrink: 0;
 }
 .photo-preview-area img { width: 100%; height: 100%; object-fit: cover; display: none; }
-.photo-preview-area svg { opacity: 0.35; }
-.photo-upload-text-area {
-  padding: 16px 20px; flex: 1;
-}
-.photo-upload-text-area .upload-text { margin-bottom: 4px; color: var(--nt-slate); font-size: 13px; }
-.photo-upload-text-area .upload-hint { font-size: 11px; color: var(--nt-muted); }
+.upload-text { font-size: 13px; font-weight: 500; color: var(--nt-slate); margin-bottom: 2px; }
+.upload-hint { font-size: 11px; color: var(--nt-muted); font-weight: 300; }
 
-/* Film row */
-.film-entry {
-  background: var(--nt-ice);
-  border: 1px solid var(--nt-border);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 10px;
-  position: relative;
+/* ── CONSENT ── */
+.check-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--nt-border);
 }
-.film-entry-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 12px;
+.check-row:last-child { border-bottom: none; padding-bottom: 0; }
+.check-row input[type="checkbox"] {
+  width: 16px; height: 16px; flex-shrink: 0;
+  margin-top: 3px; accent-color: var(--nt-green); cursor: pointer;
 }
-.film-entry-num {
-  font-family: var(--font-mono);
-  font-size: 10px; letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--nt-muted);
+.check-row span {
+  font-size: 13px; color: var(--nt-slate); font-weight: 300; line-height: 1.6;
 }
-.film-entry-remove {
-  background: none; border: none;
-  font-size: 12px; color: var(--nt-muted);
-  cursor: pointer; padding: 2px 6px;
-  border-radius: 4px;
-  transition: all .15s;
+
+/* ── SUBMIT BUTTON ── */
+.submit-wrap { margin-top: 8px; }
+.btn-submit {
+  width: 100%;
+  background: var(--nt-green); color: var(--nt-black);
+  border: none; border-radius: 9px;
+  padding: 16px; font-size: 15px; font-weight: 600;
   font-family: var(--font-body);
+  cursor: pointer; transition: background .15s;
+  letter-spacing: .01em;
 }
-.film-entry-remove:hover { color: var(--nt-red); background: var(--nt-red-l); }
-
-/* Career history rows — enhanced */
-.history-row-enhanced {
-  background: var(--nt-ice);
-  border: 1px solid var(--nt-border);
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 10px;
+.btn-submit:hover { background: #23D98C; }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.submit-note {
+  text-align: center; margin-top: 10px;
+  font-size: 11px; color: var(--nt-muted); font-weight: 300;
 }
-.history-row-stats {
-  display: grid;
-  grid-template-columns: 100px 1fr 60px 60px 60px 60px 60px 100px;
-  gap: 10px;
-  align-items: end;
-}
-.tier-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-mono);
-  font-size: 9px; letter-spacing: .06em;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-weight: 500;
-  margin-top: 6px;
-}
-.tier-t1 { background: var(--nt-amber-l); color: #92400E; }
-.tier-t2 { background: var(--nt-blue-l); color: #1e40af; }
-.tier-t3 { background: var(--nt-green-l); color: var(--nt-green-d); }
-.tier-t4 { background: #F3F4F6; color: #6B7280; }
-.tier-t5 { background: var(--nt-purple-l); color: var(--nt-purple); }
-
-/* Playoff block */
-.playoff-block {
-  background: linear-gradient(135deg, #0a1628 0%, #0f2040 100%);
-  border: 1px solid rgba(245,158,11,0.2);
-  border-radius: 14px; overflow: hidden;
-  margin-bottom: 16px;
-  position: relative;
-}
-.playoff-block::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--nt-amber), transparent);
-}
-.playoff-block .form-block-header {
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-}
-.playoff-block .form-block-title { color: var(--nt-white); }
-.playoff-block .form-block-sub { color: rgba(255,255,255,0.3); }
-.playoff-block .form-block-body { padding: 24px 28px; }
-.playoff-block .form-group label { color: rgba(255,255,255,0.4); }
-.playoff-block .stat-section-label { color: rgba(255,255,255,0.25); }
-.playoff-block .stat-section-label::after { background: rgba(255,255,255,0.08); }
-.playoff-block .stat-input-group label { color: rgba(255,255,255,0.35); }
-.playoff-block .stat-input-group input {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.1);
-  color: var(--nt-white);
-}
-.playoff-block .stat-input-group input:focus {
-  border-color: var(--nt-amber);
-  background: rgba(255,255,255,0.09);
-}
-.playoff-icon {
-  display: inline-flex; align-items: center; gap: 8px;
-}
-
-/* ── SIDEBAR ── */
-.sidebar { position: sticky; top: 80px; }
-
-.sidebar-summary {
-  background: var(--nt-black);
-  border-radius: 14px;
-  padding: 24px;
-  margin-bottom: 16px;
-}
-.sidebar-label {
-  font-family: var(--font-mono);
-  font-size: 10px; letter-spacing: .1em;
-  color: rgba(255,255,255,0.3); text-transform: uppercase;
-  margin-bottom: 14px;
-}
-.summary-row {
-  display: flex; justify-content: space-between;
-  align-items: baseline;
-  font-size: 13px; padding: 7px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-.summary-row:last-child { border-bottom: none; }
-.sum-key { color: rgba(255,255,255,0.35); font-weight: 300; }
-.sum-val {
-  font-weight: 500; color: var(--nt-white);
-  font-family: var(--font-mono); font-size: 12px;
-  text-align: right; max-width: 140px; word-break: break-word;
-}
-.sum-val .empty { color: rgba(255,255,255,0.15); font-weight: 300; font-family: var(--font-body); font-style: italic; font-size: 11px; }
-
-.tier-reco-block {
-  background: var(--nt-white);
-  border: 1px solid var(--nt-border);
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 16px;
+.submit-error {
+  margin-top: 12px; padding: 12px 16px;
+  background: #FDEAEC; border: 1px solid rgba(232,52,74,0.2);
+  border-radius: 8px; font-size: 13px; color: var(--nt-red);
   display: none;
 }
-.tier-reco-block.visible { display: block; }
-.trb-label {
-  font-family: var(--font-mono);
-  font-size: 10px; letter-spacing: .1em;
-  color: var(--nt-green); text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.trb-tier {
-  font-family: var(--font-display);
-  font-size: 24px; letter-spacing: .02em;
-  color: var(--nt-black); margin-bottom: 6px;
-}
-.trb-why {
-  font-size: 12px; font-weight: 300;
-  color: var(--nt-muted); line-height: 1.6;
-}
 
-.sidebar-help {
-  background: var(--nt-white);
-  border: 1px solid var(--nt-border);
-  border-radius: 14px; padding: 18px 20px;
-}
-.sh-title {
-  font-weight: 500; font-size: 13px; color: var(--nt-black);
-  margin-bottom: 6px;
-}
-.sh-body {
-  font-size: 12px; font-weight: 300;
-  color: var(--nt-muted); line-height: 1.6;
-  margin-bottom: 12px;
-}
-.sh-link {
-  font-size: 12px; font-weight: 500;
-  color: var(--nt-green); text-decoration: none;
-}
-.sh-link:hover { text-decoration: underline; }
-
-/* ── FORM NAVIGATION ── */
-.form-nav {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-top: 8px;
-}
-.btn-nav {
-  padding: 11px 28px; border-radius: 7px;
-  font-size: 14px; font-weight: 500;
-  font-family: var(--font-body);
-  cursor: pointer; border: none;
-  transition: background .15s, color .15s;
-}
-.btn-nav.primary { background: var(--nt-green); color: var(--nt-black); }
-.btn-nav.primary:hover { background: #23D98C; }
-.btn-nav.ghost {
-  background: transparent; color: var(--nt-muted);
-  border: 1px solid var(--nt-border-strong);
-}
-.btn-nav.ghost:hover { color: var(--nt-slate); background: var(--nt-white); }
-.btn-nav.large { padding: 14px 36px; font-size: 15px; }
-
-/* ── SECTION 4 DARK ── */
-.dark-block {
-  background: var(--nt-black);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 14px; overflow: hidden;
-  margin-bottom: 16px;
-}
-.dark-block .form-block-header {
-  border-bottom-color: rgba(255,255,255,0.07);
-}
-.dark-block .form-block-title { color: var(--nt-white); }
-.dark-block .form-block-sub { color: rgba(255,255,255,0.3); }
-.dark-block .form-block-body { padding: 24px 28px; }
-.dark-block .form-group label { color: rgba(255,255,255,0.35); }
-.dark-block .form-group input,
-.dark-block .form-group select,
-.dark-block .form-group textarea {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.1);
-  color: var(--nt-white);
-}
-.dark-block .form-group input::placeholder { color: rgba(255,255,255,0.2); }
-.dark-block .form-group input:focus,
-.dark-block .form-group select:focus,
-.dark-block .form-group textarea:focus {
-  border-color: var(--nt-green);
-  background: rgba(255,255,255,0.08);
-}
-.dark-block .form-group select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238896A8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 12px center;
-}
-.dark-block .form-group select option { background: var(--nt-black); color: var(--nt-white); }
-.dark-block .upload-zone {
-  border-color: rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.03);
-}
-.dark-block .upload-zone:hover {
-  border-color: var(--nt-green);
-  background: rgba(29,188,122,0.07);
-}
-.dark-block .upload-text { color: rgba(255,255,255,0.55); }
-
-/* Add-another button */
-.btn-add-row {
-  background: none;
-  border: 1px dashed var(--nt-border-strong);
-  border-radius: 7px; padding: 9px 16px;
-  font-size: 12px; color: var(--nt-muted);
-  cursor: pointer; width: 100%;
-  font-family: var(--font-body);
-  transition: all .15s;
-}
-.btn-add-row:hover { background: var(--nt-ice); color: var(--nt-slate); border-color: var(--nt-slate); }
-
-/* ── SUCCESS STATE ── */
+/* ── SUCCESS ── */
 .success-panel {
-  display: none; text-align: center; padding: 80px 32px;
+  display: none; text-align: center;
+  padding: 80px 32px;
 }
 .success-panel.visible { display: block; }
 .success-icon {
@@ -660,31 +285,12 @@ nav {
 .success-title {
   font-family: var(--font-display);
   font-size: 52px; letter-spacing: .02em;
-  color: var(--nt-black); line-height: .95;
-  margin-bottom: 16px;
+  color: var(--nt-black); line-height: .95; margin-bottom: 16px;
 }
 .success-title em { color: var(--nt-green); font-style: normal; }
 .success-sub {
-  font-size: 15px; font-weight: 300;
-  color: var(--nt-muted); max-width: 480px; margin: 0 auto 36px;
-  line-height: 1.65;
-}
-.success-detail {
-  display: inline-flex; gap: 32px; flex-wrap: wrap; justify-content: center;
-  background: var(--nt-white); border: 1px solid var(--nt-border);
-  border-radius: 12px; padding: 24px 36px;
-  margin-bottom: 36px;
-}
-.sd-item { text-align: center; }
-.sd-val {
-  font-family: var(--font-display);
-  font-size: 32px; color: var(--nt-green);
-  line-height: 1;
-}
-.sd-label {
-  font-size: 11px; color: var(--nt-muted);
-  font-family: var(--font-mono); letter-spacing: .06em;
-  text-transform: uppercase; margin-top: 4px;
+  font-size: 15px; font-weight: 300; color: var(--nt-muted);
+  max-width: 440px; margin: 0 auto 36px; line-height: 1.65;
 }
 .success-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .btn-primary-lg {
@@ -704,42 +310,18 @@ nav {
 }
 .btn-outline-lg:hover { background: var(--nt-white); }
 
-/* Section note */
-.section-note {
-  display: flex; align-items: flex-start; gap: 10px;
-  background: var(--nt-blue-l);
-  border: 1px solid rgba(45,125,210,0.18);
-  border-radius: 8px;
-  padding: 12px 14px;
-  font-size: 12px; font-weight: 300; color: var(--nt-slate);
-  line-height: 1.5; margin-bottom: 18px;
-}
-.section-note svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; color: var(--nt-blue); }
-
-/* GPA / academic row */
-.gpa-flag {
-  display: inline-block;
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: .06em;
-  text-transform: uppercase;
-  padding: 2px 7px; border-radius: 3px;
-  background: var(--nt-green-l); color: var(--nt-green-d);
-  margin-left: 6px; vertical-align: middle;
-}
-
-@media (max-width: 768px) {
-  .intake-body { grid-template-columns: 1fr; }
-  .sidebar { position: static; }
-  .intake-header-inner { flex-direction: column; }
-  .intake-header-right { text-align: left; }
-  .form-row, .form-row-3, .form-row-4, .form-row-5, .stat-row, .stat-row-5, .stat-row-6 { grid-template-columns: 1fr 1fr; }
-  .history-row-stats { grid-template-columns: 1fr 1fr; }
+@media (max-width: 640px) {
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+  .plan-grid { grid-template-columns: 1fr 1fr; }
   nav { padding: 0 16px; }
+  .intake-header { padding: 36px 20px 32px; }
+  .intake-body { padding: 24px 16px 60px; }
 }
 </style>
 </head>
 <body>
 
-<!-- ── NAV ── -->
+<!-- NAV -->
 <nav>
   <a href="nexttier_landing.html" class="nav-logo">NEXT<span>TIER</span></a>
   <a href="nexttier_landing.html" class="nav-back">
@@ -748,999 +330,400 @@ nav {
   </a>
 </nav>
 
-<!-- ── HEADER ── -->
+<!-- HEADER -->
 <div class="intake-header">
   <div class="intake-header-inner">
-    <div>
-      <div class="intake-eyebrow">Player profile intake</div>
-      <h1>BUILD YOUR<br>PLAYER <em>PROFILE.</em></h1>
-    </div>
-    <div class="intake-header-right">
-      <div class="intake-time">Estimated time</div>
-      <div class="intake-time-val">~8</div>
-      <div class="intake-time-label">minutes to complete</div>
-    </div>
+    <div class="intake-eyebrow">Player profile intake</div>
+    <h1>BUILD YOUR<br>PLAYER <em>PROFILE.</em></h1>
+    <p class="intake-header-sub">Takes about 2 minutes. Your PDS report will be ready within 48 hours.</p>
   </div>
 </div>
 
-<!-- ── PROGRESS ── -->
-<div class="progress-bar-wrap">
-  <div class="progress-bar-inner">
-    <div class="prog-step active" onclick="goToStep(1)">
-      <div class="prog-step-num">Step 01</div>
-      <div class="prog-step-label">Player info</div>
+<!-- BODY -->
+<div class="intake-body">
+
+  <!-- SUCCESS STATE -->
+  <div class="success-panel" id="successPanel">
+    <div class="success-icon">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M6 16l7 7L26 9" stroke="#1DBC7A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <div class="prog-step" onclick="goToStep(2)">
-      <div class="prog-step-num">Step 02</div>
-      <div class="prog-step-label">Stats & history</div>
-    </div>
-    <div class="prog-step" onclick="goToStep(3)">
-      <div class="prog-step-num">Step 03</div>
-      <div class="prog-step-label">Goals & context</div>
-    </div>
-    <div class="prog-step" onclick="goToStep(4)">
-      <div class="prog-step-num">Step 04</div>
-      <div class="prog-step-label">Film & contact</div>
+    <div class="success-title">PROFILE<br><em>SUBMITTED.</em></div>
+    <p class="success-sub">We've received your player's information. Your full Player Development Score and metric breakdown will be ready within 48 hours.</p>
+    <div class="success-actions">
+      <a href="nexttier_landing.html" class="btn-primary-lg">Back to home</a>
+      <a href="#" class="btn-outline-lg" onclick="location.reload()">Submit another profile</a>
     </div>
   </div>
-</div>
 
-<!-- ── BODY ── -->
-<div class="intake-body" id="intakeBody">
-
-  <!-- MAIN FORM AREA -->
+  <!-- FORM -->
   <div id="formArea">
 
-    <!-- SUCCESS STATE -->
-    <div class="success-panel" id="successPanel">
-      <div class="success-icon">
-        <svg viewBox="0 0 32 32" fill="none"><path d="M6 16l7 7L26 9" stroke="#1DBC7A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <!-- 1. PLAYER INFORMATION -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">PLAYER INFORMATION</div>
+          <div class="form-block-sub">Basic details for the player profile</div>
+        </div>
+        <div class="form-block-tag">Required</div>
       </div>
-      <div class="success-title">PROFILE<br><em>SUBMITTED.</em></div>
-      <p class="success-sub">We've received your player's information. Your full Player Development Score and metric breakdown will be ready within 48 hours.</p>
-      <div class="success-detail">
-        <div class="sd-item">
-          <div class="sd-val">48h</div>
-          <div class="sd-label">PDS turnaround</div>
-        </div>
-        <div class="sd-item">
-          <div class="sd-val">14</div>
-          <div class="sd-label">Metrics scored</div>
-        </div>
-        <div class="sd-item">
-          <div class="sd-val">4.2K+</div>
-          <div class="sd-label">Comparison pool</div>
-        </div>
-      </div>
-      <div class="success-actions">
-        <a href="nexttier_landing.html" class="btn-primary-lg">Back to home</a>
-        <a href="#" class="btn-outline-lg" onclick="location.reload()">Submit another profile</a>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════════════
-         STEP 1: PLAYER INFO
-    ══════════════════════════════════════ -->
-    <div class="form-section active" id="step1">
-
-      <!-- Player Information -->
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">PLAYER INFORMATION</div>
-            <div class="form-block-sub">Basic identifying details for the player profile</div>
-          </div>
-          <div class="form-block-tag">Required</div>
-        </div>
-        <div class="form-block-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label>First name <span class="req">*</span></label>
-              <input type="text" id="firstName" placeholder="e.g. Tyler" oninput="updateSummary()">
-            </div>
-            <div class="form-group">
-              <label>Last name <span class="req">*</span></label>
-              <input type="text" id="lastName" placeholder="e.g. Keating" oninput="updateSummary()">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Date of birth <span class="req">*</span></label>
-              <input type="date" id="dob" onchange="updateSummary()">
-            </div>
-            <div class="form-group">
-              <label>Birth city / province</label>
-              <input type="text" id="birthCity" placeholder="e.g. Edmonton, AB">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Position <span class="req">*</span></label>
-              <select id="position" onchange="updateSummary(); toggleGoalieFields()">
-                <option value="">Select position</option>
-                <option>Centre</option>
-                <option>Left Wing</option>
-                <option>Right Wing</option>
-                <option>Left Defense</option>
-                <option>Right Defense</option>
-                <option>Goaltender</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Shoots / catches</label>
-              <select id="shoots">
-                <option value="">Select</option>
-                <option>Left</option>
-                <option>Right</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Height</label>
-              <input type="text" placeholder="e.g. 5'11&quot;" id="height">
-            </div>
-            <div class="form-group">
-              <label>Weight (lbs)</label>
-              <input type="number" placeholder="e.g. 170" id="weight">
-            </div>
-          </div>
-          <!-- NEW: Jersey number -->
-          <div class="form-row">
-            <div class="form-group">
-              <label>Jersey number</label>
-              <input type="number" placeholder="e.g. 14" id="jerseyNum" min="1" max="99">
-            </div>
-            <div class="form-group">
-              <label>Draft eligibility year</label>
-              <select id="draftYear">
-                <option value="">Not yet eligible / unknown</option>
-                <option>2025</option>
-                <option>2026</option>
-                <option>2027</option>
-                <option>2028</option>
-                <option>2029</option>
-                <option>2030</option>
-                <option>Not eligible (overage)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- NEW: Player Photo Upload -->
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">PLAYER PHOTO</div>
-            <div class="form-block-sub">Used on your recruiting card and profile — headshot or action photo</div>
-          </div>
-          <div class="form-block-tag optional">Optional</div>
-        </div>
-        <div class="form-block-body">
-          <div class="photo-upload-zone" onclick="document.getElementById('photoUpload').click()">
-            <div class="photo-preview-area" id="photoPreviewArea">
-              <img id="photoPreviewImg" src="" alt="Player photo preview">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <circle cx="16" cy="12" r="5" stroke="#8896A8" stroke-width="1.5"/>
-                <path d="M5 26c0-5 4.5-9 11-9s11 4 11 9" stroke="#8896A8" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <div class="photo-upload-text-area">
-              <div class="upload-text">Upload player photo</div>
-              <div class="upload-hint">JPG, PNG, WEBP up to 10MB<br>Headshot or action photo recommended</div>
-            </div>
-          </div>
-          <input type="file" id="photoUpload" style="display:none" accept="image/*" onchange="previewPhoto(this)">
-        </div>
-      </div>
-
-      <!-- Current Team -->
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">CURRENT TEAM</div>
-            <div class="form-block-sub">Where is the player competing right now?</div>
-          </div>
-        </div>
-        <div class="form-block-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Team name <span class="req">*</span></label>
-              <input type="text" id="teamName" placeholder="e.g. Sherwood Park Crusaders" oninput="updateSummary()">
-            </div>
-            <div class="form-group">
-              <label>Current league <span class="req">*</span></label>
-              <select id="currentLeague" onchange="updateSummary(); document.getElementById('otherLeagueField').style.display = this.value === 'other' ? 'block' : 'none'">
-                <option value="">Select league</option>
-                <optgroup label="Alberta">
-                  <option>AEHL U18</option>
-                  <option>AEHL U15</option>
-                  <option>AJHL</option>
-                  <option>AMHL U18 AAA</option>
-                  <option>AMHL U15 AAA</option>
-                </optgroup>
-                <optgroup label="BC / West">
-                  <option>BCHL</option>
-                  <option>PJHL</option>
-                  <option>BCEHL U18</option>
-                </optgroup>
-                <optgroup label="National / US">
-                  <option>USHL</option>
-                  <option>NAHL</option>
-                  <option>OJHL</option>
-                  <option>NCAA D1</option>
-                  <option>NCAA D2/D3</option>
-                  <option>ACHA</option>
-                </optgroup>
-                <option value="other">Other (specify below)</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Season</label>
-              <select id="season">
-                <option>2025–26</option>
-                <option>2024–25</option>
-                <option>2026–27 (upcoming)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Age group / division</label>
-              <input type="text" placeholder="e.g. U18 Tier 1" id="ageGroup">
-            </div>
-          </div>
-          <div class="form-group" id="otherLeagueField" style="display:none">
-            <label>League name (if not listed)</label>
-            <input type="text" placeholder="Enter your league name">
-          </div>
-        </div>
-      </div>
-
-      <!-- NEW: Academic & Agent -->
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">ACADEMIC & REPRESENTATION</div>
-            <div class="form-block-sub">Used to match NCAA eligibility windows and recruiting contacts</div>
-          </div>
-          <div class="form-block-tag recruiting">Recruiting engine</div>
-        </div>
-        <div class="form-block-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Academic year <span class="opt">(optional)</span></label>
-              <select id="academicYear">
-                <option value="">Select</option>
-                <option>Grade 8</option>
-                <option>Grade 9</option>
-                <option>Grade 10</option>
-                <option>Grade 11</option>
-                <option>Grade 12</option>
-                <option>College Freshman (Year 1)</option>
-                <option>College Sophomore (Year 2)</option>
-                <option>College Junior (Year 3)</option>
-                <option>College Senior (Year 4)</option>
-                <option>Post-grad / Prep year</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>GPA <span class="opt">(optional)</span></label>
-              <input type="text" id="gpa" placeholder="e.g. 3.6 / 4.0 or 85%">
-            </div>
-          </div>
-          <div class="form-group" style="margin-bottom:0">
-            <label>Agent / advisor name <span class="opt">(optional)</span></label>
-            <input type="text" id="agentName" placeholder="e.g. John Doe, Platinum Sports Group">
-          </div>
-        </div>
-      </div>
-
-      <div class="form-nav">
-        <div></div>
-        <button class="btn-nav primary" onclick="goToStep(2)">Next: Stats & history →</button>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════════════
-         STEP 2: STATS & HISTORY
-    ══════════════════════════════════════ -->
-    <div class="form-section" id="step2">
-
-      <!-- Current Season Stats -->
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">CURRENT SEASON STATS</div>
-            <div class="form-block-sub">As of the most recent game played</div>
-          </div>
-          <div class="form-block-tag">Season 2025–26</div>
-        </div>
-        <div class="form-block-body">
-
-          <!-- Games available vs played -->
-          <div class="stat-section-label">Availability</div>
-          <div class="stat-row">
-            <div class="stat-input-group">
-              <label>GP</label>
-              <input type="number" placeholder="0" min="0" id="statGP">
-            </div>
-            <div class="stat-input-group">
-              <label>GA (Avail)</label>
-              <input type="number" placeholder="0" min="0" id="statGA" title="Games the player was available to play">
-            </div>
-            <div class="stat-input-group">
-              <label>TOI/G (min)</label>
-              <input type="text" placeholder="e.g. 18:24" id="statTOI" title="Average time on ice per game">
-            </div>
-            <div class="stat-input-group">
-              <label>Avail %</label>
-              <input type="text" placeholder="—" id="statAvailPct" readonly title="Auto-calculated" style="background:#F3F4F6;color:var(--nt-muted);cursor:default">
-            </div>
-          </div>
-
-          <!-- Core scoring stats -->
-          <div class="stat-section-label">Scoring</div>
-          <div class="stat-row">
-            <div class="stat-input-group">
-              <label>G</label>
-              <input type="number" placeholder="0" min="0" id="statG">
-            </div>
-            <div class="stat-input-group">
-              <label>A</label>
-              <input type="number" placeholder="0" min="0" id="statA">
-            </div>
-            <div class="stat-input-group">
-              <label>PPG</label>
-              <input type="number" placeholder="0" min="0" id="statPPG">
-            </div>
-            <div class="stat-input-group">
-              <label>SHG</label>
-              <input type="number" placeholder="0" min="0" id="statSHG">
-            </div>
-          </div>
-
-          <!-- Discipline & impact -->
-          <div class="stat-section-label">Discipline & Impact</div>
-          <div class="stat-row">
-            <div class="stat-input-group">
-              <label>+/-</label>
-              <input type="number" placeholder="0" id="statPlusMinus">
-            </div>
-            <div class="stat-input-group">
-              <label>PIM</label>
-              <input type="number" placeholder="0" min="0" id="statPIM">
-            </div>
-            <div class="stat-input-group">
-              <label>GWG</label>
-              <input type="number" placeholder="0" min="0" id="statGWG">
-            </div>
-            <div class="stat-input-group">
-              <label>Pts/GP</label>
-              <input type="text" placeholder="—" id="statPtsPerGP" readonly style="background:#F3F4F6;color:var(--nt-muted);cursor:default">
-            </div>
-          </div>
-
-          <!-- Shots on goal & faceoffs -->
-          <div class="stat-section-label">Shots & Faceoffs</div>
-          <div class="stat-row-5" id="shotsRow">
-            <div class="stat-input-group">
-              <label>SOG</label>
-              <input type="number" placeholder="0" min="0" id="statSOG" title="Shots on goal">
-            </div>
-            <div class="stat-input-group">
-              <label>SOG/GP</label>
-              <input type="text" placeholder="—" id="statSOGperGP" readonly style="background:#F3F4F6;color:var(--nt-muted);cursor:default">
-            </div>
-            <div class="stat-input-group">
-              <label>FOW</label>
-              <input type="number" placeholder="—" id="statFOW" title="Faceoff wins">
-            </div>
-            <div class="stat-input-group">
-              <label>FOL</label>
-              <input type="number" placeholder="—" id="statFOL" title="Faceoff losses">
-            </div>
-            <div class="stat-input-group">
-              <label>FO%</label>
-              <input type="text" placeholder="—" id="statFOPct" readonly style="background:#F3F4F6;color:var(--nt-muted);cursor:default" title="Auto-calculated faceoff win %">
-            </div>
-          </div>
-
-          <!-- Goalie stats -->
-          <div class="stat-section-label" id="goalieSection">Goaltender stats</div>
-          <div class="form-row" id="goalieStatsRow">
-            <input type="text" placeholder="Save % (e.g. .912)" id="statSavePct" style="background:var(--nt-ice);border:1px solid var(--nt-border-strong);border-radius:8px;padding:10px 14px;font-size:14px;font-weight:300;color:var(--nt-black);font-family:var(--font-body);outline:none;transition:border-color .15s;">
-            <input type="text" placeholder="GAA (e.g. 2.84)" id="statGAA" style="background:var(--nt-ice);border:1px solid var(--nt-border-strong);border-radius:8px;padding:10px 14px;font-size:14px;font-weight:300;color:var(--nt-black);font-family:var(--font-body);outline:none;transition:border-color .15s;">
-          </div>
-        </div>
-      </div>
-
-      <!-- ── PLAYOFF STATS (separate block) ── -->
-      <div class="playoff-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">
-              <span class="playoff-icon">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style="vertical-align:middle;margin-right:6px"><path d="M9 2l1.8 3.6L15 6.5l-3 2.9.7 4.1L9 11.6l-3.7 1.9.7-4.1-3-2.9 4.2-.9L9 2z" fill="#F59E0B" stroke="#F59E0B" stroke-width=".5"/></svg>
-                PLAYOFF STATS
-              </span>
-            </div>
-            <div class="form-block-sub">Most recent playoff / tournament run — tracked separately for recruiting</div>
-          </div>
-          <div class="form-block-tag playoff">Separate block</div>
-        </div>
-        <div class="form-block-body">
-          <div class="section-note" style="background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.2);color:rgba(255,255,255,0.5)">
-            <svg viewBox="0 0 14 14" fill="none" style="color:#F59E0B"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-            <span>Playoff performance is weighted separately in your PDS. Stats from multiple rounds are combined here.</span>
-          </div>
-          <div class="form-row" style="margin-bottom:16px">
-            <div class="form-group" style="margin-bottom:0">
-              <label style="color:rgba(255,255,255,0.35)">Season / tournament</label>
-              <input type="text" placeholder="e.g. 2024–25 AEHL Playoffs" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-size:14px;font-weight:300;color:var(--nt-white);font-family:var(--font-body);outline:none;width:100%;transition:border-color .15s;" id="playoffSeason">
-            </div>
-            <div class="form-group" style="margin-bottom:0">
-              <label style="color:rgba(255,255,255,0.35)">Round reached</label>
-              <select id="playoffRound" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-size:14px;font-weight:300;color:var(--nt-white);font-family:var(--font-body);outline:none;width:100%;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238896A8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;">
-                <option value="">Select round</option>
-                <option>First round</option>
-                <option>Second round</option>
-                <option>Semifinals</option>
-                <option>Finals</option>
-                <option>Champions</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="stat-section-label" style="color:rgba(255,255,255,0.3)">Scoring</div>
-          <div class="stat-row" style="margin-bottom:16px">
-            <div class="stat-input-group">
-              <label>PO GP</label>
-              <input type="number" placeholder="0" min="0" id="poGP">
-            </div>
-            <div class="stat-input-group">
-              <label>PO G</label>
-              <input type="number" placeholder="0" min="0" id="poG">
-            </div>
-            <div class="stat-input-group">
-              <label>PO A</label>
-              <input type="number" placeholder="0" min="0" id="poA">
-            </div>
-            <div class="stat-input-group">
-              <label>PO Pts</label>
-              <input type="text" placeholder="—" id="poPts" readonly style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 8px;font-family:var(--font-display);font-size:22px;text-align:center;color:var(--nt-amber);cursor:default;">
-            </div>
-          </div>
-
-          <div class="stat-section-label" style="color:rgba(255,255,255,0.3)">Discipline & Impact</div>
-          <div class="stat-row-5">
-            <div class="stat-input-group">
-              <label>PO +/-</label>
-              <input type="number" placeholder="0" id="poPlusMinus">
-            </div>
-            <div class="stat-input-group">
-              <label>PO PIM</label>
-              <input type="number" placeholder="0" min="0" id="poPIM">
-            </div>
-            <div class="stat-input-group">
-              <label>PO SOG</label>
-              <input type="number" placeholder="0" min="0" id="poSOG">
-            </div>
-            <div class="stat-input-group">
-              <label>PO FOW</label>
-              <input type="number" placeholder="—" id="poFOW">
-            </div>
-            <div class="stat-input-group">
-              <label>PO FO%</label>
-              <input type="text" placeholder="—" id="poFOPct" readonly style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 8px;font-family:var(--font-display);font-size:22px;text-align:center;color:rgba(255,255,255,0.4);cursor:default;">
-            </div>
-          </div>
-          <div style="margin-top:12px">
-            <label style="display:block;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:7px;font-family:var(--font-mono)">Playoff TOI/game (avg)</label>
-            <input type="text" placeholder="e.g. 21:30" id="poTOI" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-size:14px;font-weight:300;color:var(--nt-white);font-family:var(--font-body);outline:none;width:200px;transition:border-color .15s;">
-          </div>
-        </div>
-      </div>
-
-      <!-- Career History (enhanced) -->
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">CAREER HISTORY</div>
-            <div class="form-block-sub">Previous seasons — most recent first. +/-, PIM, and league tier tracked per season.</div>
-          </div>
-          <div class="form-block-tag recruiting">Recruiting engine</div>
-        </div>
-        <div class="form-block-body">
-          <div id="historyRows">
-            <!-- Row 1 seeded by JS -->
-          </div>
-          <button type="button" class="btn-add-row" onclick="addHistoryRow()">
-            + Add another season
-          </button>
-        </div>
-      </div>
-
-      <!-- Notable Achievements -->
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">NOTABLE ACHIEVEMENTS</div>
-            <div class="form-block-sub">Tournament wins, all-star selections, invites, camps</div>
-          </div>
-          <div class="form-block-tag optional">Optional</div>
-        </div>
-        <div class="form-block-body">
-          <div class="form-group" style="margin-bottom:0">
-            <label>Achievements</label>
-            <textarea id="achievements" placeholder="e.g. AEHL U18 All-Star 2025, AJHL Bonnyville camp invite Sep 2025, TELUS Cup participant…"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-nav">
-        <button class="btn-nav ghost" onclick="goToStep(1)">← Back</button>
-        <button class="btn-nav primary" onclick="goToStep(3)">Next: Goals & context →</button>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════════════
-         STEP 3: GOALS & CONTEXT
-    ══════════════════════════════════════ -->
-    <div class="form-section" id="step3">
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">DEVELOPMENT GOALS</div>
-            <div class="form-block-sub">What is the player working toward?</div>
-          </div>
-          <div class="form-block-tag">Shapes your roadmap</div>
-        </div>
-        <div class="form-block-body">
+      <div class="form-block-body">
+        <div class="form-row">
           <div class="form-group">
-            <label>Primary goal <span class="req">*</span></label>
-            <div class="radio-group">
-              <label class="radio-opt"><input type="radio" name="goal" value="develop" onchange="updateSummary();updateTierReco()"><span class="radio-label"><span class="radio-dot"></span>Long-term development</span></label>
-              <label class="radio-opt"><input type="radio" name="goal" value="junior" onchange="updateSummary();updateTierReco()"><span class="radio-label"><span class="radio-dot"></span>Make junior team</span></label>
-              <label class="radio-opt"><input type="radio" name="goal" value="college" onchange="updateSummary();updateTierReco()"><span class="radio-label"><span class="radio-dot"></span>College / NCAA</span></label>
-              <label class="radio-opt"><input type="radio" name="goal" value="pro" onchange="updateSummary();updateTierReco()"><span class="radio-label"><span class="radio-dot"></span>Professional hockey</span></label>
-            </div>
+            <label>First name <span class="req">*</span></label>
+            <input type="text" id="firstName" placeholder="e.g. Tyler">
           </div>
           <div class="form-group">
-            <label>Target league / program (if known)</label>
-            <input type="text" id="targetLeague" placeholder="e.g. AJHL Bonnyville Pontiacs, BCHL, NCAA D1…">
+            <label>Last name <span class="req">*</span></label>
+            <input type="text" id="lastName" placeholder="e.g. Keating">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date of birth <span class="req">*</span></label>
+            <input type="date" id="dob">
           </div>
           <div class="form-group">
-            <label>Target timeline</label>
-            <select id="timeline">
-              <option value="">Select</option>
-              <option>This coming season (2026–27)</option>
-              <option>1–2 years</option>
-              <option>3–4 years</option>
-              <option>5+ years</option>
+            <label>Position <span class="req">*</span></label>
+            <select id="position">
+              <option value="">Select position</option>
+              <option>Centre</option>
+              <option>Left Wing</option>
+              <option>Right Wing</option>
+              <option>Left Defense</option>
+              <option>Right Defense</option>
+              <option>Goaltender</option>
             </select>
           </div>
         </div>
-      </div>
-
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">PLAYER CONTEXT</div>
-            <div class="form-block-sub">Helps our scouts calibrate the score correctly</div>
-          </div>
-        </div>
-        <div class="form-block-body">
+        <div class="form-row">
           <div class="form-group">
-            <label>Biggest strength (player's own words)</label>
-            <textarea id="strength" placeholder="e.g. Skating speed and edges. Very comfortable in tight spaces along the boards…" style="min-height:75px"></textarea>
+            <label>Height <span class="opt">(optional)</span></label>
+            <input type="text" id="height" placeholder="e.g. 5'11&quot;">
           </div>
           <div class="form-group">
-            <label>Known development areas</label>
-            <textarea id="devAreas" placeholder="e.g. Penalty minutes need to come down. Two-way game still developing…" style="min-height:75px"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Recent injuries <span class="opt">(optional)</span></label>
-            <input type="text" id="injuries" placeholder="e.g. Shoulder sprain Sep 2025, missed 6 GP">
-          </div>
-          <div class="form-group">
-            <label>Other context scouts should know</label>
-            <textarea id="otherContext" placeholder="e.g. Moved up from U15 mid-season. Bilingual player (English / French)…" style="min-height:75px"></textarea>
+            <label>Weight (lbs) <span class="opt">(optional)</span></label>
+            <input type="number" id="weight" placeholder="e.g. 170">
           </div>
         </div>
-      </div>
-
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">PLAN SELECTION</div>
-            <div class="form-block-sub">Choose the level of intelligence that fits your goals</div>
-          </div>
-        </div>
-        <div class="form-block-body">
-          <div class="form-group" style="margin-bottom:0">
-            <label>Desired plan <span class="req">*</span></label>
-            <div class="radio-group">
-              <label class="radio-opt"><input type="radio" name="plan" value="starter" onchange="updateSummary()"><span class="radio-label"><span class="radio-dot"></span>Starter — $29/mo</span></label>
-              <label class="radio-opt"><input type="radio" name="plan" value="scout" onchange="updateSummary()"><span class="radio-label"><span class="radio-dot"></span>Scout — $59/mo</span></label>
-              <label class="radio-opt"><input type="radio" name="plan" value="elite" onchange="updateSummary()"><span class="radio-label"><span class="radio-dot"></span>Elite — $99/mo</span></label>
-              <label class="radio-opt"><input type="radio" name="plan" value="unsure" onchange="updateSummary()"><span class="radio-label"><span class="radio-dot"></span>Not sure yet</span></label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-nav">
-        <button class="btn-nav ghost" onclick="goToStep(2)">← Back</button>
-        <button class="btn-nav primary" onclick="goToStep(4)">Next: Film & contact →</button>
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════
-         STEP 4: FILM & CONTACT
-    ══════════════════════════════════════ -->
-    <div class="form-section" id="step4">
-
-      <!-- Game Film (multiple uploads) -->
-      <div class="dark-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">GAME FILM</div>
-            <div class="form-block-sub">Add multiple clips with date and opponent — processed within 48h</div>
-          </div>
-          <div class="form-block-tag">Optional but recommended</div>
+    <!-- 2. CONTACT INFORMATION -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">CONTACT INFORMATION</div>
+          <div class="form-block-sub">Who should receive the PDS report?</div>
         </div>
-        <div class="form-block-body">
-          <div id="filmEntries">
-            <!-- Seeded by JS -->
-          </div>
-          <button type="button" onclick="addFilmEntry()" style="background:none;border:1px dashed rgba(255,255,255,0.12);border-radius:7px;padding:9px 16px;font-size:12px;color:rgba(255,255,255,0.3);cursor:pointer;width:100%;font-family:var(--font-body);transition:all .15s;margin-top:4px" onmouseover="this.style.borderColor='var(--nt-green)';this.style.color='var(--nt-green)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='rgba(255,255,255,0.3)'">
-            + Add another film clip
-          </button>
-        </div>
+        <div class="form-block-tag">Required</div>
       </div>
-
-      <!-- Contact Information -->
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">CONTACT INFORMATION</div>
-            <div class="form-block-sub">Who should receive the PDS report?</div>
+      <div class="form-block-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Your name <span class="req">*</span></label>
+            <input type="text" id="contactName" placeholder="Parent, guardian, or player">
           </div>
-          <div class="form-block-tag">Required</div>
-        </div>
-        <div class="form-block-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Your name <span class="req">*</span></label>
-              <input type="text" id="contactName" placeholder="Parent, guardian, or player" oninput="updateSummary()">
-            </div>
-            <div class="form-group">
-              <label>Relationship to player <span class="req">*</span></label>
-              <select id="relationship">
-                <option value="">Select</option>
-                <option>Parent / Guardian</option>
-                <option>The player</option>
-                <option>Coach / Trainer</option>
-                <option>Agent</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Email address <span class="req">*</span></label>
-              <input type="email" id="email" placeholder="you@email.com" oninput="updateSummary()">
-            </div>
-            <div class="form-group">
-              <label>Phone <span class="opt">(optional)</span></label>
-              <input type="tel" id="phone" placeholder="e.g. +1 780 555 0123">
-            </div>
-          </div>
-          <div class="form-group" style="margin-bottom:0">
-            <label>How did you hear about Next Tier?</label>
-            <select id="hearAbout">
+          <div class="form-group">
+            <label>Relationship to player <span class="req">*</span></label>
+            <select id="relationship">
               <option value="">Select</option>
-              <option>Coach / Trainer recommendation</option>
-              <option>Social media</option>
-              <option>Word of mouth</option>
-              <option>Search engine</option>
-              <option>Team / league partnership</option>
-              <option>Other</option>
+              <option>Parent / Guardian</option>
+              <option>The player</option>
+              <option>Coach / Trainer</option>
+              <option>Agent</option>
             </select>
           </div>
         </div>
-      </div>
-
-      <!-- Consent & Submit -->
-      <div class="form-block">
-        <div class="form-block-header">
-          <div>
-            <div class="form-block-title">CONSENT & SUBMISSION</div>
-            <div class="form-block-sub">Review before you submit</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email address <span class="req">*</span></label>
+            <input type="email" id="email" placeholder="you@email.com">
+          </div>
+          <div class="form-group">
+            <label>Phone <span class="opt">(optional)</span></label>
+            <input type="tel" id="phone" placeholder="+1 780 555 0123">
           </div>
         </div>
-        <div class="form-block-body">
-          <div style="margin-bottom:16px">
-            <label class="check-opt" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-              <input type="checkbox" id="consentData" style="position:static;opacity:1;width:auto;height:auto;margin-top:3px">
-              <span style="font-size:13px;color:var(--nt-slate);font-weight:300;line-height:1.6">I consent to Next Tier collecting and processing the player's performance data for the purpose of generating a Player Development Score and development recommendations.</span>
+        <div class="form-group" style="margin-bottom:0">
+          <label>How did you hear about Next Tier? <span class="opt">(optional)</span></label>
+          <select id="hearAbout">
+            <option value="">Select</option>
+            <option>Coach / Trainer recommendation</option>
+            <option>Social media</option>
+            <option>Word of mouth</option>
+            <option>Search engine</option>
+            <option>Team / league partnership</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. TEAM -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">TEAM</div>
+          <div class="form-block-sub">Where is the player competing right now?</div>
+        </div>
+        <div class="form-block-tag">Required</div>
+      </div>
+      <div class="form-block-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Team name <span class="req">*</span></label>
+            <input type="text" id="teamName" placeholder="e.g. Sherwood Park Crusaders">
+          </div>
+          <div class="form-group">
+            <label>Current league <span class="req">*</span></label>
+            <select id="currentLeague">
+              <option value="">Select league</option>
+              <optgroup label="Alberta">
+                <option>AEHL U18</option>
+                <option>AEHL U15</option>
+                <option>AJHL</option>
+                <option>AMHL U18 AAA</option>
+                <option>AMHL U15 AAA</option>
+              </optgroup>
+              <optgroup label="BC / West">
+                <option>BCHL</option>
+                <option>PJHL</option>
+                <option>BCEHL U18</option>
+              </optgroup>
+              <optgroup label="National / US">
+                <option>USHL</option>
+                <option>NAHL</option>
+                <option>OJHL</option>
+                <option>NCAA D1</option>
+                <option>NCAA D2/D3</option>
+                <option>ACHA</option>
+              </optgroup>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0">
+            <label>Season</label>
+            <select id="season">
+              <option>2025–26</option>
+              <option>2024–25</option>
+              <option>2026–27 (upcoming)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label>Jersey number <span class="opt">(optional)</span></label>
+            <input type="number" id="jerseyNum" placeholder="e.g. 14" min="1" max="99">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. PLAYER PHOTO (optional) -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">PLAYER PHOTO</div>
+          <div class="form-block-sub">Used on your recruiting card — headshot or action photo</div>
+        </div>
+        <div class="form-block-tag optional">Optional</div>
+      </div>
+      <div class="form-block-body">
+        <div class="photo-upload-zone" onclick="document.getElementById('photoUpload').click()">
+          <div class="photo-preview-area" id="photoPreviewArea">
+            <img id="photoPreviewImg" src="" alt="Player photo preview">
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="12" r="5" stroke="#8896A8" stroke-width="1.5"/>
+              <path d="M5 26c0-5 4.5-9 11-9s11 4 11 9" stroke="#8896A8" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="upload-text">Upload player photo</div>
+            <div class="upload-hint">JPG, PNG, WEBP up to 10MB · Headshot or action photo</div>
+          </div>
+        </div>
+        <input type="file" id="photoUpload" style="display:none" accept="image/*" onchange="previewPhoto(this)">
+      </div>
+    </div>
+
+    <!-- 5. PLAN SELECTION -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">PLAN SELECTION</div>
+          <div class="form-block-sub">Choose the level of intelligence that fits your goals</div>
+        </div>
+        <div class="form-block-tag">Required</div>
+      </div>
+      <div class="form-block-body">
+        <div class="plan-grid">
+          <div>
+            <input type="radio" name="plan" id="planStarter" value="starter" class="plan-opt">
+            <label for="planStarter">
+              <span class="plan-name">STARTER</span>
+              <span class="plan-price">$29 / mo</span>
+              <span class="plan-desc">Annual PDS + baseline benchmarks</span>
             </label>
           </div>
           <div>
-            <label class="check-opt" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-              <input type="checkbox" id="consentContact" style="position:static;opacity:1;width:auto;height:auto;margin-top:3px">
-              <span style="font-size:13px;color:var(--nt-slate);font-weight:300;line-height:1.6">I agree to receive the PDS report and occasional development insights from Next Tier at the email address provided. Unsubscribe anytime.</span>
+            <input type="radio" name="plan" id="planScout" value="scout" class="plan-opt">
+            <label for="planScout">
+              <span class="plan-name">SCOUT</span>
+              <span class="plan-price">$59 / mo</span>
+              <span class="plan-desc">Monthly eval + development roadmap</span>
+            </label>
+          </div>
+          <div>
+            <input type="radio" name="plan" id="planElite" value="elite" class="plan-opt">
+            <label for="planElite">
+              <span class="plan-name">ELITE</span>
+              <span class="plan-price">$99 / mo</span>
+              <span class="plan-desc">Live recruiting profile + scout matching</span>
+            </label>
+          </div>
+          <div>
+            <input type="radio" name="plan" id="planUnsure" value="unsure" class="plan-opt">
+            <label for="planUnsure">
+              <span class="plan-name">NOT SURE</span>
+              <span class="plan-price">—</span>
+              <span class="plan-desc">We'll recommend a plan for you</span>
             </label>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="form-nav">
-        <button class="btn-nav ghost" onclick="goToStep(3)">← Back</button>
-        <button class="btn-nav primary large" onclick="submitForm()">Submit player profile →</button>
+    <!-- 6. CONSENT & SUBMISSION -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">CONSENT & SUBMISSION</div>
+          <div class="form-block-sub">Review before you submit</div>
+        </div>
+      </div>
+      <div class="form-block-body">
+        <div class="check-row">
+          <input type="checkbox" id="consentData">
+          <span>I consent to Next Tier collecting and processing the player's performance data for the purpose of generating a Player Development Score and development recommendations.</span>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="consentContact">
+          <span>I agree to receive the PDS report and occasional development insights from Next Tier at the email address provided. Unsubscribe anytime.</span>
+        </div>
+        <div class="submit-wrap" style="margin-top:20px">
+          <button class="btn-submit" onclick="submitForm()">Submit player profile →</button>
+          <div class="submit-note">Your information is private and never shared or sold.</div>
+          <div class="submit-error" id="submitError"></div>
+        </div>
       </div>
     </div>
 
   </div><!-- /formArea -->
-
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-summary">
-      <div class="sidebar-label">Profile summary</div>
-      <div class="summary-row">
-        <span class="sum-key">Player</span>
-        <span class="sum-val" id="sumName"><span class="empty">Not yet entered</span></span>
-      </div>
-      <div class="summary-row">
-        <span class="sum-key">Jersey</span>
-        <span class="sum-val" id="sumJersey"><span class="empty">—</span></span>
-      </div>
-      <div class="summary-row">
-        <span class="sum-key">Position</span>
-        <span class="sum-val" id="sumPosition"><span class="empty">—</span></span>
-      </div>
-      <div class="summary-row">
-        <span class="sum-key">Team</span>
-        <span class="sum-val" id="sumTeam"><span class="empty">—</span></span>
-      </div>
-      <div class="summary-row">
-        <span class="sum-key">League</span>
-        <span class="sum-val" id="sumLeague"><span class="empty">—</span></span>
-      </div>
-      <div class="summary-row">
-        <span class="sum-key">Draft yr</span>
-        <span class="sum-val" id="sumDraft"><span class="empty">—</span></span>
-      </div>
-      <div class="summary-row">
-        <span class="sum-key">Goal</span>
-        <span class="sum-val" id="sumGoal"><span class="empty">—</span></span>
-      </div>
-      <div class="summary-row">
-        <span class="sum-key">Plan</span>
-        <span class="sum-val" id="sumPlan"><span class="empty">—</span></span>
-      </div>
-      <div class="summary-row">
-        <span class="sum-key">Contact</span>
-        <span class="sum-val" id="sumContact"><span class="empty">—</span></span>
-      </div>
-    </div>
-
-    <div class="tier-reco-block" id="tierRecoBlock">
-      <div class="trb-label">Recommended plan</div>
-      <div class="trb-tier" id="trbTierName">—</div>
-      <div class="trb-why" id="trbTierWhy"></div>
-    </div>
-
-    <div class="sidebar-help">
-      <div class="sh-title">Need help?</div>
-      <p class="sh-body">Our team is available to walk you through the intake form or answer questions about your player's profile.</p>
-      <a href="mailto:support@nexttier.ca" class="sh-link">support@nexttier.ca →</a>
-    </div>
-  </div>
-
 </div><!-- /intake-body -->
 
 <script>
-let currentStep = 1;
-let filmCount = 0;
+// ── Google Apps Script Integration ──
+// No OAuth, no popup — POSTs silently to your deployed Apps Script web app.
+//
+// SETUP:
+//   1. Open your Google Sheet → Extensions → Apps Script
+//   2. Paste the contents of next_tier_apps_script.gs
+//   3. Deploy → New deployment → Web app (Execute as: Me, Access: Anyone)
+//   4. Copy the Web App URL and paste it below
 
-// ── League tier classification ──
-const LEAGUE_TIERS = {
-  'USHL': { tier: 'T1', label: 'Tier 1 — Major Junior' },
-  'NCAA D1': { tier: 'T1', label: 'Tier 1 — NCAA D1' },
-  'AJHL': { tier: 'T2', label: 'Tier 2 — Tier II Junior A' },
-  'BCHL': { tier: 'T2', label: 'Tier 2 — Tier II Junior A' },
-  'OJHL': { tier: 'T2', label: 'Tier 2 — Tier II Junior A' },
-  'NAHL': { tier: 'T2', label: 'Tier 2 — Tier II Junior A' },
-  'NCAA D2/D3': { tier: 'T2', label: 'Tier 2 — NCAA D2/D3' },
-  'ACHA': { tier: 'T3', label: 'Tier 3 — ACHA' },
-  'PJHL': { tier: 'T3', label: 'Tier 3 — Junior B' },
-  'AEHL U18': { tier: 'T3', label: 'Tier 3 — Midget AAA' },
-  'AEHL U15': { tier: 'T3', label: 'Tier 3 — Bantam AAA' },
-  'AMHL U18 AAA': { tier: 'T3', label: 'Tier 3 — U18 AAA' },
-  'AMHL U15 AAA': { tier: 'T3', label: 'Tier 3 — U15 AAA' },
-  'BCEHL U18': { tier: 'T3', label: 'Tier 3 — U18 AAA (BC)' },
-};
+const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/nexttierstats.com/s/AKfycbwyA1YWm3dPoJ8nTyjggXoT_xzQg1uP-FLb4hLRO41wZywGY1Er3AFZVLGry3xMkb4G0g/exec';
 
-function getTierBadge(leagueText) {
-  for (const [key, val] of Object.entries(LEAGUE_TIERS)) {
-    if (leagueText && leagueText.includes(key)) {
-      const cls = { T1: 'tier-t1', T2: 'tier-t2', T3: 'tier-t3', T4: 'tier-t4', T5: 'tier-t5' }[val.tier] || 'tier-t4';
-      return `<span class="tier-badge ${cls}">${val.tier} · ${val.label}</span>`;
-    }
+function collectFormData() {
+  const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const checked = id => { const el = document.getElementById(id); return el ? (el.checked ? 'Yes' : 'No') : 'No'; };
+  const radio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
+  const planLabels = { starter: 'Starter — $29/mo', scout: 'Scout — $59/mo', elite: 'Elite — $99/mo', unsure: 'Not sure yet' };
+  const planVal = radio('plan');
+
+  return [
+    new Date().toLocaleString('en-CA', { timeZone: 'America/Edmonton' }),
+    v('firstName'),
+    v('lastName'),
+    v('dob'),
+    v('position'),
+    v('height'),
+    v('weight'),
+    v('contactName'),
+    v('relationship'),
+    v('email'),
+    v('phone'),
+    v('hearAbout'),
+    v('teamName'),
+    v('currentLeague'),
+    v('season'),
+    v('jerseyNum'),
+    planLabels[planVal] || planVal,
+    checked('consentData'),
+    checked('consentContact')
+  ];
+}
+
+function showSuccessPanel() {
+  document.getElementById('formArea').style.display = 'none';
+  document.getElementById('successPanel').classList.add('visible');
+  setSubmitLoading(false);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showSubmitError(msg) {
+  const el = document.getElementById('submitError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function setSubmitLoading(loading) {
+  const btn = document.querySelector('.btn-submit');
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Saving…' : 'Submit player profile →';
+}
+
+async function submitForm() {
+  const email = v('email');
+  const consent = document.getElementById('consentData').checked;
+
+  if (!document.getElementById('firstName').value.trim()) { alert('Please enter the player\'s first name.'); return; }
+  if (!document.getElementById('lastName').value.trim()) { alert('Please enter the player\'s last name.'); return; }
+  if (!document.getElementById('dob').value) { alert('Please enter the player\'s date of birth.'); return; }
+  if (!document.getElementById('position').value) { alert('Please select a position.'); return; }
+  if (!document.getElementById('email').value.trim()) { alert('Please enter your email address.'); return; }
+  if (!document.getElementById('teamName').value.trim()) { alert('Please enter the team name.'); return; }
+  if (!document.getElementById('currentLeague').value) { alert('Please select a league.'); return; }
+  if (!document.querySelector('input[name="plan"]:checked')) { alert('Please select a plan.'); return; }
+  if (!consent) { alert('Please accept the data consent to submit.'); return; }
+
+  document.getElementById('submitError').style.display = 'none';
+
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL') {
+    showSubmitError('Setup required: paste your Apps Script Web App URL into APPS_SCRIPT_URL in the code.');
+    return;
   }
-  return leagueText ? `<span class="tier-badge tier-t4">Unclassified</span>` : '';
+
+  setSubmitLoading(true);
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ row: collectFormData() })
+    });
+    showSuccessPanel();
+  } catch (err) {
+    showSubmitError('Submission failed — please check your connection and try again. (' + err.message + ')');
+    setSubmitLoading(false);
+  }
 }
 
-// ── History row template ──
-function addHistoryRow(isFirst) {
-  const container = document.getElementById('historyRows');
-  const idx = container.querySelectorAll('.history-row-enhanced').length + 1;
-  const row = document.createElement('div');
-  row.className = 'history-row-enhanced';
-  row.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <span style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted)">Season ${idx}</span>
-      ${idx > 1 ? `<button type="button" class="film-entry-remove" onclick="this.closest('.history-row-enhanced').remove(); renumberHistory()">Remove</button>` : ''}
-    </div>
-    <div style="display:grid;grid-template-columns:110px 1fr;gap:10px;margin-bottom:10px">
-      <div class="form-group" style="margin-bottom:0">
-        <label>Season</label>
-        <select style="font-size:13px;padding:8px 10px">
-          <option>2024–25</option>
-          <option>2023–24</option>
-          <option>2022–23</option>
-          <option>2021–22</option>
-          <option>2020–21</option>
-          <option>2019–20</option>
-          <option>Earlier</option>
-        </select>
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label>Team / League</label>
-        <input type="text" placeholder="e.g. Bonnyville Pontiacs / AJHL" oninput="updateRowTier(this)" style="font-size:13px;padding:8px 10px">
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:8px">
-      <div class="stat-input-group">
-        <label>GP</label>
-        <input type="number" placeholder="0" min="0" style="font-size:16px;padding:8px 4px">
-      </div>
-      <div class="stat-input-group">
-        <label>G</label>
-        <input type="number" placeholder="0" min="0" style="font-size:16px;padding:8px 4px">
-      </div>
-      <div class="stat-input-group">
-        <label>A</label>
-        <input type="number" placeholder="0" min="0" style="font-size:16px;padding:8px 4px">
-      </div>
-      <div class="stat-input-group">
-        <label>+/-</label>
-        <input type="number" placeholder="0" style="font-size:16px;padding:8px 4px">
-      </div>
-      <div class="stat-input-group">
-        <label>PIM</label>
-        <input type="number" placeholder="0" min="0" style="font-size:16px;padding:8px 4px">
-      </div>
-      <div class="stat-input-group">
-        <label>TOI/G</label>
-        <input type="text" placeholder="—" style="font-size:16px;padding:8px 4px">
-      </div>
-    </div>
-    <div class="tier-display"></div>
-  `;
-  container.appendChild(row);
-}
+// helper used in validation block above
+function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
-function updateRowTier(input) {
-  const row = input.closest('.history-row-enhanced');
-  const tierDiv = row.querySelector('.tier-display');
-  if (tierDiv) tierDiv.innerHTML = getTierBadge(input.value);
-}
-
-function renumberHistory() {
-  document.querySelectorAll('#historyRows .history-row-enhanced').forEach((row, i) => {
-    const label = row.querySelector('span[style*="font-mono"]');
-    if (label) label.textContent = `Season ${i + 1}`;
-  });
-}
-
-// ── Film entry template ──
-function addFilmEntry() {
-  filmCount++;
-  const container = document.getElementById('filmEntries');
-  const entry = document.createElement('div');
-  entry.className = 'film-entry';
-  entry.innerHTML = `
-    <div class="film-entry-header">
-      <span class="film-entry-num">Clip ${filmCount}</span>
-      ${filmCount > 1 ? `<button type="button" class="film-entry-remove" onclick="this.closest('.film-entry').remove(); renumberFilm()">Remove</button>` : ''}
-    </div>
-    <div class="form-row" style="margin-bottom:10px">
-      <div class="form-group" style="margin-bottom:0">
-        <label style="color:rgba(255,255,255,0.3)">Game date</label>
-        <input type="date" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:300;color:var(--nt-white);font-family:var(--font-body);outline:none;width:100%;transition:border-color .15s">
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label style="color:rgba(255,255,255,0.3)">Opponent</label>
-        <input type="text" placeholder="e.g. Lloydminster Blazers" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:300;color:var(--nt-white);font-family:var(--font-body);outline:none;width:100%;transition:border-color .15s">
-      </div>
-    </div>
-    <div class="upload-zone" onclick="this.nextElementSibling.click()" style="padding:16px;border-color:rgba(255,255,255,0.1);background:rgba(255,255,255,0.03)">
-      <div class="upload-text" style="font-size:13px;color:rgba(255,255,255,0.45)">Upload video file</div>
-      <div class="upload-hint">MP4, MOV up to 4GB</div>
-    </div>
-    <input type="file" style="display:none" accept="video/*">
-    <div class="form-group" style="margin-top:10px;margin-bottom:0">
-      <label style="color:rgba(255,255,255,0.3)">Or paste a video link</label>
-      <input type="url" placeholder="youtube.com/… or drive.google.com/…" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:300;color:var(--nt-white);font-family:var(--font-body);outline:none;width:100%;transition:border-color .15s">
-    </div>
-    <div class="form-group" style="margin-top:10px;margin-bottom:0">
-      <label style="color:rgba(255,255,255,0.3)">Scout notes for this clip</label>
-      <textarea placeholder="e.g. 3rd period only — note the offensive zone read at 2:14…" style="min-height:60px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:300;color:var(--nt-white);font-family:var(--font-body);outline:none;width:100%;resize:vertical;transition:border-color .15s"></textarea>
-    </div>
-  `;
-  container.appendChild(entry);
-}
-
-function renumberFilm() {
-  document.querySelectorAll('#filmEntries .film-entry').forEach((entry, i) => {
-    const label = entry.querySelector('.film-entry-num');
-    if (label) label.textContent = `Clip ${i + 1}`;
-  });
-  filmCount = document.querySelectorAll('#filmEntries .film-entry').length;
-}
-
-// ── Auto-calc stats ──
-function wireAutoCalc() {
-  const fields = ['statGP','statGA','statG','statA','statSOG','statFOW','statFOL','poG','poA','poFOW'];
-  fields.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', recalcStats);
-  });
-}
-
-function recalcStats() {
-  const gp = parseFloat(document.getElementById('statGP').value) || 0;
-  const ga = parseFloat(document.getElementById('statGA').value) || 0;
-  const g = parseFloat(document.getElementById('statG').value) || 0;
-  const a = parseFloat(document.getElementById('statA').value) || 0;
-  const sog = parseFloat(document.getElementById('statSOG').value) || 0;
-  const fow = parseFloat(document.getElementById('statFOW').value);
-  const fol = parseFloat(document.getElementById('statFOL').value);
-
-  // Availability %
-  const availPct = document.getElementById('statAvailPct');
-  if (ga > 0 && gp >= 0) {
-    availPct.value = `${Math.round((gp / ga) * 100)}%`;
-  } else { availPct.value = '—'; }
-
-  // Pts/GP
-  const ptsPerGP = document.getElementById('statPtsPerGP');
-  if (gp > 0) {
-    ptsPerGP.value = ((g + a) / gp).toFixed(2);
-  } else { ptsPerGP.value = '—'; }
-
-  // SOG/GP
-  const sogPerGP = document.getElementById('statSOGperGP');
-  if (gp > 0 && sog > 0) {
-    sogPerGP.value = (sog / gp).toFixed(1);
-  } else { sogPerGP.value = '—'; }
-
-  // FO%
-  const foPct = document.getElementById('statFOPct');
-  if (!isNaN(fow) && !isNaN(fol) && (fow + fol) > 0) {
-    foPct.value = `${Math.round((fow / (fow + fol)) * 100)}%`;
-  } else { foPct.value = '—'; }
-
-  // Playoff pts
-  const poG = parseFloat(document.getElementById('poG').value) || 0;
-  const poA = parseFloat(document.getElementById('poA').value) || 0;
-  document.getElementById('poPts').value = poG + poA > 0 ? poG + poA : '—';
-}
-
-// ── Photo preview ──
 function previewPhoto(input) {
   if (input.files && input.files[0]) {
     const reader = new FileReader();
@@ -1754,247 +737,6 @@ function previewPhoto(input) {
     reader.readAsDataURL(input.files[0]);
   }
 }
-
-// ── Show/hide goalie fields ──
-function toggleGoalieFields() {
-  const pos = document.getElementById('position').value;
-  const isGoalie = pos === 'Goaltender';
-  const goalieSection = document.getElementById('goalieSection');
-  const goalieRow = document.getElementById('goalieStatsRow');
-  const shotsRow = document.getElementById('shotsRow');
-  if (goalieSection) goalieSection.style.display = isGoalie ? '' : 'none';
-  if (goalieRow) goalieRow.style.display = isGoalie ? '' : 'none';
-  // Hide faceoff for goalies
-  if (shotsRow) {
-    // remove FOW/FOL for goalie, keep SOG
-  }
-}
-
-// ── Navigation ──
-function goToStep(n) {
-  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
-  const section = document.getElementById('step' + n);
-  if (section) section.classList.add('active');
-  document.querySelectorAll('.prog-step').forEach((el, i) => {
-    el.classList.remove('active', 'done');
-    if (i + 1 === n) el.classList.add('active');
-    else if (i + 1 < n) el.classList.add('done');
-  });
-  currentStep = n;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// ── Google Apps Script Integration ──
-// No OAuth, no popup — form POSTs silently to your deployed Apps Script web app.
-//
-// ⚠️  ONE-TIME SETUP (5 min):
-//   1. Open your Google Sheet → Extensions → Apps Script
-//   2. Paste the contents of `next_tier_apps_script.gs` (provided separately)
-//   3. Click Deploy → New deployment → Web app
-//      - Execute as: Me (your Google account)
-//      - Who has access: Anyone
-//   4. Copy the Web App URL and paste it below
-
-const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/nexttierstats.com/s/AKfycbxQk-946-QE1YgCLB5xp5Ct_aor0g5-nIObR-6sPje69UhPz9QIjwhN9A7_QGv6tXmcrA/exec';
-
-function collectFormData() {
-  const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-  const checked = id => { const el = document.getElementById(id); return el ? (el.checked ? 'Yes' : 'No') : 'No'; };
-  const radio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
-
-  // Career history rows
-  const historyRows = document.querySelectorAll('#historyRows .history-row-enhanced');
-  const history = [];
-  historyRows.forEach(row => {
-    const inputs = row.querySelectorAll('input, select');
-    const season    = inputs[0] ? inputs[0].value : '';
-    const teamLeague = inputs[1] ? inputs[1].value : '';
-    const gp  = inputs[2] ? inputs[2].value : '';
-    const g   = inputs[3] ? inputs[3].value : '';
-    const a   = inputs[4] ? inputs[4].value : '';
-    const pm  = inputs[5] ? inputs[5].value : '';
-    const pim = inputs[6] ? inputs[6].value : '';
-    const toi = inputs[7] ? inputs[7].value : '';
-    history.push(`${season} | ${teamLeague} | GP:${gp} G:${g} A:${a} +/-:${pm} PIM:${pim} TOI:${toi}`);
-  });
-
-  // Film clips
-  const filmEntries = document.querySelectorAll('#filmEntries .film-entry');
-  const clips = [];
-  filmEntries.forEach((entry, i) => {
-    const inputs = entry.querySelectorAll('input, textarea');
-    const date  = inputs[0] ? inputs[0].value : '';
-    const opp   = inputs[1] ? inputs[1].value : '';
-    const link  = inputs[2] ? inputs[2].value : '';
-    const notes = inputs[3] ? inputs[3].value : '';
-    if (date || opp || link || notes) {
-      clips.push(`Clip ${i+1}: ${date} vs ${opp} | ${link} | ${notes}`);
-    }
-  });
-
-  const goalLabels = { develop:'Long-term development', junior:'Make junior team', college:'College / NCAA', pro:'Professional hockey' };
-  const planLabels = { starter:'Starter — $29/mo', scout:'Scout — $59/mo', elite:'Elite — $99/mo', unsure:'Not sure yet' };
-  const goalVal = radio('goal');
-  const planVal = radio('plan');
-
-  return [
-    new Date().toLocaleString('en-CA', { timeZone: 'America/Edmonton' }),
-    v('firstName'), v('lastName'), v('jerseyNum'), v('dob'), v('birthCity'),
-    v('position'), v('shoots'), v('height'), v('weight'), v('draftYear'),
-    v('teamName'), v('currentLeague'), v('ageGroup'), v('season'),
-    v('academicYear'), v('gpa'), v('agentName'),
-    v('statGP'), v('statGA'), v('statAvailPct'), v('statTOI'),
-    v('statG'), v('statA'), v('statPPG'), v('statSHG'),
-    v('statPlusMinus'), v('statPIM'), v('statGWG'), v('statPtsPerGP'),
-    v('statSOG'), v('statSOGperGP'), v('statFOW'), v('statFOL'), v('statFOPct'),
-    v('statSavePct'), v('statGAA'),
-    v('poGP'), v('poG'), v('poA'), v('poPts'), v('poFOW'), v('poTOI'),
-    v('achievements'),
-    goalLabels[goalVal] || goalVal, v('targetLeague'), v('timeline'),
-    v('strength'), v('devAreas'), v('injuries'), v('otherContext'),
-    planLabels[planVal] || planVal,
-    v('contactName'), v('relationship'), v('email'), v('phone'), v('hearAbout'),
-    history.join(' || '),
-    clips.join(' || '),
-    checked('consentData'), checked('consentContact')
-  ];
-}
-
-function showSuccessPanel() {
-  document.querySelectorAll('.form-section').forEach(s => s.style.display = 'none');
-  document.getElementById('successPanel').classList.add('visible');
-  document.getElementById('sidebar').style.display = 'none';
-  document.querySelectorAll('.prog-step').forEach(el => { el.classList.remove('active'); el.classList.add('done'); });
-  setSubmitLoading(false);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function showSubmitError(msg) {
-  let errEl = document.getElementById('submitError');
-  if (!errEl) {
-    errEl = document.createElement('div');
-    errEl.id = 'submitError';
-    errEl.style.cssText = 'margin-top:12px;padding:12px 16px;background:#FDEAEC;border:1px solid rgba(232,52,74,0.2);border-radius:8px;font-size:13px;color:#E8344A;line-height:1.5;';
-    const navEl = document.querySelector('#step4 .form-nav');
-    if (navEl) navEl.appendChild(errEl);
-  }
-  errEl.textContent = msg;
-}
-
-function setSubmitLoading(loading) {
-  const btn = document.querySelector('#step4 .btn-nav.primary.large');
-  if (!btn) return;
-  if (loading) {
-    btn.disabled = true;
-    btn.textContent = 'Saving…';
-    btn.style.opacity = '0.7';
-  } else {
-    btn.disabled = false;
-    btn.textContent = 'Submit player profile →';
-    btn.style.opacity = '';
-  }
-}
-
-async function submitForm() {
-  const email = document.getElementById('email').value;
-  const consent = document.getElementById('consentData').checked;
-  if (!email) { alert('Please enter your email address before submitting.'); return; }
-  if (!consent) { alert('Please review and accept the data consent before submitting.'); return; }
-
-  const errEl = document.getElementById('submitError');
-  if (errEl) errEl.textContent = '';
-
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL') {
-    showSubmitError('Setup required: paste your Apps Script Web App URL into APPS_SCRIPT_URL in the form code.');
-    return;
-  }
-
-  setSubmitLoading(true);
-
-  try {
-    const row = collectFormData();
-    // Apps Script requires no-cors mode for cross-origin POST from a static page;
-    // the script returns a redirect on success which the browser follows silently.
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ row })
-    });
-    // no-cors means we can't read the response, but if no network error thrown it succeeded
-    showSuccessPanel();
-  } catch (err) {
-    showSubmitError('Submission failed — please check your connection and try again. (' + err.message + ')');
-    setSubmitLoading(false);
-  }
-}
-
-// ── Sidebar summary ──
-function updateSummary() {
-  const first = document.getElementById('firstName').value;
-  const last = document.getElementById('lastName').value;
-  const pos = document.getElementById('position').value;
-  const team = document.getElementById('teamName').value;
-  const league = document.getElementById('currentLeague').value;
-  const goalEl = document.querySelector('input[name="goal"]:checked');
-  const planEl = document.querySelector('input[name="plan"]:checked');
-  const contact = document.getElementById('contactName').value;
-  const email = document.getElementById('email').value;
-  const jersey = document.getElementById('jerseyNum').value;
-  const draftYr = document.getElementById('draftYear').value;
-
-  const goalLabels = { develop:'Long-term dev', junior:'Make junior', college:'College / NCAA', pro:'Professional' };
-  const planLabels = { starter:'Starter — $29/mo', scout:'Scout — $59/mo', elite:'Elite — $99/mo', unsure:'Not sure yet' };
-
-  set('sumName', first && last ? `${first} ${last}` : (first || null));
-  set('sumJersey', jersey ? `#${jersey}` : null);
-  set('sumPosition', pos || null);
-  set('sumTeam', team || null);
-  set('sumLeague', league || null);
-  set('sumDraft', draftYr || null);
-  set('sumGoal', goalEl ? goalLabels[goalEl.value] : null);
-  set('sumPlan', planEl ? planLabels[planEl.value] : null);
-  set('sumContact', email || (contact || null));
-}
-
-function set(id, val) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  if (val) {
-    el.innerHTML = val;
-  } else {
-    el.innerHTML = '<span class="empty">—</span>';
-  }
-}
-
-function updateTierReco() {
-  const goalEl = document.querySelector('input[name="goal"]:checked');
-  const league = document.getElementById('currentLeague').value;
-  if (!goalEl) return;
-  const goal = goalEl.value;
-  let tier = 'Scout — $59/mo';
-  let why = 'Monthly evaluations and a development roadmap will have the most impact at this stage.';
-  if (goal === 'pro' || goal === 'college' || league === 'NCAA D1' || league === 'USHL') {
-    tier = 'Elite — $99/mo';
-    why = 'A live recruiting profile actively matched to college and pro scouts is essential at this level and goal.';
-  } else if (goal === 'develop') {
-    tier = 'Starter — $29/mo';
-    why = 'At this stage, a baseline PDS and annual evaluations give you the benchmarks to track progress without over-investing.';
-  }
-  document.getElementById('trbTierName').textContent = tier;
-  document.getElementById('trbTierWhy').textContent = why;
-  document.getElementById('tierRecoBlock').classList.add('visible');
-}
-
-// ── Init ──
-document.addEventListener('DOMContentLoaded', () => {
-  addHistoryRow(true);
-  addFilmEntry();
-  wireAutoCalc();
-  toggleGoalieFields();
-  document.getElementById('goalieSection').style.display = 'none';
-  document.getElementById('goalieStatsRow').style.display = 'none';
-});
 </script>
 </body>
 </html>
