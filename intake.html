@@ -176,40 +176,51 @@ nav {
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
 
-/* ── RADIO / PLAN ── */
+/* ── RADIO / PRICING ── */
 .plan-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 .plan-opt { display: none; }
 .plan-opt + label {
   display: block;
   border: 1px solid var(--nt-border-strong);
-  border-radius: 10px;
-  padding: 14px 12px;
+  border-radius: 12px;
+  padding: 22px 20px;
   cursor: pointer;
   transition: border-color .15s, background .15s;
-  text-align: center;
 }
 .plan-opt + label:hover { border-color: var(--nt-green); background: var(--nt-green-l); }
-.plan-opt:checked + label {
-  border-color: var(--nt-green);
-  background: var(--nt-green-l);
-}
+.plan-opt:checked + label { border-color: var(--nt-green); background: var(--nt-green-l); }
 .plan-name {
   font-family: var(--font-display);
-  font-size: 18px; letter-spacing: .02em;
-  color: var(--nt-black); display: block; margin-bottom: 2px;
+  font-size: 20px; letter-spacing: .02em;
+  color: var(--nt-black); display: block; margin-bottom: 4px;
 }
 .plan-price {
-  font-family: var(--font-mono);
-  font-size: 11px; color: var(--nt-green);
-  letter-spacing: .04em;
+  font-family: var(--font-display);
+  font-size: 34px; color: var(--nt-green);
+  letter-spacing: .02em; display: block;
+  margin-bottom: 8px; line-height: 1;
 }
 .plan-desc {
-  font-size: 11px; color: var(--nt-muted);
-  font-weight: 300; margin-top: 4px; line-height: 1.4;
+  font-size: 12px; color: var(--nt-muted);
+  font-weight: 300; line-height: 1.5;
+}
+.plan-includes {
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--nt-border);
+  list-style: none;
+}
+.plan-includes li {
+  font-size: 12px; color: var(--nt-slate);
+  font-weight: 300; padding: 3px 0;
+  display: flex; align-items: center; gap: 7px;
+}
+.plan-includes li::before {
+  content: ''; width: 5px; height: 5px;
+  border-radius: 50%; background: var(--nt-green); flex-shrink: 0;
 }
 
 /* ── PHOTO UPLOAD ── */
@@ -312,7 +323,7 @@ nav {
 
 @media (max-width: 640px) {
   .form-row, .form-row-3 { grid-template-columns: 1fr; }
-  .plan-grid { grid-template-columns: 1fr 1fr; }
+  .plan-grid { grid-template-columns: 1fr; }
   nav { padding: 0 16px; }
   .intake-header { padding: 36px 20px 32px; }
   .intake-body { padding: 24px 16px 60px; }
@@ -547,47 +558,42 @@ nav {
       </div>
     </div>
 
-    <!-- 5. PLAN SELECTION -->
+    <!-- 5. PRICING -->
     <div class="form-block">
       <div class="form-block-header">
         <div>
-          <div class="form-block-title">PLAN SELECTION</div>
-          <div class="form-block-sub">Choose the level of intelligence that fits your goals</div>
+          <div class="form-block-title">PRICING</div>
+          <div class="form-block-sub">Choose the package that fits your goals</div>
         </div>
         <div class="form-block-tag">Required</div>
       </div>
       <div class="form-block-body">
         <div class="plan-grid">
           <div>
-            <input type="radio" name="plan" id="planStarter" value="starter" class="plan-opt">
-            <label for="planStarter">
-              <span class="plan-name">STARTER</span>
-              <span class="plan-price">$29 / mo</span>
-              <span class="plan-desc">Annual PDS + baseline benchmarks</span>
+            <input type="radio" name="plan" id="planCard" value="player_card" class="plan-opt">
+            <label for="planCard">
+              <span class="plan-name">PLAYER CARD</span>
+              <span class="plan-price">$75</span>
+              <span class="plan-desc">A professional digital recruiting card built from your player profile.</span>
+              <ul class="plan-includes">
+                <li>Player stats snapshot</li>
+                <li>Shareable digital card</li>
+                <li>Delivered within 48h</li>
+              </ul>
             </label>
           </div>
           <div>
-            <input type="radio" name="plan" id="planScout" value="scout" class="plan-opt">
-            <label for="planScout">
-              <span class="plan-name">SCOUT</span>
-              <span class="plan-price">$59 / mo</span>
-              <span class="plan-desc">Monthly eval + development roadmap</span>
-            </label>
-          </div>
-          <div>
-            <input type="radio" name="plan" id="planElite" value="elite" class="plan-opt">
-            <label for="planElite">
-              <span class="plan-name">ELITE</span>
-              <span class="plan-price">$99 / mo</span>
-              <span class="plan-desc">Live recruiting profile + scout matching</span>
-            </label>
-          </div>
-          <div>
-            <input type="radio" name="plan" id="planUnsure" value="unsure" class="plan-opt">
-            <label for="planUnsure">
-              <span class="plan-name">NOT SURE</span>
-              <span class="plan-price">—</span>
-              <span class="plan-desc">We'll recommend a plan for you</span>
+            <input type="radio" name="plan" id="planVideo" value="video_review" class="plan-opt">
+            <label for="planVideo">
+              <span class="plan-name">VIDEO REVIEW</span>
+              <span class="plan-price">$300</span>
+              <span class="plan-desc">Full scout-level video breakdown with written feedback and development notes.</span>
+              <ul class="plan-includes">
+                <li>Full game film analysis</li>
+                <li>Written scout report</li>
+                <li>Development recommendations</li>
+                <li>Delivered within 5 business days</li>
+              </ul>
             </label>
           </div>
         </div>
@@ -638,7 +644,7 @@ function collectFormData() {
   const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
   const checked = id => { const el = document.getElementById(id); return el ? (el.checked ? 'Yes' : 'No') : 'No'; };
   const radio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
-  const planLabels = { starter: 'Starter — $29/mo', scout: 'Scout — $59/mo', elite: 'Elite — $99/mo', unsure: 'Not sure yet' };
+  const planLabels = { player_card: 'Player Card — $75', video_review: 'Video Review — $300' };
   const planVal = radio('plan');
 
   return [
