@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Next Tier — Player Profile Intake</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
 :root {
   --nt-black: #08090C;
@@ -1438,7 +1439,7 @@ nav {
           </div>
           <div class="form-group" style="margin-bottom:0">
             <label>How did you hear about Next Tier?</label>
-            <select>
+            <select id="hearAbout">
               <option value="">Select</option>
               <option>Coach / Trainer recommendation</option>
               <option>Social media</option>
@@ -1783,16 +1784,149 @@ function goToStep(n) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function submitForm() {
-  const email = document.getElementById('email').value;
-  const consent = document.getElementById('consentData').checked;
-  if (!email) { alert('Please enter your email address before submitting.'); return; }
-  if (!consent) { alert('Please review and accept the data consent before submitting.'); return; }
+// ── Google Apps Script Integration ──
+// No OAuth, no popup — form POSTs silently to your deployed Apps Script web app.
+//
+// ⚠️  ONE-TIME SETUP (5 min):
+//   1. Open your Google Sheet → Extensions → Apps Script
+//   2. Paste the contents of `next_tier_apps_script.gs` (provided separately)
+//   3. Click Deploy → New deployment → Web app
+//      - Execute as: Me (your Google account)
+//      - Who has access: Anyone
+//   4. Copy the Web App URL and paste it below
+
+const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/nexttierstats.com/s/AKfycbxQk-946-QE1YgCLB5xp5Ct_aor0g5-nIObR-6sPje69UhPz9QIjwhN9A7_QGv6tXmcrA/exec';
+
+function collectFormData() {
+  const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const checked = id => { const el = document.getElementById(id); return el ? (el.checked ? 'Yes' : 'No') : 'No'; };
+  const radio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
+
+  // Career history rows
+  const historyRows = document.querySelectorAll('#historyRows .history-row-enhanced');
+  const history = [];
+  historyRows.forEach(row => {
+    const inputs = row.querySelectorAll('input, select');
+    const season    = inputs[0] ? inputs[0].value : '';
+    const teamLeague = inputs[1] ? inputs[1].value : '';
+    const gp  = inputs[2] ? inputs[2].value : '';
+    const g   = inputs[3] ? inputs[3].value : '';
+    const a   = inputs[4] ? inputs[4].value : '';
+    const pm  = inputs[5] ? inputs[5].value : '';
+    const pim = inputs[6] ? inputs[6].value : '';
+    const toi = inputs[7] ? inputs[7].value : '';
+    history.push(`${season} | ${teamLeague} | GP:${gp} G:${g} A:${a} +/-:${pm} PIM:${pim} TOI:${toi}`);
+  });
+
+  // Film clips
+  const filmEntries = document.querySelectorAll('#filmEntries .film-entry');
+  const clips = [];
+  filmEntries.forEach((entry, i) => {
+    const inputs = entry.querySelectorAll('input, textarea');
+    const date  = inputs[0] ? inputs[0].value : '';
+    const opp   = inputs[1] ? inputs[1].value : '';
+    const link  = inputs[2] ? inputs[2].value : '';
+    const notes = inputs[3] ? inputs[3].value : '';
+    if (date || opp || link || notes) {
+      clips.push(`Clip ${i+1}: ${date} vs ${opp} | ${link} | ${notes}`);
+    }
+  });
+
+  const goalLabels = { develop:'Long-term development', junior:'Make junior team', college:'College / NCAA', pro:'Professional hockey' };
+  const planLabels = { starter:'Starter — $29/mo', scout:'Scout — $59/mo', elite:'Elite — $99/mo', unsure:'Not sure yet' };
+  const goalVal = radio('goal');
+  const planVal = radio('plan');
+
+  return [
+    new Date().toLocaleString('en-CA', { timeZone: 'America/Edmonton' }),
+    v('firstName'), v('lastName'), v('jerseyNum'), v('dob'), v('birthCity'),
+    v('position'), v('shoots'), v('height'), v('weight'), v('draftYear'),
+    v('teamName'), v('currentLeague'), v('ageGroup'), v('season'),
+    v('academicYear'), v('gpa'), v('agentName'),
+    v('statGP'), v('statGA'), v('statAvailPct'), v('statTOI'),
+    v('statG'), v('statA'), v('statPPG'), v('statSHG'),
+    v('statPlusMinus'), v('statPIM'), v('statGWG'), v('statPtsPerGP'),
+    v('statSOG'), v('statSOGperGP'), v('statFOW'), v('statFOL'), v('statFOPct'),
+    v('statSavePct'), v('statGAA'),
+    v('poGP'), v('poG'), v('poA'), v('poPts'), v('poFOW'), v('poTOI'),
+    v('achievements'),
+    goalLabels[goalVal] || goalVal, v('targetLeague'), v('timeline'),
+    v('strength'), v('devAreas'), v('injuries'), v('otherContext'),
+    planLabels[planVal] || planVal,
+    v('contactName'), v('relationship'), v('email'), v('phone'), v('hearAbout'),
+    history.join(' || '),
+    clips.join(' || '),
+    checked('consentData'), checked('consentContact')
+  ];
+}
+
+function showSuccessPanel() {
   document.querySelectorAll('.form-section').forEach(s => s.style.display = 'none');
   document.getElementById('successPanel').classList.add('visible');
   document.getElementById('sidebar').style.display = 'none';
   document.querySelectorAll('.prog-step').forEach(el => { el.classList.remove('active'); el.classList.add('done'); });
+  setSubmitLoading(false);
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showSubmitError(msg) {
+  let errEl = document.getElementById('submitError');
+  if (!errEl) {
+    errEl = document.createElement('div');
+    errEl.id = 'submitError';
+    errEl.style.cssText = 'margin-top:12px;padding:12px 16px;background:#FDEAEC;border:1px solid rgba(232,52,74,0.2);border-radius:8px;font-size:13px;color:#E8344A;line-height:1.5;';
+    const navEl = document.querySelector('#step4 .form-nav');
+    if (navEl) navEl.appendChild(errEl);
+  }
+  errEl.textContent = msg;
+}
+
+function setSubmitLoading(loading) {
+  const btn = document.querySelector('#step4 .btn-nav.primary.large');
+  if (!btn) return;
+  if (loading) {
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    btn.style.opacity = '0.7';
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Submit player profile →';
+    btn.style.opacity = '';
+  }
+}
+
+async function submitForm() {
+  const email = document.getElementById('email').value;
+  const consent = document.getElementById('consentData').checked;
+  if (!email) { alert('Please enter your email address before submitting.'); return; }
+  if (!consent) { alert('Please review and accept the data consent before submitting.'); return; }
+
+  const errEl = document.getElementById('submitError');
+  if (errEl) errEl.textContent = '';
+
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL') {
+    showSubmitError('Setup required: paste your Apps Script Web App URL into APPS_SCRIPT_URL in the form code.');
+    return;
+  }
+
+  setSubmitLoading(true);
+
+  try {
+    const row = collectFormData();
+    // Apps Script requires no-cors mode for cross-origin POST from a static page;
+    // the script returns a redirect on success which the browser follows silently.
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ row })
+    });
+    // no-cors means we can't read the response, but if no network error thrown it succeeded
+    showSuccessPanel();
+  } catch (err) {
+    showSubmitError('Submission failed — please check your connection and try again. (' + err.message + ')');
+    setSubmitLoading(false);
+  }
 }
 
 // ── Sidebar summary ──
@@ -1858,7 +1992,6 @@ document.addEventListener('DOMContentLoaded', () => {
   addFilmEntry();
   wireAutoCalc();
   toggleGoalieFields();
-  // Hide goalie section by default
   document.getElementById('goalieSection').style.display = 'none';
   document.getElementById('goalieStatsRow').style.display = 'none';
 });
