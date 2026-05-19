@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Parent Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="nt-auth.js"></script>
+<style>
+:root{--nt-black:#08090C;--nt-ice:#F0F4F8;--nt-white:#FFFFFF;--nt-green:#1DBC7A;--nt-green-l:#E3F9EE;--nt-green-d:#0E8A57;--nt-blue:#2D7DD2;--nt-blue-l:#E8F2FC;--nt-slate:#3D4A5C;--nt-muted:#8896A8;--nt-border:rgba(61,74,92,0.12);--nt-border-strong:rgba(61,74,92,0.22);--font-display:'Bebas Neue',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--nt-ice);color:var(--nt-black);-webkit-font-smoothing:antialiased;}
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:var(--font-display);font-size:26px;letter-spacing:.04em;color:#fff;text-decoration:none;}
+.nav-logo span{color:var(--nt-green);}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--nt-blue);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:#fff;}
+.nav-name{font-size:13px;color:rgba(255,255,255,0.6);}
+.nav-role{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-blue);}
+.btn-logout{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:7px 14px;font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;font-family:var(--font-body);}
+.page-body{max-width:960px;margin:0 auto;padding:36px 24px 80px;}
+.page-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--nt-blue);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.page-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-blue);}
+.page-title{font-family:var(--font-display);font-size:clamp(32px,4vw,48px);letter-spacing:.02em;color:var(--nt-black);margin-bottom:6px;}
+.page-title em{color:var(--nt-green);font-style:normal;}
+.page-sub{font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:32px;}
+.section{background:var(--nt-white);border:1px solid var(--nt-border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.section-head{padding:20px 24px 16px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;}
+.section-title{font-family:var(--font-display);font-size:18px;letter-spacing:.02em;}
+.section-body{padding:22px 24px;}
+.player-card{display:flex;align-items:center;gap:18px;padding:16px;background:var(--nt-ice);border-radius:10px;border:1px solid var(--nt-border);}
+.player-avatar{width:56px;height:56px;border-radius:10px;background:var(--nt-green);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:26px;color:var(--nt-black);flex-shrink:0;}
+.player-name{font-family:var(--font-display);font-size:22px;letter-spacing:.02em;color:var(--nt-black);}
+.player-meta{font-size:12px;font-weight:300;color:var(--nt-muted);}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
+.pill-pending{background:#FFF8E6;color:#B87900;}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px;}
+.info-item{padding:14px;background:var(--nt-ice);border-radius:8px;}
+.info-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:4px;}
+.info-val{font-size:14px;font-weight:500;color:var(--nt-black);}
+.cta-box{background:var(--nt-black);border-radius:12px;padding:22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.cta-text{font-size:14px;font-weight:300;color:rgba(255,255,255,0.5);max-width:380px;line-height:1.6;}
+.cta-text strong{color:#fff;font-weight:500;}
+.btn-cta{background:var(--nt-green);color:var(--nt-black);border:none;border-radius:7px;padding:11px 22px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);text-decoration:none;white-space:nowrap;}
+.loading-overlay{position:fixed;inset:0;background:var(--nt-black);display:flex;align-items:center;justify-content:center;z-index:999;}
+.loading-logo{font-family:var(--font-display);font-size:36px;letter-spacing:.04em;color:#fff;}
+.loading-logo span{color:var(--nt-green);}
+@media(max-width:640px){.info-grid{grid-template-columns:1fr 1fr;}.page-body{padding:24px 16px 60px;}nav{padding:0 16px;}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">NEXT<span>TIER</span></div>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-logo">NEXT<span>TIER</span></a>
+  <div class="nav-right">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="nav-avatar" data-nt-initial>?</div>
+      <div>
+        <div class="nav-name" data-nt-name>Loading…</div>
+        <div class="nav-role">Parent</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="NT.logout()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page-body">
+  <div class="page-eyebrow">Parent Dashboard</div>
+  <div class="page-title">YOUR PLAYER'S <em>PROGRESS.</em></div>
+  <div class="page-sub">Track reports, status updates, and all activity for your linked player.</div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">LINKED PLAYER</div>
+      <span class="pill pill-pending"><span class="pill-dot"></span>In review</span>
+    </div>
+    <div class="section-body">
+      <div class="player-card">
+        <div class="player-avatar">TK</div>
+        <div>
+          <div class="player-name">TYLER KEATING</div>
+          <div class="player-meta">Centre · Sherwood Park Crusaders · AEHL U18 · 2025–26</div>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-item"><div class="info-label">Package</div><div class="info-val">Player Card</div></div>
+        <div class="info-item"><div class="info-label">Submitted</div><div class="info-val">May 16, 2026</div></div>
+        <div class="info-item"><div class="info-label">ETA</div><div class="info-val">48 hours</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><div class="section-title">UPGRADE TO VIDEO REVIEW</div></div>
+    <div class="section-body">
+      <div class="cta-box">
+        <div class="cta-text"><strong>Get a full scout-level breakdown.</strong> Our video review includes a complete game film analysis, written scout report, and development recommendations delivered within 5 business days.</div>
+        <a href="intake.html" class="btn-cta">Upgrade for $300 →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><div class="section-title">CONTACT NEXT TIER</div></div>
+    <div class="section-body">
+      <p style="font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:14px;">Have a question about your player's profile or report timeline?</p>
+      <a href="contact.html" style="display:inline-block;background:var(--nt-ice);border:1px solid var(--nt-border-strong);border-radius:7px;padding:10px 20px;font-size:13px;font-weight:500;color:var(--nt-slate);text-decoration:none;">Go to contact page →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = await NT.guard(['parent', 'admin']);
+  document.getElementById('loadingOverlay').style.display = 'none';
+  if (user) NT.renderUser();
+});
+</script>
+</body>
+</html>
