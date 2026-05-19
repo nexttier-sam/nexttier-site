@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="nt-auth.js"></script>
+<style>
+:root {
+  --nt-black: #08090C; --nt-ice: #F0F4F8; --nt-white: #FFFFFF;
+  --nt-green: #1DBC7A; --nt-green-d: #0E8A57; --nt-green-l: #E3F9EE;
+  --nt-red: #E8344A; --nt-slate: #3D4A5C; --nt-muted: #8896A8;
+  --nt-border: rgba(61,74,92,0.12); --nt-border-strong: rgba(61,74,92,0.22);
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body); background: var(--nt-black);
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px; -webkit-font-smoothing: antialiased;
+}
+.auth-logo {
+  font-family: var(--font-display); font-size: 32px; letter-spacing: .04em;
+  color: var(--nt-white); text-decoration: none; margin-bottom: 36px;
+}
+.auth-logo span { color: var(--nt-green); }
+
+.auth-card {
+  background: var(--nt-white); border-radius: 16px;
+  width: 100%; max-width: 420px; overflow: hidden;
+}
+.auth-tabs {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--nt-border);
+}
+.auth-tab {
+  padding: 16px; text-align: center; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--nt-muted);
+  border: none; background: none; font-family: var(--font-body);
+  transition: color .15s; border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.auth-tab.active { color: var(--nt-black); border-bottom-color: var(--nt-green); }
+
+.auth-body { padding: 28px; }
+.auth-panel { display: none; }
+.auth-panel.active { display: block; }
+
+.auth-title {
+  font-family: var(--font-display); font-size: 28px;
+  letter-spacing: .02em; color: var(--nt-black);
+  margin-bottom: 4px;
+}
+.auth-sub { font-size: 13px; font-weight: 300; color: var(--nt-muted); margin-bottom: 24px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group:last-of-type { margin-bottom: 0; }
+.form-group label {
+  display: block; font-size: 11px; font-weight: 500;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--nt-muted); margin-bottom: 6px; font-family: var(--font-mono);
+}
+.form-group input, .form-group select {
+  width: 100%; background: var(--nt-ice);
+  border: 1px solid var(--nt-border-strong); border-radius: 8px;
+  padding: 10px 14px; font-size: 14px; font-weight: 300;
+  color: var(--nt-black); font-family: var(--font-body);
+  outline: none; transition: border-color .15s; -webkit-appearance: none;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--nt-green); background: var(--nt-white);
+}
+.form-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238896A8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn-auth {
+  width: 100%; background: var(--nt-green); color: var(--nt-black);
+  border: none; border-radius: 8px; padding: 13px;
+  font-size: 14px; font-weight: 600; font-family: var(--font-body);
+  cursor: pointer; transition: background .15s; margin-top: 20px;
+}
+.btn-auth:hover { background: #23D98C; }
+.btn-auth:disabled { opacity: .6; cursor: not-allowed; }
+
+.auth-error {
+  margin-top: 14px; padding: 10px 14px;
+  background: #FDEAEC; border: 1px solid rgba(232,52,74,.2);
+  border-radius: 7px; font-size: 13px; color: var(--nt-red); display: none;
+}
+.auth-success {
+  margin-top: 14px; padding: 10px 14px;
+  background: var(--nt-green-l); border: 1px solid rgba(29,188,122,.2);
+  border-radius: 7px; font-size: 13px; color: var(--nt-green-d); display: none;
+}
+
+.role-info {
+  margin-top: 16px; padding: 12px 14px;
+  background: var(--nt-ice); border-radius: 8px;
+  font-size: 12px; font-weight: 300; color: var(--nt-slate); line-height: 1.6;
+}
+.role-info strong { font-weight: 500; color: var(--nt-black); }
+
+.auth-footer {
+  text-align: center; margin-top: 20px;
+  font-size: 12px; color: rgba(255,255,255,0.25);
+}
+.auth-footer a { color: rgba(255,255,255,0.4); }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="auth-logo">NEXT<span>TIER</span></a>
+
+<div class="auth-card">
+  <div class="auth-tabs">
+    <button class="auth-tab active" onclick="switchTab('login')">Sign in</button>
+    <button class="auth-tab" onclick="switchTab('register')">Create account</button>
+  </div>
+  <div class="auth-body">
+
+    <!-- LOGIN -->
+    <div class="auth-panel active" id="panelLogin">
+      <div class="auth-title">WELCOME BACK</div>
+      <div class="auth-sub">Sign in to your Next Tier account</div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-auth" id="btnLogin" onclick="doLogin()">Sign in →</button>
+      <div class="auth-error"  id="loginError"></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="auth-panel" id="panelRegister">
+      <div class="auth-title">CREATE ACCOUNT</div>
+      <div class="auth-sub">Join Next Tier — it's free to sign up</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>First name</label>
+          <input type="text" id="regFirst" placeholder="Tyler">
+        </div>
+        <div class="form-group">
+          <label>Last name</label>
+          <input type="text" id="regLast" placeholder="Keating">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="regEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="regPassword" placeholder="Min 8 characters" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label>I am a…</label>
+        <select id="regRole" onchange="updateRoleInfo()">
+          <option value="">Select your role</option>
+          <option value="player">Player</option>
+          <option value="parent">Parent / Guardian</option>
+          <option value="scout">Scout / Recruiter</option>
+        </select>
+      </div>
+      <div class="role-info" id="roleInfo" style="display:none"></div>
+      <button class="btn-auth" id="btnRegister" onclick="doRegister()">Create account →</button>
+      <div class="auth-error"   id="registerError"></div>
+      <div class="auth-success" id="registerSuccess"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="auth-footer">
+  <a href="index.html">← Back to home</a>
+</div>
+
+<script>
+const ROLE_DESCRIPTIONS = {
+  player: '<strong>Player access</strong> — view your player card, reports, and development notes.',
+  parent: '<strong>Parent / Guardian access</strong> — view your linked player\'s profile and all reports.',
+  scout:  '<strong>Scout / Recruiter access</strong> — browse player cards and public profiles. No personal contact info.'
+};
+
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0) === (tab === 'login'));
+  });
+  document.getElementById('panelLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('panelRegister').classList.toggle('active', tab === 'register');
+}
+
+function updateRoleInfo() {
+  const role = document.getElementById('regRole').value;
+  const info = document.getElementById('roleInfo');
+  if (role && ROLE_DESCRIPTIONS[role]) {
+    info.innerHTML = ROLE_DESCRIPTIONS[role];
+    info.style.display = 'block';
+  } else {
+    info.style.display = 'none';
+  }
+}
+
+async function doLogin() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl    = document.getElementById('loginError');
+  const btn      = document.getElementById('btnLogin');
+  errEl.style.display = 'none';
+
+  if (!email || !password) { showErr(errEl, 'Please enter your email and password.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  try {
+    const res = await NT.login(email, password);
+    if (res.status === 'ok') {
+      NT.setSession(res.token, res.user);
+      // Redirect based on role
+      const dest = new URLSearchParams(window.location.search).get('redirect');
+      if (dest) { window.location.href = dest; return; }
+      window.location.href = dashboardFor(res.user.role);
+    } else {
+      showErr(errEl, res.message);
+      btn.disabled = false; btn.textContent = 'Sign in →';
+    }
+  } catch(e) {
+    showErr(errEl, 'Connection error. Please try again.');
+    btn.disabled = false; btn.textContent = 'Sign in →';
+  }
+}
+
+async function doRegister() {
+  const firstName = document.getElementById('regFirst').value.trim();
+  const lastName  = document.getElementById('regLast').value.trim();
+  const email     = document.getElementById('regEmail').value.trim();
+  const password  = document.getElementById('regPassword').value;
+  const role      = document.getElementById('regRole').value;
+  const errEl     = document.getElementById('registerError');
+  const succEl    = document.getElementById('registerSuccess');
+  const btn       = document.getElementById('btnRegister');
+  errEl.style.display = 'none'; succEl.style.display = 'none';
+
+  if (!firstName) { showErr(errEl, 'Please enter your first name.'); return; }
+  if (!email)     { showErr(errEl, 'Please enter your email address.'); return; }
+  if (password.length < 8) { showErr(errEl, 'Password must be at least 8 characters.'); return; }
+  if (!role)      { showErr(errEl, 'Please select your role.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Creating account…';
+
+  try {
+    const res = await NT.register(email, password, role, firstName, lastName);
+    if (res.status === 'ok') {
+      NT.setSession(res.token, res.user);
+      succEl.textContent = 'Account created! Redirecting…';
+      succEl.style.display = 'block';
+      setTimeout(() => { window.location.href = dashboardFor(role); }, 800);
+    } else {
+      showErr(errEl, res.message);
+      btn.disabled = false; btn.textContent = 'Create account →';
+    }
+  } catch(e) {
+    showErr(errEl, 'Connection error. Please try again.');
+    btn.disabled = false; btn.textContent = 'Create account →';
+  }
+}
+
+function dashboardFor(role) {
+  const map = { player: 'dashboard-player.html', parent: 'dashboard-parent.html', scout: 'dashboard-scout.html', admin: 'dashboard-admin.html' };
+  return map[role] || 'index.html';
+}
+
+function showErr(el, msg) {
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// If already logged in, redirect to dashboard
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = NT.getUser();
+  if (user) {
+    const valid = await NT.validate();
+    if (valid) { window.location.href = dashboardFor(valid.role); }
+  }
+});
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (document.getElementById('panelLogin').classList.contains('active')) doLogin();
+  else doRegister();
+});
+</script>
+</body>
+</html>
