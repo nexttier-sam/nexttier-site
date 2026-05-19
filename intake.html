@@ -629,17 +629,16 @@ nav {
 </div><!-- /intake-body -->
 
 <script>
-// ── Google Apps Script Integration ──
-// Paste your deployed Apps Script Web App URL here:
-const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/nexttierstats.com/s/AKfycbxLKAsFUtJjMflXQeP5mm-nrBjHv7nJv0LFfYD3-IqxqnpLgJ8mrkhk364WSM853kXh/exec';
+// ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ───────────────────────
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+// ─────────────────────────────────────────────────────────────────
 
-// ── Helpers (defined first so submitForm can call them) ───────────
 function v(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : '';
 }
 
-function checked(id) {
+function isChecked(id) {
   const el = document.getElementById(id);
   return el ? (el.checked ? 'Yes' : 'No') : 'No';
 }
@@ -648,27 +647,14 @@ function collectFormData() {
   const planEl  = document.querySelector('input[name="plan"]:checked');
   const planVal = planEl ? planEl.value : '';
   const planLabels = { player_card: 'Player Card — $75', video_review: 'Video Review — $300' };
-
   return [
     new Date().toLocaleString('en-CA', { timeZone: 'America/Edmonton' }),
-    v('firstName'),
-    v('lastName'),
-    v('dob'),
-    v('position'),
-    v('height'),
-    v('weight'),
-    v('contactName'),
-    v('relationship'),
-    v('email'),
-    v('phone'),
-    v('hearAbout'),
-    v('teamName'),
-    v('currentLeague'),
-    v('season'),
-    v('jerseyNum'),
+    v('firstName'), v('lastName'), v('dob'), v('position'),
+    v('height'), v('weight'), v('contactName'), v('relationship'),
+    v('email'), v('phone'), v('hearAbout'), v('teamName'),
+    v('currentLeague'), v('season'), v('jerseyNum'),
     planLabels[planVal] || planVal,
-    checked('consentData'),
-    checked('consentContact')
+    isChecked('consentData'), isChecked('consentContact')
   ];
 }
 
@@ -693,43 +679,45 @@ function setSubmitLoading(loading) {
 }
 
 async function submitForm() {
-  // ── Validation ──
-  if (!document.getElementById('firstName').value.trim()) { alert('Please enter the player\'s first name.'); return; }
-  if (!document.getElementById('lastName').value.trim())  { alert('Please enter the player\'s last name.'); return; }
-  if (!document.getElementById('dob').value)              { alert('Please enter the player\'s date of birth.'); return; }
-  if (!document.getElementById('position').value)         { alert('Please select a position.'); return; }
-  if (!document.getElementById('email').value.trim())     { alert('Please enter your email address.'); return; }
-  if (!document.getElementById('teamName').value.trim())  { alert('Please enter the team name.'); return; }
-  if (!document.getElementById('currentLeague').value)    { alert('Please select a league.'); return; }
+  if (!v('firstName'))                                       { alert('Please enter the player\'s first name.'); return; }
+  if (!v('lastName'))                                        { alert('Please enter the player\'s last name.'); return; }
+  if (!document.getElementById('dob').value)                 { alert('Please enter the player\'s date of birth.'); return; }
+  if (!document.getElementById('position').value)            { alert('Please select a position.'); return; }
+  if (!v('email'))                                           { alert('Please enter your email address.'); return; }
+  if (!v('teamName'))                                        { alert('Please enter the team name.'); return; }
+  if (!document.getElementById('currentLeague').value)       { alert('Please select a league.'); return; }
   if (!document.querySelector('input[name="plan"]:checked')) { alert('Please select a package.'); return; }
-  if (!document.getElementById('consentData').checked)    { alert('Please accept the data consent to submit.'); return; }
+  if (!document.getElementById('consentData').checked)       { alert('Please accept the data consent to submit.'); return; }
 
   document.getElementById('submitError').style.display = 'none';
 
   if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL') {
-    showSubmitError('Setup required: paste your Apps Script Web App URL into APPS_SCRIPT_URL.');
+    showSubmitError('Setup required: replace YOUR_APPS_SCRIPT_WEB_APP_URL with your deployed Apps Script URL.');
     return;
   }
 
   setSubmitLoading(true);
 
   try {
-    // Apps Script requires the payload as a plain-text string body when using no-cors.
-    // We include type:'intake' so the Apps Script router sends it to the right sheet tab.
-    const payload = JSON.stringify({ type: 'intake', row: collectFormData() });
+    const body = JSON.stringify({ type: 'intake', row: collectFormData() });
 
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode:   'no-cors',     // required for cross-origin calls to Apps Script
-      body:   payload        // no Content-Type header — no-cors strips custom headers anyway
+    // Use a Google Forms redirect trick: POST to the script URL which returns
+    // a redirect. We follow it with fetch (no-cors not needed this way).
+    // Apps Script deployed as "Anyone" handles cross-origin fine for simple POSTs.
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body:    'data=' + encodeURIComponent(body)
     });
 
-    // no-cors means we cannot read the response status, but if no network error
-    // was thrown the request reached Apps Script successfully.
+    // If fetch didn't throw, the request reached Apps Script.
+    // We show success regardless of response body because Apps Script
+    // redirect responses have opaque bodies in some browsers.
     showSuccessPanel();
 
   } catch (err) {
-    showSubmitError('Submission failed — check your connection and try again. (' + err.message + ')');
+    // Network failure — show the actual error so we can debug it
+    showSubmitError('Could not reach the server. Error: ' + err.message + '. Check that the Apps Script URL is correct and deployed.');
     setSubmitLoading(false);
   }
 }
