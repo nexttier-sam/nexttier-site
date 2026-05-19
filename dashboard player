@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Player Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="nt-auth.js"></script>
+<style>
+:root {
+  --nt-black:#08090C;--nt-ice:#F0F4F8;--nt-white:#FFFFFF;
+  --nt-green:#1DBC7A;--nt-green-l:#E3F9EE;--nt-green-d:#0E8A57;
+  --nt-slate:#3D4A5C;--nt-muted:#8896A8;
+  --nt-border:rgba(61,74,92,0.12);--nt-border-strong:rgba(61,74,92,0.22);
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--nt-ice);color:var(--nt-black);-webkit-font-smoothing:antialiased;}
+/* NAV */
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:var(--font-display);font-size:26px;letter-spacing:.04em;color:#fff;text-decoration:none;}
+.nav-logo span{color:var(--nt-green);}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.nav-user{display:flex;align-items:center;gap:10px;}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--nt-green);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:var(--nt-black);}
+.nav-name{font-size:13px;color:rgba(255,255,255,0.6);}
+.nav-role{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-green);}
+.btn-logout{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:7px 14px;font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;font-family:var(--font-body);transition:all .15s;}
+.btn-logout:hover{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);}
+/* LAYOUT */
+.page-body{max-width:960px;margin:0 auto;padding:36px 24px 80px;}
+.page-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--nt-green);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.page-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-green);}
+.page-title{font-family:var(--font-display);font-size:clamp(32px,4vw,48px);letter-spacing:.02em;color:var(--nt-black);margin-bottom:6px;}
+.page-title em{color:var(--nt-green);font-style:normal;}
+.page-sub{font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:32px;}
+/* CARDS */
+.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{background:var(--nt-white);border:1px solid var(--nt-border);border-radius:12px;padding:20px;}
+.stat-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:8px;}
+.stat-val{font-family:var(--font-display);font-size:36px;letter-spacing:.02em;color:var(--nt-black);line-height:1;}
+.stat-val em{color:var(--nt-green);font-style:normal;}
+.stat-note{font-size:12px;font-weight:300;color:var(--nt-muted);margin-top:6px;}
+/* SECTION */
+.section{background:var(--nt-white);border:1px solid var(--nt-border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.section-head{padding:20px 24px 16px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;}
+.section-title{font-family:var(--font-display);font-size:18px;letter-spacing:.02em;}
+.section-body{padding:22px 24px;}
+/* STATUS PILL */
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
+.pill-pending{background:#FFF8E6;color:#B87900;}
+.pill-ready{background:var(--nt-green-l);color:var(--nt-green-d);}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+/* LIST */
+.report-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--nt-border);}
+.report-row:last-child{border-bottom:none;padding-bottom:0;}
+.report-icon{width:38px;height:38px;border-radius:8px;background:var(--nt-ice);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.report-icon svg{width:18px;height:18px;}
+.report-info{flex:1;}
+.report-name{font-size:14px;font-weight:500;color:var(--nt-black);}
+.report-meta{font-size:12px;font-weight:300;color:var(--nt-muted);margin-top:2px;}
+.btn-sm{background:var(--nt-green);color:var(--nt-black);border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);white-space:nowrap;}
+.btn-sm.outline{background:transparent;color:var(--nt-slate);border:1px solid var(--nt-border-strong);}
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:var(--nt-black);display:flex;align-items:center;justify-content:center;z-index:999;}
+.loading-logo{font-family:var(--font-display);font-size:36px;letter-spacing:.04em;color:#fff;}
+.loading-logo span{color:var(--nt-green);}
+@media(max-width:640px){.card-grid{grid-template-columns:1fr 1fr;}.page-body{padding:24px 16px 60px;}nav{padding:0 16px;}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">NEXT<span>TIER</span></div>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-logo">NEXT<span>TIER</span></a>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar" data-nt-initial>?</div>
+      <div>
+        <div class="nav-name" data-nt-name>Loading…</div>
+        <div class="nav-role" data-nt-role>Player</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="NT.logout()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page-body">
+  <div class="page-eyebrow">Player Dashboard</div>
+  <div class="page-title">YOUR <em>PROFILE.</em></div>
+  <div class="page-sub">Everything related to your player profile and reports in one place.</div>
+
+  <div class="card-grid">
+    <div class="stat-card">
+      <div class="stat-label">Package</div>
+      <div class="stat-val" style="font-size:22px;">Player <em>Card</em></div>
+      <div class="stat-note">$75 one-time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Profile status</div>
+      <div style="margin-top:4px"><span class="pill pill-pending"><span class="pill-dot"></span>In review</span></div>
+      <div class="stat-note">Submitted 2 days ago</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Delivery ETA</div>
+      <div class="stat-val">48<em>h</em></div>
+      <div class="stat-note">Player card</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">MY REPORTS</div>
+      <span class="pill pill-pending"><span class="pill-dot"></span>1 pending</span>
+    </div>
+    <div class="section-body">
+      <div class="report-row">
+        <div class="report-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--nt-muted)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h6"/></svg>
+        </div>
+        <div class="report-info">
+          <div class="report-name">Player Card</div>
+          <div class="report-meta">Submitted — in production</div>
+        </div>
+        <span class="pill pill-pending"><span class="pill-dot"></span>Pending</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">MY PROFILE SUBMISSION</div>
+    </div>
+    <div class="section-body">
+      <p style="font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:16px;">Your intake form has been received. Need to update any details?</p>
+      <a href="intake.html" class="btn-sm outline" style="text-decoration:none;display:inline-block">Re-submit profile →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = await NT.guard(['player', 'admin']);
+  document.getElementById('loadingOverlay').style.display = 'none';
+  if (user) NT.renderUser();
+});
+</script>
+</body>
+</html>
