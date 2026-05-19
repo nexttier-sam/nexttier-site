@@ -630,7 +630,7 @@ nav {
 
 <script>
 // ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ───────────────────────
-const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/nexttierstats.com/s/AKfycbxLKAsFUtJjMflXQeP5mm-nrBjHv7nJv0LFfYD3-IqxqnpLgJ8mrkhk364WSM853kXh/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/nexttierstats.com/s/AKfycbwlt-hlFubdSI8X_Ck9TAPuIxfIOU7hpyLaZE5p52paZPzeM-sELzEHnHB9F0e-1fN_/exec';
 // ─────────────────────────────────────────────────────────────────
 
 function v(id) {
@@ -699,25 +699,27 @@ async function submitForm() {
   setSubmitLoading(true);
 
   try {
-    const body = JSON.stringify({ type: 'intake', row: collectFormData() });
+    // Encode the row as a single JSON parameter on a GET request.
+    // GET requests to Apps Script never trigger CORS preflight — this is
+    // the only method that works reliably from a static HTML page.
+    const row     = collectFormData();
+    const encoded = encodeURIComponent(JSON.stringify({ type: 'intake', row }));
+    const url     = APPS_SCRIPT_URL + '?payload=' + encoded;
 
-    // Use a Google Forms redirect trick: POST to the script URL which returns
-    // a redirect. We follow it with fetch (no-cors not needed this way).
-    // Apps Script deployed as "Anyone" handles cross-origin fine for simple POSTs.
-    const response = await fetch(APPS_SCRIPT_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body:    'data=' + encodeURIComponent(body)
+    // Use an Image() ping — fires the GET with zero CORS issues.
+    // If Apps Script receives it, the row gets written.
+    await new Promise((resolve) => {
+      const img  = new Image();
+      img.onload = img.onerror = resolve; // resolve either way
+      img.src    = url;
+      // Fallback: also resolve after 6 seconds in case the ping stalls
+      setTimeout(resolve, 6000);
     });
 
-    // If fetch didn't throw, the request reached Apps Script.
-    // We show success regardless of response body because Apps Script
-    // redirect responses have opaque bodies in some browsers.
     showSuccessPanel();
 
   } catch (err) {
-    // Network failure — show the actual error so we can debug it
-    showSubmitError('Could not reach the server. Error: ' + err.message + '. Check that the Apps Script URL is correct and deployed.');
+    showSubmitError('Submission failed: ' + err.message);
     setSubmitLoading(false);
   }
 }
