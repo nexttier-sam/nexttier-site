@@ -630,22 +630,24 @@ nav {
 
 <script>
 // ── Google Apps Script Integration ──
-// No OAuth, no popup — POSTs silently to your deployed Apps Script web app.
-//
-// SETUP:
-//   1. Open your Google Sheet → Extensions → Apps Script
-//   2. Paste the contents of next_tier_apps_script.gs
-//   3. Deploy → New deployment → Web app (Execute as: Me, Access: Anyone)
-//   4. Copy the Web App URL and paste it below
+// Paste your deployed Apps Script Web App URL here:
+const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
 
-const APPS_SCRIPT_URL = 'https://script.google.com/a/macros/nexttierstats.com/s/AKfycbwyA1YWm3dPoJ8nTyjggXoT_xzQg1uP-FLb4hLRO41wZywGY1Er3AFZVLGry3xMkb4G0g/exec';
+// ── Helpers (defined first so submitForm can call them) ───────────
+function v(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+function checked(id) {
+  const el = document.getElementById(id);
+  return el ? (el.checked ? 'Yes' : 'No') : 'No';
+}
 
 function collectFormData() {
-  const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
-  const checked = id => { const el = document.getElementById(id); return el ? (el.checked ? 'Yes' : 'No') : 'No'; };
-  const radio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
+  const planEl  = document.querySelector('input[name="plan"]:checked');
+  const planVal = planEl ? planEl.value : '';
   const planLabels = { player_card: 'Player Card — $75', video_review: 'Video Review — $300' };
-  const planVal = radio('plan');
 
   return [
     new Date().toLocaleString('en-CA', { timeZone: 'America/Edmonton' }),
@@ -691,44 +693,46 @@ function setSubmitLoading(loading) {
 }
 
 async function submitForm() {
-  const email = v('email');
-  const consent = document.getElementById('consentData').checked;
-
+  // ── Validation ──
   if (!document.getElementById('firstName').value.trim()) { alert('Please enter the player\'s first name.'); return; }
-  if (!document.getElementById('lastName').value.trim()) { alert('Please enter the player\'s last name.'); return; }
-  if (!document.getElementById('dob').value) { alert('Please enter the player\'s date of birth.'); return; }
-  if (!document.getElementById('position').value) { alert('Please select a position.'); return; }
-  if (!document.getElementById('email').value.trim()) { alert('Please enter your email address.'); return; }
-  if (!document.getElementById('teamName').value.trim()) { alert('Please enter the team name.'); return; }
-  if (!document.getElementById('currentLeague').value) { alert('Please select a league.'); return; }
-  if (!document.querySelector('input[name="plan"]:checked')) { alert('Please select a plan.'); return; }
-  if (!consent) { alert('Please accept the data consent to submit.'); return; }
+  if (!document.getElementById('lastName').value.trim())  { alert('Please enter the player\'s last name.'); return; }
+  if (!document.getElementById('dob').value)              { alert('Please enter the player\'s date of birth.'); return; }
+  if (!document.getElementById('position').value)         { alert('Please select a position.'); return; }
+  if (!document.getElementById('email').value.trim())     { alert('Please enter your email address.'); return; }
+  if (!document.getElementById('teamName').value.trim())  { alert('Please enter the team name.'); return; }
+  if (!document.getElementById('currentLeague').value)    { alert('Please select a league.'); return; }
+  if (!document.querySelector('input[name="plan"]:checked')) { alert('Please select a package.'); return; }
+  if (!document.getElementById('consentData').checked)    { alert('Please accept the data consent to submit.'); return; }
 
   document.getElementById('submitError').style.display = 'none';
 
   if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL') {
-    showSubmitError('Setup required: paste your Apps Script Web App URL into APPS_SCRIPT_URL in the code.');
+    showSubmitError('Setup required: paste your Apps Script Web App URL into APPS_SCRIPT_URL.');
     return;
   }
 
   setSubmitLoading(true);
 
   try {
+    // Apps Script requires the payload as a plain-text string body when using no-cors.
+    // We include type:'intake' so the Apps Script router sends it to the right sheet tab.
+    const payload = JSON.stringify({ type: 'intake', row: collectFormData() });
+
     await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ row: collectFormData() })
+      mode:   'no-cors',     // required for cross-origin calls to Apps Script
+      body:   payload        // no Content-Type header — no-cors strips custom headers anyway
     });
+
+    // no-cors means we cannot read the response status, but if no network error
+    // was thrown the request reached Apps Script successfully.
     showSuccessPanel();
+
   } catch (err) {
-    showSubmitError('Submission failed — please check your connection and try again. (' + err.message + ')');
+    showSubmitError('Submission failed — check your connection and try again. (' + err.message + ')');
     setSubmitLoading(false);
   }
 }
-
-// helper used in validation block above
-function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
 function previewPhoto(input) {
   if (input.files && input.files[0]) {
