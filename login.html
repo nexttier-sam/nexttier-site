@@ -8,10 +8,10 @@
 <script src="nt-auth.js"></script>
 <style>
 :root {
-  --nt-black: #08090C; --nt-ice: #F0F4F8; --nt-white: #FFFFFF;
-  --nt-green: #1DBC7A; --nt-green-d: #0E8A57; --nt-green-l: #E3F9EE;
-  --nt-red: #E8344A; --nt-slate: #3D4A5C; --nt-muted: #8896A8;
-  --nt-border: rgba(61,74,92,0.12); --nt-border-strong: rgba(61,74,92,0.22);
+  --nt-black: #000000; --nt-ice: #1A1A1A; --nt-white: #FFFFFF;
+  --nt-green: #CCFF00; --nt-green-d: #99BF00; --nt-green-l: #1E2200;
+  --nt-red: #E8344A; --nt-slate: #CCCCCC; --nt-muted: #888888;
+  --nt-border: rgba(204,255,0,0.08); --nt-border-strong: rgba(204,255,0,0.18);
   --font-display: 'Bebas Neue', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --font-mono: 'DM Mono', monospace;
@@ -23,14 +23,11 @@ body {
   align-items: center; justify-content: center;
   padding: 24px; -webkit-font-smoothing: antialiased;
 }
-.auth-logo {
-  font-family: var(--font-display); font-size: 32px; letter-spacing: .04em;
-  color: var(--nt-white); text-decoration: none; margin-bottom: 36px;
-}
-.auth-logo span { color: var(--nt-green); }
+.auth-logo { display:flex; align-items:center; justify-content:center; text-decoration:none; margin-bottom:36px; }
+
 
 .auth-card {
-  background: var(--nt-white); border-radius: 16px;
+  background: #1E1E1E; border-radius: 16px;
   width: 100%; max-width: 420px; overflow: hidden;
 }
 .auth-tabs {
@@ -44,7 +41,7 @@ body {
   transition: color .15s; border-bottom: 2px solid transparent;
   margin-bottom: -1px;
 }
-.auth-tab.active { color: var(--nt-black); border-bottom-color: var(--nt-green); }
+.auth-tab.active { color: var(--nt-white); border-bottom-color: var(--nt-green); }
 
 .auth-body { padding: 28px; }
 .auth-panel { display: none; }
@@ -52,7 +49,7 @@ body {
 
 .auth-title {
   font-family: var(--font-display); font-size: 28px;
-  letter-spacing: .02em; color: var(--nt-black);
+  letter-spacing: .02em; color: var(--nt-white);
   margin-bottom: 4px;
 }
 .auth-sub { font-size: 13px; font-weight: 300; color: var(--nt-muted); margin-bottom: 24px; }
@@ -65,14 +62,14 @@ body {
   color: var(--nt-muted); margin-bottom: 6px; font-family: var(--font-mono);
 }
 .form-group input, .form-group select {
-  width: 100%; background: var(--nt-ice);
+  width: 100%; background: #111111;
   border: 1px solid var(--nt-border-strong); border-radius: 8px;
   padding: 10px 14px; font-size: 14px; font-weight: 300;
-  color: var(--nt-black); font-family: var(--font-body);
+  color: var(--nt-white); font-family: var(--font-body);
   outline: none; transition: border-color .15s; -webkit-appearance: none;
 }
 .form-group input:focus, .form-group select:focus {
-  border-color: var(--nt-green); background: var(--nt-white);
+  border-color: var(--nt-green); background: #1E1E1E;
 }
 .form-group select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238896A8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -80,7 +77,7 @@ body {
 }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .btn-auth {
-  width: 100%; background: var(--nt-green); color: var(--nt-black);
+  width: 100%; background: var(--nt-green); color: #000000;
   border: none; border-radius: 8px; padding: 13px;
   font-size: 14px; font-weight: 600; font-family: var(--font-body);
   cursor: pointer; transition: background .15s; margin-top: 20px;
@@ -90,7 +87,7 @@ body {
 
 .auth-error {
   margin-top: 14px; padding: 10px 14px;
-  background: #FDEAEC; border: 1px solid rgba(232,52,74,.2);
+  background: #2A0A0C; border: 1px solid rgba(232,52,74,.2);
   border-radius: 7px; font-size: 13px; color: var(--nt-red); display: none;
 }
 .auth-success {
@@ -101,10 +98,10 @@ body {
 
 .role-info {
   margin-top: 16px; padding: 12px 14px;
-  background: var(--nt-ice); border-radius: 8px;
-  font-size: 12px; font-weight: 300; color: var(--nt-slate); line-height: 1.6;
+  background: #111111; border-radius: 8px;
+  font-size: 12px; font-weight: 300; color: #CCCCCC; line-height: 1.6;
 }
-.role-info strong { font-weight: 500; color: var(--nt-black); }
+.role-info strong { font-weight: 500; color: var(--nt-white); }
 
 .auth-footer {
   text-align: center; margin-top: 20px;
@@ -115,7 +112,7 @@ body {
 </head>
 <body>
 
-<a href="index.html" class="auth-logo">NEXT<span>TIER</span></a>
+<a href="index.html" class="auth-logo"><img src="nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></a>
 
 <div class="auth-card">
   <div class="auth-tabs">
