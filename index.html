@@ -17,37 +17,39 @@
 
 :root {
 
---nt-black: #08090C;
+--nt-black: #000000;
 
---nt-ice: #F0F4F8;
+--nt-charcoal: #2A2A2A;
+
+--nt-ice: #111111;
 
 --nt-white: #FFFFFF;
 
---nt-green: #1DBC7A;
+--nt-green: #CCFF00;
 
---nt-green-d: #0E8A57;
+--nt-green-d: #99BF00;
 
---nt-green-l: #E3F9EE;
+--nt-green-l: #1C2200;
 
 --nt-red: #E8344A;
 
---nt-red-l: #FDEAEC;
+--nt-red-l: #2A0A0C;
 
---nt-amber: #F59E0B;
+--nt-amber: #CCFF00;
 
---nt-amber-l: #FEF3C7;
+--nt-amber-l: #1C2200;
 
---nt-blue: #2D7DD2;
+--nt-blue: #CCFF00;
 
---nt-blue-l: #E8F2FC;
+--nt-blue-l: #1C2200;
 
---nt-slate: #3D4A5C;
+--nt-slate: #CCCCCC;
 
---nt-muted: #8896A8;
+--nt-muted: #777777;
 
---nt-border: rgba(61,74,92,0.12);
+--nt-border: rgba(204,255,0,0.1);
 
---nt-border-strong: rgba(61,74,92,0.22);
+--nt-border-strong: rgba(204,255,0,0.2);
 
 --font-display: 'Bebas Neue', sans-serif;
 
@@ -65,9 +67,9 @@ body {
 
 font-family: var(--font-body);
 
-background: var(--nt-ice);
+background: #161616;
 
-color: var(--nt-black);
+color: var(--nt-white);
 
 font-size: 15px;
 
@@ -91,17 +93,9 @@ padding: 0 32px; height: 56px;
 
 }
 
-.nav-logo {
+.nav-logo { display:flex; align-items:center; text-decoration:none; }
 
-font-family: var(--font-display);
 
-font-size: 26px; letter-spacing: .04em;
-
-color: var(--nt-white);
-
-}
-
-.nav-logo span { color: var(--nt-green); }
 
 .nav-links { display: flex; gap: 24px; align-items: center; }
 
@@ -125,7 +119,7 @@ cursor: pointer;
 
 background: var(--nt-green) !important;
 
-color: var(--nt-black) !important;
+color: #000000 !important;
 
 font-weight: 500 !important;
 
@@ -157,11 +151,11 @@ background:
 
 repeating-linear-gradient(0deg, transparent, transparent 39px,
 
-rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px),
+rgba(204,255,0,0.03) 39px, rgba(204,255,0,0.03) 40px),
 
 repeating-linear-gradient(90deg, transparent, transparent 39px,
 
-rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px);
+rgba(204,255,0,0.03) 39px, rgba(204,255,0,0.03) 40px);
 
 pointer-events: none;
 
@@ -179,7 +173,7 @@ width: 520px; height: 520px;
 
 border-radius: 50%;
 
-background: radial-gradient(circle, rgba(29,188,122,0.08) 0%, transparent 70%);
+background: radial-gradient(circle, rgba(204,255,0,0.07) 0%, transparent 70%);
 
 pointer-events: none;
 
@@ -259,7 +253,7 @@ margin-bottom: 40px;
 
 background: var(--nt-green);
 
-color: var(--nt-black);
+color: var(--nt-white);
 
 font-weight: 500; font-size: 14px;
 
@@ -421,7 +415,7 @@ font-family: var(--font-display);
 
 font-size: 34px; line-height: 1;
 
-color: var(--nt-black); letter-spacing: .02em;
+color: var(--nt-white); letter-spacing: .02em;
 
 }
 
@@ -477,7 +471,7 @@ font-size: clamp(34px, 5vw, 50px);
 
 line-height: 1.0; letter-spacing: .02em;
 
-color: var(--nt-black);
+color: var(--nt-white);
 
 margin-bottom: 10px;
 
@@ -495,7 +489,7 @@ margin-bottom: 40px; line-height: 1.65;
 
 /* ── HOW IT WORKS ── */
 
-#how { background: var(--nt-white); border-top: 1px solid var(--nt-border); border-bottom: 1px solid var(--nt-border); }
+#how { background: #1A1A1A; border-top: 1px solid var(--nt-border); border-bottom: 1px solid var(--nt-border); }
 
 .steps-grid {
 
@@ -543,7 +537,7 @@ font-family: var(--font-display);
 
 font-size: 22px; letter-spacing: .02em;
 
-color: var(--nt-black); margin-bottom: 8px;
+color: var(--nt-white); margin-bottom: 8px;
 
 }
 
@@ -595,11 +589,11 @@ white-space: nowrap;
 
 }
 
-.btn-glossary:hover { background: var(--nt-green); color: var(--nt-black); }
+.btn-glossary:hover { background: var(--nt-green); color: var(--nt-white); }
 
 /* ── FEATURES ── */
 
-#features { background: var(--nt-ice); }
+#features { background: #161616; }
 
 .features-grid {
 
@@ -613,7 +607,7 @@ gap: 16px;
 
 .feat-card {
 
-background: var(--nt-white);
+background: #1A1A1A;
 
 border: 1px solid var(--nt-border);
 
@@ -655,7 +649,7 @@ font-family: var(--font-display);
 
 font-size: 20px; letter-spacing: .02em;
 
-color: var(--nt-black); margin-bottom: 8px;
+color: var(--nt-white); margin-bottom: 8px;
 
 }
 
@@ -671,7 +665,7 @@ color: var(--nt-muted); line-height: 1.65;
 
 background: var(--nt-black);
 
-border-color: var(--nt-black);
+border-color: var(--nt-white);
 
 }
 
@@ -683,7 +677,7 @@ border-color: var(--nt-black);
 
 /* ── TIERS ── */
 
-#tiers { background: var(--nt-white); border-top: 1px solid var(--nt-border); }
+#tiers { background: #1A1A1A; border-top: 1px solid var(--nt-border); }
 
 .tier-grid {
 
@@ -697,7 +691,7 @@ gap: 16px;
 
 .tier-card {
 
-background: var(--nt-ice);
+background: #161616;
 
 border: 1px solid var(--nt-border);
 
@@ -759,7 +753,7 @@ color: var(--nt-white); line-height: 1;
 
 }
 
-.tier-card.featured .tier-name { color: var(--nt-black); }
+.tier-card.featured .tier-name { color: var(--nt-white); }
 
 .tier-tagline {
 
@@ -789,7 +783,7 @@ color: var(--nt-white);
 
 }
 
-.tier-card.featured .tier-price { color: var(--nt-black); }
+.tier-card.featured .tier-price { color: var(--nt-white); }
 
 .tier-per {
 
@@ -807,7 +801,7 @@ color: rgba(255,255,255,0.4);
 
 display: flex; align-items: flex-start; gap: 10px;
 
-font-size: 13px; color: var(--nt-slate);
+font-size: 13px; color: #CCCCCC;
 
 margin-bottom: 10px; line-height: 1.4;
 
@@ -847,7 +841,7 @@ transition: background .15s;
 
 }
 
-.tier-cta.primary { background: var(--nt-green); color: var(--nt-black); }
+.tier-cta.primary { background: var(--nt-green); color: var(--nt-white); }
 
 .tier-cta.primary:hover { background: #23D98C; }
 
@@ -857,17 +851,17 @@ transition: background .15s;
 
 .tier-cta.outline {
 
-background: transparent; color: var(--nt-slate);
+background: transparent; color: #CCCCCC;
 
 border: 1px solid var(--nt-border-strong);
 
 }
 
-.tier-cta.outline:hover { background: var(--nt-white); }
+.tier-cta.outline:hover { background: #1A1A1A; }
 
 /* ── FAQ ── */
 
-#faq { background: var(--nt-white); border-top: 1px solid var(--nt-border); }
+#faq { background: #1A1A1A; border-top: 1px solid var(--nt-border); }
 
 .faq-list { max-width: 680px; }
 
@@ -885,7 +879,7 @@ padding: 20px 0;
 
 font-weight: 500; font-size: 15px;
 
-color: var(--nt-black); cursor: pointer;
+color: var(--nt-white); cursor: pointer;
 
 display: flex; justify-content: space-between;
 
@@ -939,11 +933,11 @@ background:
 
 repeating-linear-gradient(0deg, transparent, transparent 39px,
 
-rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px),
+rgba(204,255,0,0.03) 39px, rgba(204,255,0,0.03) 40px),
 
 repeating-linear-gradient(90deg, transparent, transparent 39px,
 
-rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px);
+rgba(204,255,0,0.03) 39px, rgba(204,255,0,0.03) 40px);
 
 pointer-events: none;
 
@@ -1154,7 +1148,7 @@ display: none;
 
 }
 
-.gloss-modal-close:hover { border-color: #1DBC7A; color: #e8eaed; }
+.gloss-modal-close:hover { border-color: #CCFF00; color: #e8eaed; }
 
 .gloss-modal-overlay.open .gloss-modal-close { display: block; }
 
@@ -1569,7 +1563,7 @@ text-transform: uppercase;
 
 <nav>
 
-<div class="nav-logo">NEXT<span>TIER</span></div>
+<div class="nav-logo"><img src="nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;display:block;"></div>
 
 <div class="nav-links">
 
@@ -1811,9 +1805,9 @@ text-transform: uppercase;
 
 <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 
-<circle cx="9" cy="9" r="7.5" stroke="#1DBC7A" stroke-width="1.5"/>
+<circle cx="9" cy="9" r="7.5" stroke="#CCFF00" stroke-width="1.5"/>
 
-<path d="M9 5v4l2.5 2.5" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M9 5v4l2.5 2.5" stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round"/>
 
 </svg>
 
@@ -1831,7 +1825,7 @@ text-transform: uppercase;
 
 <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 
-<path d="M2 14l4-4 3 3 4-5 3 2" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M2 14l4-4 3 3 4-5 3 2" stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 
 </svg>
 
@@ -1849,9 +1843,9 @@ text-transform: uppercase;
 
 <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 
-<rect x="2" y="4" width="14" height="10" rx="2" stroke="#1DBC7A" stroke-width="1.5"/>
+<rect x="2" y="4" width="14" height="10" rx="2" stroke="#CCFF00" stroke-width="1.5"/>
 
-<path d="M6 8h6M6 11h4" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M6 8h6M6 11h4" stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round"/>
 
 </svg>
 
@@ -1869,7 +1863,7 @@ text-transform: uppercase;
 
 <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 
-<path d="M9 2L2 7v9h4v-4h6v4h4V7L9 2z" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9 2L2 7v9h4v-4h6v4h4V7L9 2z" stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 
 </svg>
 
@@ -1887,9 +1881,9 @@ text-transform: uppercase;
 
 <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 
-<circle cx="7" cy="7" r="4.5" stroke="#1DBC7A" stroke-width="1.5"/>
+<circle cx="7" cy="7" r="4.5" stroke="#CCFF00" stroke-width="1.5"/>
 
-<path d="M10.5 10.5L16 16" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M10.5 10.5L16 16" stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round"/>
 
 </svg>
 
@@ -1907,9 +1901,9 @@ text-transform: uppercase;
 
 <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
 
-<path d="M9 2v4M9 12v4M2 9h4M12 9h4" stroke="#1DBC7A" stroke-width="1.5" stroke-linecap="round"/>
+<path d="M9 2v4M9 12v4M2 9h4M12 9h4" stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round"/>
 
-<circle cx="9" cy="9" r="3" stroke="#1DBC7A" stroke-width="1.5"/>
+<circle cx="9" cy="9" r="3" stroke="#CCFF00" stroke-width="1.5"/>
 
 </svg>
 
