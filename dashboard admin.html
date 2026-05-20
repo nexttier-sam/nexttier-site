@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="nt-auth.js"></script>
+<style>
+:root{--nt-black:#08090C;--nt-ice:#F0F4F8;--nt-white:#FFFFFF;--nt-green:#1DBC7A;--nt-green-l:#E3F9EE;--nt-green-d:#0E8A57;--nt-red:#E8344A;--nt-red-l:#FDEAEC;--nt-amber:#F59E0B;--nt-amber-l:#FEF3C7;--nt-slate:#3D4A5C;--nt-muted:#8896A8;--nt-border:rgba(61,74,92,0.12);--nt-border-strong:rgba(61,74,92,0.22);--font-display:'Bebas Neue',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--nt-ice);color:var(--nt-black);-webkit-font-smoothing:antialiased;}
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:var(--font-display);font-size:26px;letter-spacing:.04em;color:#fff;text-decoration:none;}
+.nav-logo span{color:var(--nt-green);}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--nt-red);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:#fff;}
+.nav-name{font-size:13px;color:rgba(255,255,255,.6);}
+.nav-role{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-red);}
+.btn-logout{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 14px;font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;font-family:var(--font-body);}
+.page-body{max-width:1100px;margin:0 auto;padding:36px 24px 80px;}
+.page-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--nt-red);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.page-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-red);}
+.page-title{font-family:var(--font-display);font-size:clamp(32px,4vw,48px);letter-spacing:.02em;color:var(--nt-black);margin-bottom:6px;}
+.page-title em{color:var(--nt-green);font-style:normal;}
+.page-sub{font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:32px;}
+/* STAT TILES */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-tile{background:var(--nt-white);border:1px solid var(--nt-border);border-radius:12px;padding:18px 20px;}
+.stat-tile-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:8px;}
+.stat-tile-val{font-family:var(--font-display);font-size:36px;letter-spacing:.02em;color:var(--nt-black);line-height:1;}
+.stat-tile-val em{color:var(--nt-green);font-style:normal;}
+/* TABLE */
+.section{background:var(--nt-white);border:1px solid var(--nt-border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.section-head{padding:20px 24px 16px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.section-title{font-family:var(--font-display);font-size:18px;letter-spacing:.02em;}
+.search-input{background:var(--nt-ice);border:1px solid var(--nt-border-strong);border-radius:7px;padding:8px 12px;font-size:13px;color:var(--nt-black);font-family:var(--font-body);outline:none;min-width:220px;}
+.search-input:focus{border-color:var(--nt-green);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--nt-ice);}
+th{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);padding:10px 16px;text-align:left;font-weight:500;border-bottom:1px solid var(--nt-border);}
+td{padding:13px 16px;font-size:13px;color:var(--nt-slate);border-bottom:1px solid var(--nt-border);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(248,250,252,0.8);}
+.role-badge{display:inline-block;border-radius:4px;padding:3px 8px;font-size:10px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
+.role-player{background:var(--nt-green-l);color:var(--nt-green-d);}
+.role-parent{background:#E8F2FC;color:#1A5FAA;}
+.role-scout{background:#F0EBF8;color:#5B3F8A;}
+.role-admin{background:var(--nt-red-l);color:var(--nt-red);}
+.status-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--font-mono);letter-spacing:.05em;}
+.status-active{color:var(--nt-green-d);}
+.status-suspended{color:var(--nt-red);}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.action-btn{background:none;border:1px solid var(--nt-border-strong);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--font-body);color:var(--nt-slate);transition:all .15s;margin-right:4px;}
+.action-btn:hover{background:var(--nt-ice);}
+.action-btn.danger{border-color:rgba(232,52,74,.3);color:var(--nt-red);}
+.action-btn.danger:hover{background:var(--nt-red-l);}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(8,9,12,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:200;display:none;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--nt-white);border-radius:14px;padding:28px;width:100%;max-width:420px;}
+.modal-title{font-family:var(--font-display);font-size:22px;letter-spacing:.02em;margin-bottom:4px;}
+.modal-sub{font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:22px;}
+.modal-group{margin-bottom:16px;}
+.modal-group label{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:6px;}
+.modal-group select{width:100%;background:var(--nt-ice);border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);outline:none;-webkit-appearance:none;}
+.modal-group select:focus{border-color:var(--nt-green);}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.btn-save{flex:1;background:var(--nt-green);color:var(--nt-black);border:none;border-radius:7px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);}
+.btn-cancel{flex:1;background:var(--nt-ice);color:var(--nt-slate);border:1px solid var(--nt-border-strong);border-radius:7px;padding:11px;font-size:13px;cursor:pointer;font-family:var(--font-body);}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--nt-black);color:#fff;border-radius:8px;padding:11px 20px;font-size:13px;z-index:300;transition:transform .25s;opacity:0;}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.loading-overlay{position:fixed;inset:0;background:var(--nt-black);display:flex;align-items:center;justify-content:center;z-index:999;}
+.loading-logo{font-family:var(--font-display);font-size:36px;letter-spacing:.04em;color:#fff;}
+.loading-logo span{color:var(--nt-green);}
+@media(max-width:768px){.stat-row{grid-template-columns:1fr 1fr;}.page-body{padding:24px 16px 60px;}nav{padding:0 16px;}table{font-size:12px;}th,td{padding:10px 10px;}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-logo">NEXT<span>TIER</span></div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title">EDIT USER</div>
+    <div class="modal-sub" id="modalSubtitle">Update role or account status</div>
+    <input type="hidden" id="editUserId">
+    <div class="modal-group">
+      <label>Role</label>
+      <select id="editRole">
+        <option value="player">Player</option>
+        <option value="parent">Parent</option>
+        <option value="scout">Scout</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="modal-group">
+      <label>Status</label>
+      <select id="editStatus">
+        <option value="active">Active</option>
+        <option value="suspended">Suspended</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveUser()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">NEXT<span>TIER</span></a>
+  <div class="nav-right">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="nav-avatar" data-nt-initial>A</div>
+      <div>
+        <div class="nav-name" data-nt-name>Admin</div>
+        <div class="nav-role">Admin</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="NT.logout()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page-body">
+  <div class="page-eyebrow">Admin Panel</div>
+  <div class="page-title">NEXT TIER <em>ADMIN.</em></div>
+  <div class="page-sub">User management, submissions, and platform overview.</div>
+
+  <div class="stat-row" id="statRow">
+    <div class="stat-tile"><div class="stat-tile-label">Total users</div><div class="stat-tile-val" id="countTotal">—</div></div>
+    <div class="stat-tile"><div class="stat-tile-label">Players</div><div class="stat-tile-val" id="countPlayers">—</div></div>
+    <div class="stat-tile"><div class="stat-tile-label">Scouts</div><div class="stat-tile-val" id="countScouts">—</div></div>
+    <div class="stat-tile"><div class="stat-tile-label">Suspended</div><div class="stat-tile-val" id="countSuspended">—</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">USER ACCOUNTS</div>
+      <input class="search-input" type="text" placeholder="Search by name or email…" oninput="filterUsers(this.value)">
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody">
+          <tr><td colspan="6" style="text-align:center;color:var(--nt-muted);padding:32px;">Loading users…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+let allUsers = [];
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = await NT.guard(['admin']);
+  document.getElementById('loadingOverlay').style.display = 'none';
+  if (user) { NT.renderUser(); loadUsers(); }
+});
+
+async function loadUsers() {
+  const token = NT.getToken();
+  try {
+    const res = await NT.api({ type: 'getUsers', token });
+    if (res.status === 'ok') {
+      allUsers = res.users;
+      renderStats(allUsers);
+      renderTable(allUsers);
+    } else {
+      showTableError(res.message);
+    }
+  } catch(e) {
+    showTableError('Failed to load users. Check your Apps Script connection.');
+  }
+}
+
+function renderStats(users) {
+  document.getElementById('countTotal').textContent    = users.length;
+  document.getElementById('countPlayers').textContent  = users.filter(u => u.role === 'player').length;
+  document.getElementById('countScouts').textContent   = users.filter(u => u.role === 'scout').length;
+  document.getElementById('countSuspended').textContent = users.filter(u => u.status === 'suspended').length;
+}
+
+function renderTable(users) {
+  const tbody = document.getElementById('userTableBody');
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--nt-muted);padding:32px;">No users found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td><strong style="font-weight:500;color:var(--nt-black);">${escHtml(u.firstName)} ${escHtml(u.lastName)}</strong></td>
+      <td>${escHtml(u.email)}</td>
+      <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+      <td><span class="status-badge status-${u.status}"><span class="status-dot"></span>${u.status}</span></td>
+      <td style="color:var(--nt-muted);font-size:12px;">${formatDate(u.createdAt)}</td>
+      <td>
+        <button class="action-btn" onclick="openEditModal('${escHtml(u.id)}','${escHtml(u.firstName)} ${escHtml(u.lastName)}','${u.role}','${u.status}')">Edit</button>
+        ${u.status === 'active'
+          ? `<button class="action-btn danger" onclick="quickSuspend('${u.id}')">Suspend</button>`
+          : `<button class="action-btn" onclick="quickActivate('${u.id}')">Activate</button>`}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterUsers(query) {
+  const q = query.toLowerCase();
+  const filtered = allUsers.filter(u =>
+    (u.firstName + ' ' + u.lastName + ' ' + u.email).toLowerCase().includes(q)
+  );
+  renderTable(filtered);
+}
+
+function openEditModal(id, name, role, status) {
+  document.getElementById('editUserId').value = id;
+  document.getElementById('modalSubtitle').textContent = name;
+  document.getElementById('editRole').value = role;
+  document.getElementById('editStatus').value = status;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('open');
+}
+
+async function saveUser() {
+  const userId = document.getElementById('editUserId').value;
+  const role   = document.getElementById('editRole').value;
+  const status = document.getElementById('editStatus').value;
+  const token  = NT.getToken();
+
+  const res = await NT.api({ type: 'updateUser', token, userId, role, status });
+  if (res.status === 'ok') {
+    closeModal();
+    showToast('User updated successfully.');
+    await loadUsers();
+  } else {
+    showToast('Error: ' + res.message);
+  }
+}
+
+async function quickSuspend(id) {
+  if (!confirm('Suspend this user? They will no longer be able to log in.')) return;
+  const res = await NT.api({ type: 'updateUser', token: NT.getToken(), userId: id, status: 'suspended' });
+  if (res.status === 'ok') { showToast('User suspended.'); await loadUsers(); }
+}
+
+async function quickActivate(id) {
+  const res = await NT.api({ type: 'updateUser', token: NT.getToken(), userId: id, status: 'active' });
+  if (res.status === 'ok') { showToast('User reactivated.'); await loadUsers(); }
+}
+
+function showTableError(msg) {
+  document.getElementById('userTableBody').innerHTML =
+    `<tr><td colspan="6" style="text-align:center;color:var(--nt-red);padding:32px;">${msg}</td></tr>`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' }); }
+  catch(_) { return iso; }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
