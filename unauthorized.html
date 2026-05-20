@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Access Denied</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="nt-auth.js"></script>
+<style>
+:root{--nt-black:#08090C;--nt-green:#1DBC7A;--nt-red:#E8344A;--nt-muted:#8896A8;--font-display:'Bebas Neue',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--nt-black);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;-webkit-font-smoothing:antialiased;text-align:center;}
+.logo{font-family:var(--font-display);font-size:28px;letter-spacing:.04em;color:#fff;text-decoration:none;margin-bottom:48px;}
+.logo span{color:var(--nt-green);}
+.code{font-family:var(--font-display);font-size:120px;letter-spacing:.04em;color:rgba(255,255,255,.06);line-height:1;margin-bottom:8px;}
+.title{font-family:var(--font-display);font-size:42px;letter-spacing:.02em;color:#fff;margin-bottom:12px;}
+.title em{color:var(--nt-red);font-style:normal;}
+.sub{font-size:14px;font-weight:300;color:var(--nt-muted);max-width:360px;line-height:1.7;margin-bottom:36px;}
+.btn-home{background:var(--nt-green);color:var(--nt-black);border:none;border-radius:8px;padding:13px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-body);text-decoration:none;display:inline-block;margin-right:10px;}
+.btn-dash{background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:13px 28px;font-size:14px;cursor:pointer;font-family:var(--font-body);text-decoration:none;display:inline-block;}
+</style>
+</head>
+<body>
+<a href="index.html" class="logo">NEXT<span>TIER</span></a>
+<div class="code">403</div>
+<div class="title">ACCESS <em>DENIED.</em></div>
+<p class="sub">You don't have permission to view this page. Your current account role doesn't include access here.</p>
+<div>
+  <a href="index.html" class="btn-home">Back to home</a>
+  <a href="#" class="btn-dash" id="dashBtn">My dashboard</a>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = NT.getUser();
+  const btn  = document.getElementById('dashBtn');
+  if (user) {
+    const map = { player:'dashboard-player.html', parent:'dashboard-parent.html', scout:'dashboard-scout.html', admin:'dashboard-admin.html' };
+    btn.href = map[user.role] || 'login.html';
+  } else {
+    btn.href = 'login.html'; btn.textContent = 'Sign in';
+  }
+});
+</script>
+</body>
+</html>
