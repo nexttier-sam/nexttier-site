@@ -7,19 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --nt-black: #08090C;
-  --nt-ice: #F0F4F8;
+  --nt-black: #000000;
+  --nt-charcoal: #2A2A2A;
+  --nt-ice: #161616;
   --nt-white: #FFFFFF;
-  --nt-green: #1DBC7A;
-  --nt-green-d: #0E8A57;
-  --nt-green-l: #E3F9EE;
+  --nt-green: #CCFF00;
+  --nt-green-d: #99BF00;
+  --nt-green-l: #1C2200;
   --nt-red: #E8344A;
-  --nt-blue: #2D7DD2;
-  --nt-blue-l: #E8F2FC;
-  --nt-slate: #3D4A5C;
-  --nt-muted: #8896A8;
-  --nt-border: rgba(61,74,92,0.12);
-  --nt-border-strong: rgba(61,74,92,0.22);
+  --nt-blue: #CCFF00;
+  --nt-blue-l: #1C2200;
+  --nt-slate: #CCCCCC;
+  --nt-muted: #777777;
+  --nt-border: rgba(204,255,0,0.1);
+  --nt-border-strong: rgba(204,255,0,0.2);
   --font-display: 'Bebas Neue', sans-serif;
   --font-body: 'DM Sans', sans-serif;
   --font-mono: 'DM Mono', monospace;
@@ -30,8 +31,8 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-body);
-  background: var(--nt-ice);
-  color: var(--nt-black);
+  background: #111111;
+  color: var(--nt-white);
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -45,12 +46,8 @@ nav {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 32px; height: 56px;
 }
-.nav-logo {
-  font-family: var(--font-display);
-  font-size: 26px; letter-spacing: .04em;
-  color: var(--nt-white); text-decoration: none;
-}
-.nav-logo span { color: var(--nt-green); }
+.nav-logo { display:flex; align-items:center; text-decoration:none; }
+
 .nav-back {
   display: flex; align-items: center; gap: 8px;
   font-size: 13px; color: rgba(255,255,255,0.4);
@@ -69,8 +66,8 @@ nav {
   content: '';
   position: absolute; inset: 0;
   background:
-    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px),
-    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.025) 39px, rgba(255,255,255,0.025) 40px);
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(204,255,0,0.03) 39px, rgba(204,255,0,0.03) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(204,255,0,0.03) 39px, rgba(204,255,0,0.03) 40px);
   pointer-events: none;
 }
 .page-header-inner {
@@ -133,7 +130,7 @@ nav {
 
 /* ── FORM BLOCK ── */
 .form-block {
-  background: var(--nt-white);
+  background: #1E1E1E;
   border: 1px solid var(--nt-border);
   border-radius: 14px;
   overflow: hidden;
@@ -145,7 +142,7 @@ nav {
 }
 .form-block-title {
   font-family: var(--font-display);
-  font-size: 20px; letter-spacing: .02em; color: var(--nt-black);
+  font-size: 20px; letter-spacing: .02em; color: var(--nt-white);
 }
 .form-block-sub {
   font-size: 12px; font-weight: 300; color: var(--nt-muted); margin-top: 2px;
@@ -167,12 +164,12 @@ nav {
 .form-group select,
 .form-group textarea {
   width: 100%;
-  background: var(--nt-ice);
+  background: #111111;
   border: 1px solid var(--nt-border-strong);
   border-radius: 8px;
   padding: 10px 14px;
   font-size: 14px; font-weight: 300;
-  color: var(--nt-black);
+  color: var(--nt-white);
   font-family: var(--font-body);
   outline: none;
   transition: border-color .15s, background .15s;
@@ -184,7 +181,7 @@ nav {
 .form-group select:focus,
 .form-group textarea:focus {
   border-color: var(--nt-green);
-  background: var(--nt-white);
+  background: #1E1E1E;
 }
 .form-group textarea { resize: vertical; min-height: 130px; }
 .form-group select {
@@ -207,7 +204,7 @@ nav {
   display: inline-flex; align-items: center; gap: 6px;
   border: 1px solid var(--nt-border-strong);
   border-radius: 20px; padding: 6px 14px;
-  font-size: 12px; font-weight: 400; color: var(--nt-slate);
+  font-size: 12px; font-weight: 400; color: #CCCCCC;
   cursor: pointer; transition: all .15s;
   user-select: none;
 }
@@ -224,7 +221,7 @@ nav {
 /* ── SUBMIT ── */
 .btn-submit {
   width: 100%;
-  background: var(--nt-green); color: var(--nt-black);
+  background: var(--nt-green); color: #000000;
   border: none; border-radius: 9px;
   padding: 15px; font-size: 15px; font-weight: 600;
   font-family: var(--font-body);
@@ -239,7 +236,7 @@ nav {
 }
 .submit-error {
   margin-top: 12px; padding: 12px 16px;
-  background: #FDEAEC; border: 1px solid rgba(232,52,74,0.2);
+  background: #2A0A0C; border: 1px solid rgba(232,52,74,0.2);
   border-radius: 8px; font-size: 13px; color: var(--nt-red);
   display: none;
 }
@@ -284,7 +281,7 @@ nav {
 .contact-method-val a:hover { text-decoration: underline; }
 
 .hours-card {
-  background: var(--nt-white);
+  background: #1E1E1E;
   border: 1px solid var(--nt-border);
   border-radius: 14px; padding: 22px;
 }
@@ -301,11 +298,11 @@ nav {
 }
 .hours-row:last-child { border-bottom: none; }
 .hours-day { color: var(--nt-muted); font-weight: 300; }
-.hours-time { font-weight: 500; color: var(--nt-black); font-family: var(--font-mono); font-size: 12px; }
-.hours-time.closed { color: var(--nt-muted); font-weight: 300; font-family: var(--font-body); }
+.hours-time { font-weight: 500; color: var(--nt-white); font-family: var(--font-mono); font-size: 12px; }
+.hours-time.closed { color: #555555; font-weight: 300; font-family: var(--font-body); }
 
 .faq-card {
-  background: var(--nt-white);
+  background: #1E1E1E;
   border: 1px solid var(--nt-border);
   border-radius: 14px; overflow: hidden;
 }
@@ -323,18 +320,18 @@ nav {
 .faq-q {
   width: 100%; text-align: left; background: none; border: none;
   padding: 14px 20px; cursor: pointer;
-  font-size: 13px; font-weight: 500; color: var(--nt-black);
+  font-size: 13px; font-weight: 500; color: var(--nt-white);
   font-family: var(--font-body);
   display: flex; justify-content: space-between; align-items: center; gap: 12px;
   transition: background .15s;
 }
-.faq-q:hover { background: var(--nt-ice); }
+.faq-q:hover { background: #111111; }
 .faq-q svg { width: 14px; height: 14px; color: var(--nt-muted); flex-shrink: 0; transition: transform .2s; }
 .faq-q.open svg { transform: rotate(180deg); }
 .faq-a {
   display: none; padding: 0 20px 14px;
   font-size: 13px; font-weight: 300;
-  color: var(--nt-slate); line-height: 1.65;
+  color: #CCCCCC; line-height: 1.65;
 }
 .faq-a.open { display: block; }
 
@@ -354,7 +351,7 @@ nav {
 .success-title {
   font-family: var(--font-display);
   font-size: 52px; letter-spacing: .02em;
-  color: var(--nt-black); line-height: .95; margin-bottom: 16px;
+  color: var(--nt-white); line-height: .95; margin-bottom: 16px;
 }
 .success-title em { color: var(--nt-green); font-style: normal; }
 .success-sub {
@@ -362,7 +359,7 @@ nav {
   max-width: 440px; margin: 0 auto 36px; line-height: 1.65;
 }
 .btn-primary-lg {
-  background: var(--nt-green); color: var(--nt-black);
+  background: var(--nt-green); color: #000000;
   font-weight: 500; font-size: 14px;
   padding: 13px 28px; border-radius: 7px;
   border: none; cursor: pointer; font-family: var(--font-body);
@@ -384,7 +381,7 @@ nav {
 
 <!-- NAV -->
 <nav>
-  <a href="index.html" class="nav-logo">NEXT<span>TIER</span></a>
+  <a href="index.html" class="nav-logo"><img src="nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></a>
   <a href="index.html" class="nav-back">
     <svg viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Back to home
@@ -417,7 +414,7 @@ nav {
     <!-- Success state -->
     <div class="success-panel" id="successPanel">
       <div class="success-icon">
-        <svg viewBox="0 0 32 32" fill="none"><path d="M6 16l7 7L26 9" stroke="#1DBC7A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 32 32" fill="none"><path d="M6 16l7 7L26 9" stroke="#CCFF00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="success-title">MESSAGE<br><em>SENT.</em></div>
       <p class="success-sub">We've got your message and will be in touch shortly. Check your inbox — we typically reply within 4 hours on business days.</p>
