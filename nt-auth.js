@@ -32,11 +32,8 @@ const NT = (() => {
   }
 
   async function api(payload) {
-    const res = await fetch(NT_API_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body:    'data=' + encodeURIComponent(JSON.stringify(payload))
-    });
+    const url = NT_API_URL + '?payload=' + encodeURIComponent(JSON.stringify(payload));
+    const res = await fetch(url);
     return res.json();
   }
 

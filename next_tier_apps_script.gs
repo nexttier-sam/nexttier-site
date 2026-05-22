@@ -123,16 +123,22 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  // Form submissions arrive here as GET requests with a ?payload= parameter.
-  // Health check hits arrive with no parameters.
+  // All requests arrive as GET with a ?payload= parameter to avoid CORS preflight.
   if (e && e.parameter && e.parameter.payload) {
     try {
       const payload = JSON.parse(e.parameter.payload);
       const type    = payload.type || 'intake';
       switch (type) {
-        case 'intake':  return handleIntake(payload);
-        case 'contact': return handleContact(payload);
-        default:        return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
+        case 'intake':      return handleIntake(payload);
+        case 'contact':     return handleContact(payload);
+        case 'register':    return handleRegister(payload);
+        case 'login':       return handleLogin(payload);
+        case 'logout':      return handleLogout(payload);
+        case 'validate':    return handleValidate(payload);
+        case 'getUsers':    return handleGetUsers(payload);
+        case 'updateUser':  return handleUpdateUser(payload);
+        case 'getProduct':  return handleGetProduct(payload);
+        default:            return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
       }
     } catch (err) {
       return jsonCors({ status: 'error', message: 'GET parse error: ' + err.message });
