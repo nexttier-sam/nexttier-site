@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Next Tier — Player Profile Intake</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="nt-auth.js"></script>
 <style>
 :root {
   --nt-black: #000000;
@@ -630,6 +631,19 @@ nav {
 const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
 // ─────────────────────────────────────────────────────────────────
 
+// Require login — redirect to login page if not authenticated
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = NT.getUser();
+  if (!user) {
+    window.location.href = 'login.html?redirect=intake.html';
+    return;
+  }
+  const valid = await NT.validate();
+  if (!valid) {
+    window.location.href = 'login.html?redirect=intake.html';
+  }
+});
+
 function v(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : '';
@@ -699,8 +713,11 @@ async function submitForm() {
     // Encode the row as a single JSON parameter on a GET request.
     // GET requests to Apps Script never trigger CORS preflight — this is
     // the only method that works reliably from a static HTML page.
-    const row     = collectFormData();
-    const encoded = encodeURIComponent(JSON.stringify({ type: 'intake', row }));
+    const row    = collectFormData();
+    const user   = NT.getUser();
+    const payload = { type: 'intake', row };
+    if (user && user.id) payload.userId = user.id;
+    const encoded = encodeURIComponent(JSON.stringify(payload));
     const url     = APPS_SCRIPT_URL + '?payload=' + encoded;
 
     // Use an Image() ping — fires the GET with zero CORS issues.
@@ -713,7 +730,7 @@ async function submitForm() {
       setTimeout(resolve, 6000);
     });
 
-    showSuccessPanel();
+    window.location.href = 'my-product.html';
 
   } catch (err) {
     showSubmitError('Submission failed: ' + err.message);

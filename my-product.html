@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — My Product</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="nt-auth.js"></script>
+<style>
+:root {
+  --nt-black:#000000;--nt-ice:#1A1A1A;--nt-white:#FFFFFF;
+  --nt-green:#CCFF00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;
+  --nt-slate:#CCCCCC;--nt-muted:#888888;--nt-red:#E8344A;
+  --nt-border:rgba(204,255,0,0.08);--nt-border-strong:rgba(204,255,0,0.18);
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:#0D0D0D;color:var(--nt-white);-webkit-font-smoothing:antialiased;}
+
+/* NAV */
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:var(--font-display);font-size:26px;letter-spacing:.04em;color:#fff;text-decoration:none;}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.nav-user{display:flex;align-items:center;gap:10px;}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--nt-green);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:var(--nt-white);}
+.nav-name{font-size:13px;color:rgba(255,255,255,0.6);}
+.nav-role{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-green);}
+.btn-logout{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:7px 14px;font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;font-family:var(--font-body);transition:all .15s;}
+.btn-logout:hover{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);}
+
+/* LAYOUT */
+.page-body{max-width:820px;margin:0 auto;padding:40px 24px 80px;}
+.page-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--nt-green);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.page-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-green);}
+.page-title{font-family:var(--font-display);font-size:clamp(32px,4vw,48px);letter-spacing:.02em;color:var(--nt-white);margin-bottom:6px;}
+.page-title em{color:var(--nt-green);font-style:normal;}
+.page-sub{font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:36px;}
+
+/* STATUS PILL */
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
+.pill-pending{background:#2A2000;color:#CCAA00;}
+.pill-active{background:#1C2200;color:#CCFF00;}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+
+/* PRODUCT CARD */
+.product-card{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:16px;overflow:hidden;}
+.product-card-head{padding:24px 28px;border-bottom:1px solid var(--nt-border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.product-package{font-family:var(--font-display);font-size:28px;letter-spacing:.04em;color:var(--nt-white);}
+.product-date{font-size:12px;font-weight:300;color:var(--nt-muted);margin-top:4px;}
+.product-card-body{padding:28px;}
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.detail-item{}
+.detail-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:6px;}
+.detail-val{font-size:16px;font-weight:500;color:var(--nt-white);}
+.detail-val.big{font-family:var(--font-display);font-size:40px;letter-spacing:.02em;color:var(--nt-green);}
+.detail-val.empty{color:var(--nt-muted);font-size:14px;font-weight:300;}
+.product-card-foot{padding:20px 28px;border-top:1px solid var(--nt-border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.btn-sm{background:var(--nt-green);color:#000000;border:none;border-radius:6px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);text-decoration:none;display:inline-block;transition:background .15s;}
+.btn-sm:hover{background:#B8E600;}
+.btn-sm.outline{background:transparent;color:var(--nt-slate);border:1px solid var(--nt-border-strong);}
+.btn-sm.outline:hover{background:rgba(255,255,255,0.06);}
+
+/* NO PRODUCT STATE */
+.empty-state{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:16px;padding:64px 32px;text-align:center;}
+.empty-icon{width:64px;height:64px;border-radius:50%;background:var(--nt-green-l);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.empty-icon svg{width:28px;height:28px;}
+.empty-title{font-family:var(--font-display);font-size:30px;letter-spacing:.04em;color:var(--nt-white);margin-bottom:10px;}
+.empty-sub{font-size:14px;font-weight:300;color:var(--nt-muted);max-width:380px;margin:0 auto 28px;line-height:1.65;}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:var(--nt-black);display:flex;align-items:center;justify-content:center;z-index:999;}
+
+@media(max-width:640px){.detail-grid{grid-template-columns:1fr 1fr;}.page-body{padding:24px 16px 60px;}nav{padding:0 16px;}.product-card-head{flex-direction:column;}.product-card-foot{flex-direction:column;align-items:stretch;}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div><img src="nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></div>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-logo"><img src="nexttierlogo.png" alt="Next Tier" style="height:40px;width:auto;"></a>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar" id="navAvatar">—</div>
+      <div>
+        <div class="nav-name" id="navName">—</div>
+        <div class="nav-role" id="navRole">—</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="NT.logout()">Log out</button>
+  </div>
+</nav>
+
+<div class="page-body">
+  <div class="page-eyebrow">My Product</div>
+  <div class="page-title">YOUR <em>PLAYER CARD</em></div>
+  <div class="page-sub">Your submitted profile and current evaluation status.</div>
+
+  <!-- No product state -->
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="empty-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+    </div>
+    <div class="empty-title">NO PROFILE SUBMITTED YET</div>
+    <div class="empty-sub">Submit your player profile to receive your Player Development Score and personalised roadmap.</div>
+    <a href="intake (1).html" class="btn-sm">Submit player profile →</a>
+  </div>
+
+  <!-- Product card -->
+  <div class="product-card" id="productCard" style="display:none;">
+    <div class="product-card-head">
+      <div>
+        <div class="product-package" id="productPackage">—</div>
+        <div class="product-date" id="productDate">Submitted —</div>
+      </div>
+      <div class="pill pill-pending" id="statusPill">
+        <span class="pill-dot"></span>
+        <span id="statusText">Pending</span>
+      </div>
+    </div>
+    <div class="product-card-body">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">Player</div>
+          <div class="detail-val" id="detailName">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Position</div>
+          <div class="detail-val" id="detailPosition">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Jersey #</div>
+          <div class="detail-val" id="detailJersey">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Team</div>
+          <div class="detail-val" id="detailTeam">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">League</div>
+          <div class="detail-val" id="detailLeague">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">PDS Score</div>
+          <div class="detail-val big" id="detailPDS">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="product-card-foot">
+      <a href="dashboard player.html" class="btn-sm outline">← Dashboard</a>
+      <a href="contact (1).html" class="btn-sm outline">Contact support</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  // Auth gate — only player and parent roles allowed
+  const user = await NT.guard(['player', 'parent']);
+  if (!user) return; // guard handles redirect
+
+  // Populate nav
+  document.getElementById('navAvatar').textContent = (user.firstName || '?')[0].toUpperCase();
+  document.getElementById('navName').textContent   = user.firstName + (user.lastName ? ' ' + user.lastName : '');
+  document.getElementById('navRole').textContent   = user.role;
+
+  // Fetch product
+  let product = null;
+  try {
+    const res = await NT.api({ type: 'getProduct', token: NT.getToken() });
+    if (res.status === 'ok') product = res.product;
+  } catch (e) {
+    // silently fall through to empty state
+  }
+
+  document.getElementById('loadingOverlay').style.display = 'none';
+
+  if (!product) {
+    document.getElementById('emptyState').style.display = 'block';
+    return;
+  }
+
+  // Render product card
+  document.getElementById('productCard').style.display   = 'block';
+  document.getElementById('productPackage').textContent  = product.package || 'Player Profile';
+  document.getElementById('productDate').textContent     = 'Submitted ' + formatDate(product.createdAt);
+  document.getElementById('detailName').textContent      = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
+  document.getElementById('detailPosition').textContent  = product.position   || '—';
+  document.getElementById('detailJersey').textContent    = product.jerseyNumber ? '#' + product.jerseyNumber : '—';
+  document.getElementById('detailTeam').textContent      = product.team        || '—';
+  document.getElementById('detailLeague').textContent    = product.league      || '—';
+  document.getElementById('detailPDS').textContent       = product.pdsScore    || '—';
+
+  const pill = document.getElementById('statusPill');
+  const isActive = product.status === 'active';
+  pill.className = 'pill ' + (isActive ? 'pill-active' : 'pill-pending');
+  document.getElementById('statusText').textContent = isActive ? 'Active' : 'Pending Review';
+});
+</script>
+</body>
+</html>
