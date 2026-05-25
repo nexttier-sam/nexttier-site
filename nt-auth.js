@@ -1,8 +1,5 @@
 // Next Tier — shared auth library
-// ════════════════════════════════════════════════════════════════
-// Replace this URL with your deployed Google Apps Script web app URL.
-// ════════════════════════════════════════════════════════════════
-const NT_API_URL = 'https://script.google.com/a/macros/nexttierstats.com/s/AKfycbwlt-hlFubdSI8X_Ck9TAPuIxfIOU7hpyLaZE5p52paZPzeM-sELzEHnHB9F0e-1fN_/exec';
+// NT_API_URL is defined in config.js — load that file before this one.
 
 const NT = (() => {
   const STORAGE_TOKEN = 'nt_token';

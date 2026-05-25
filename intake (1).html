@@ -630,20 +630,20 @@ nav {
 <script>
 // ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ───────────────────────
 const APPS_SCRIPT_URL = NT_API_URL;
-// ─────────────────────────────────────────────────────────────────
 
 // Require login — redirect to login page if not authenticated
 window.addEventListener('DOMContentLoaded', async () => {
   const user = NT.getUser();
   if (!user) {
-    window.location.href = 'login.html?redirect=intake.html';
+    window.location.href = 'login.html?redirect=' + encodeURIComponent('intake (1).html');
     return;
   }
   const valid = await NT.validate();
   if (!valid) {
-    window.location.href = 'login.html?redirect=intake.html';
+    window.location.href = 'login.html?redirect=' + encodeURIComponent('intake (1).html');
   }
 });
+// ─────────────────────────────────────────────────────────────────
 
 function v(id) {
   const el = document.getElementById(id);
