@@ -48,7 +48,7 @@ const NT = (() => {
       try { await api({ type: 'logout', token }); } catch {}
     }
     clearSession();
-    window.location.href = 'login.html';
+    window.location.href = 'login';
   }
 
   // Validates the current session against the server.
@@ -70,16 +70,16 @@ const NT = (() => {
   async function guard(allowedRoles) {
     const user = getUser();
     if (!user) {
-      window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = 'login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
       return null;
     }
     const valid = await validate();
     if (!valid) {
-      window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = 'login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
       return null;
     }
     if (allowedRoles && allowedRoles.length && !allowedRoles.includes(valid.role)) {
-      window.location.href = 'unauthorized.html';
+      window.location.href = 'unauthorized';
       return null;
     }
     return valid;

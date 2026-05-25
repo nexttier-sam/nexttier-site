@@ -22,12 +22,12 @@ body{font-family:var(--font-body);background:var(--nt-black);min-height:100vh;di
 </style>
 </head>
 <body>
-<a href="index.html" class="logo">NEXT<span>TIER</span></a>
+<a href="/" class="logo">NEXT<span>TIER</span></a>
 <div class="code">403</div>
 <div class="title">ACCESS <em>DENIED.</em></div>
 <p class="sub">You don't have permission to view this page. Your current account role doesn't include access here.</p>
 <div>
-  <a href="index.html" class="btn-home">Back to home</a>
+  <a href="/" class="btn-home">Back to home</a>
   <a href="#" class="btn-dash" id="dashBtn">My dashboard</a>
 </div>
 <script>
@@ -35,10 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const user = NT.getUser();
   const btn  = document.getElementById('dashBtn');
   if (user) {
-    const map = { player:'dashboard%20player.html', parent:'dashboard%20parent.html', scout:'dashboard%20scout.html', admin:'dashboard%20admin.html' };
-    btn.href = map[user.role] || 'login.html';
+    const map = { player:'dashboard%20player', parent:'dashboard%20parent', scout:'dashboard%20scout', admin:'dashboard%20admin' };
+    btn.href = map[user.role] || 'login';
   } else {
-    btn.href = 'login.html'; btn.textContent = 'Sign in';
+    btn.href = 'login'; btn.textContent = 'Sign in';
   }
 });
 </script>

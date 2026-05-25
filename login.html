@@ -113,7 +113,7 @@ body {
 </head>
 <body>
 
-<a href="index.html" class="auth-logo"><img src="nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></a>
+<a href="/" class="auth-logo"><img src="nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></a>
 
 <div class="auth-card">
   <div class="auth-tabs">
@@ -179,7 +179,7 @@ body {
 </div>
 
 <div class="auth-footer">
-  <a href="index.html">← Back to home</a>
+  <a href="/">← Back to home</a>
 </div>
 
 <script>
@@ -273,8 +273,8 @@ async function doRegister() {
 }
 
 function dashboardFor(role) {
-  const map = { player: 'dashboard%20player.html', parent: 'dashboard%20parent.html', scout: 'dashboard%20scout.html', admin: 'dashboard%20admin.html' };
-  return map[role] || 'index.html';
+  const map = { player: 'dashboard%20player', parent: 'dashboard%20parent', scout: 'dashboard%20scout', admin: 'dashboard%20admin' };
+  return map[role] || 'index';
 }
 
 function showErr(el, msg) {
