@@ -185,20 +185,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 </div>
 
 <script>
-// ── Stripe payment link placeholders ─────────────────────────────
-// Replace these with your actual Stripe Payment Link URLs.
-// Get them from: Stripe Dashboard → Payment Links → Create link
-const STRIPE_LINKS = {
-  playerCard:  'STRIPE_PLAYER_CARD_URL',
-  videoReview: 'STRIPE_VIDEO_REVIEW_URL'
-};
-// ─────────────────────────────────────────────────────────────────
-
 window.addEventListener('DOMContentLoaded', async () => {
-  // Wire up Stripe links
-  document.getElementById('btnPlayerCard').href  = STRIPE_LINKS.playerCard;
-  document.getElementById('btnVideoReview').href = STRIPE_LINKS.videoReview;
-
   // Show auth nudge if not logged in
   const user = NT.getUser();
   if (!user) {
