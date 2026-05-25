@@ -387,6 +387,7 @@ nav {
     <svg viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Back to home
   </a>
+  <a href="login" id="navLoginLink" style="font-size:13px;font-weight:400;color:rgba(255,255,255,0.5);text-decoration:none;margin-left:auto;">Login</a>
 </nav>
 
 <!-- HEADER -->
@@ -676,6 +677,16 @@ function toggleFaq(btn) {
     btn.classList.add('open');
   }
 }
+</script>
+<script src="nt-auth.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const user = NT.getUser();
+  if (user) {
+    const link = document.getElementById('navLoginLink');
+    if (link) { link.textContent = 'Dashboard'; link.href = 'dashboard%20' + (user.role || 'player'); }
+  }
+});
 </script>
 </body>
 </html>

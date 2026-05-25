@@ -1575,7 +1575,9 @@ text-transform: uppercase;
 
 <a href="checkout">Purchase</a>
 
-<a href="intake" class="nav-cta">Get started</a>
+<a href="login" id="navLoginLink">Login</a>
+
+<a href="intake" class="nav-cta" id="navGetStarted">Get started</a>
 
 </div>
 
@@ -2618,6 +2620,21 @@ const glossObserver = new IntersectionObserver((entries) => {
 
 glossSections.forEach(s => glossObserver.observe(s));
 
+</script>
+
+<script src="config.js"></script>
+<script src="nt-auth.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const user = NT.getUser();
+  if (user) {
+    const loginLink = document.getElementById('navLoginLink');
+    if (loginLink) {
+      loginLink.textContent = 'Dashboard';
+      loginLink.href = 'dashboard%20' + (user.role || 'player');
+    }
+  }
+});
 </script>
 
 </body>
