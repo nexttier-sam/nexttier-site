@@ -155,6 +155,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
       </div>
     </div>
     <div class="product-card-foot">
+      <a href="player-card" class="btn-sm" id="btnViewCard">View Full Report →</a>
       <a href="dashboard player" class="btn-sm outline">← Dashboard</a>
       <a href="contact" class="btn-sm outline">Contact support</a>
     </div>
@@ -209,6 +210,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const isActive = product.status === 'active';
   pill.className = 'pill ' + (isActive ? 'pill-active' : 'pill-pending');
   document.getElementById('statusText').textContent = isActive ? 'Active' : 'Pending Review';
+  if (!isActive) document.getElementById('btnViewCard').style.display = 'none';
 });
 </script>
 </body>

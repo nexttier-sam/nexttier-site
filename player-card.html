@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Player Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="/config.js"></script>
+<script src="/nt-auth.js"></script>
+<style>
+:root {
+  --nt-black:#000000;--nt-ice:#1A1A1A;--nt-white:#FFFFFF;
+  --nt-green:#CCFF00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;
+  --nt-slate:#CCCCCC;--nt-muted:#888888;--nt-red:#E8344A;
+  --nt-amber:#CCAA00;--nt-blue:#4DA6FF;
+  --nt-border:rgba(204,255,0,0.08);--nt-border-strong:rgba(204,255,0,0.18);
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:#0D0D0D;color:var(--nt-white);-webkit-font-smoothing:antialiased;}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:var(--nt-black);display:flex;align-items:center;justify-content:center;z-index:999;}
+
+/* NAV */
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--nt-border);}
+.nav-logo{display:flex;align-items:center;text-decoration:none;}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.nav-user{display:flex;align-items:center;gap:10px;}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--nt-green);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:#000;}
+.nav-name{font-size:13px;color:rgba(255,255,255,0.6);}
+.nav-role{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-green);}
+.btn-logout{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:7px 14px;font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;font-family:var(--font-body);transition:all .15s;}
+.btn-logout:hover{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);}
+
+/* VIEW TABS */
+.view-bar{background:var(--nt-black);border-bottom:1px solid var(--nt-border);padding:0 32px;display:flex;align-items:center;gap:0;}
+.view-tab{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);padding:14px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font-mono);}
+.view-tab:hover{color:var(--nt-white);}
+.view-tab.active{color:var(--nt-green);border-bottom-color:var(--nt-green);}
+
+/* STATUS PILL */
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
+.pill-pending{background:#2A2000;color:#CCAA00;}
+.pill-active{background:#1C2200;color:#CCFF00;}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+
+/* LAYOUT */
+.page-body{max-width:960px;margin:0 auto;padding:40px 24px 80px;}
+
+/* PLAYER HEADER */
+.player-header{background:#1A1A1A;border:1px solid var(--nt-border);border-radius:16px;padding:32px 36px;margin-bottom:24px;display:flex;align-items:center;gap:32px;position:relative;overflow:hidden;}
+.player-header::before{content:'';position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(204,255,0,0.06) 0%,transparent 70%);pointer-events:none;}
+.player-number{font-family:var(--font-display);font-size:96px;color:rgba(204,255,0,0.08);line-height:1;min-width:100px;text-align:center;flex-shrink:0;}
+.player-info{flex:1;}
+.player-name{font-family:var(--font-display);font-size:clamp(36px,4vw,56px);letter-spacing:.03em;color:var(--nt-white);line-height:.95;margin-bottom:10px;}
+.player-meta-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:14px;}
+.player-meta-item{font-family:var(--font-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-muted);}
+.player-meta-item strong{color:var(--nt-slate);font-weight:500;}
+.player-meta-sep{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.15);}
+.player-header-right{text-align:right;flex-shrink:0;}
+.pds-ring{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.pds-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-muted);}
+.pds-score{font-family:var(--font-display);font-size:72px;color:var(--nt-green);line-height:1;}
+.pds-score-pending{font-family:var(--font-display);font-size:36px;color:var(--nt-muted);line-height:1;}
+.tier-badge{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:8px;background:var(--nt-green);color:#000;font-family:var(--font-display);font-size:26px;margin-top:6px;}
+.tier-badge.dim{background:rgba(255,255,255,0.07);color:var(--nt-muted);}
+
+/* SECTION CARD */
+.card{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.card-head{padding:18px 24px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:var(--font-display);font-size:18px;letter-spacing:.03em;color:var(--nt-white);}
+.card-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);}
+.card-body{padding:24px;}
+
+/* SKILL BARS */
+.skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.skill-item{}
+.skill-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.skill-name{font-size:13px;font-weight:400;color:var(--nt-slate);}
+.skill-score{font-family:var(--font-mono);font-size:12px;color:var(--nt-green);font-weight:500;}
+.skill-bar-track{height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;}
+.skill-bar-fill{height:100%;border-radius:2px;background:var(--nt-green);transition:width .8s cubic-bezier(.4,0,.2,1);}
+.skill-bar-fill.mid{background:var(--nt-amber);}
+.skill-bar-fill.low{background:var(--nt-red);}
+
+/* STATS TABLE */
+.stats-table{width:100%;border-collapse:collapse;}
+.stats-table th{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);text-align:left;padding:0 12px 12px 0;border-bottom:1px solid var(--nt-border);}
+.stats-table td{font-size:13px;color:var(--nt-slate);padding:12px 12px 12px 0;border-bottom:1px solid rgba(204,255,0,0.04);vertical-align:middle;}
+.stats-table tr:last-child td{border-bottom:none;}
+.stats-table td.season-col{font-family:var(--font-mono);font-size:11px;color:var(--nt-muted);}
+.stats-table td.highlight{font-weight:600;color:var(--nt-white);}
+
+/* PATHWAY TABLE */
+.pathway-table{width:100%;border-collapse:collapse;}
+.pathway-table th{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);text-align:left;padding:0 12px 12px 0;border-bottom:1px solid var(--nt-border);}
+.pathway-table td{font-size:13px;color:var(--nt-slate);padding:12px 12px 12px 0;border-bottom:1px solid rgba(204,255,0,0.04);}
+.pathway-table tr:last-child td{border-bottom:none;}
+.pct-bar{display:flex;align-items:center;gap:8px;}
+.pct-num{font-family:var(--font-mono);font-size:12px;color:var(--nt-green);min-width:36px;}
+.pct-track{flex:1;height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;}
+.pct-fill{height:100%;background:var(--nt-green);border-radius:2px;}
+
+/* DEV NOTES */
+.dev-note{padding:14px 16px;background:rgba(204,255,0,0.04);border-left:2px solid var(--nt-green);border-radius:0 8px 8px 0;margin-bottom:12px;}
+.dev-note:last-child{margin-bottom:0;}
+.dev-note-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-green);margin-bottom:4px;}
+.dev-note-text{font-size:13px;font-weight:300;color:var(--nt-slate);line-height:1.6;}
+
+/* INFO GRID */
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.info-item{}
+.info-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:6px;}
+.info-val{font-size:15px;font-weight:500;color:var(--nt-white);}
+.info-val.green{color:var(--nt-green);}
+
+/* NARRATIVE (parent view) */
+.narrative{font-size:14px;font-weight:300;color:var(--nt-slate);line-height:1.75;margin-bottom:20px;}
+.narrative strong{color:var(--nt-white);font-weight:500;}
+.metric-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--nt-border);}
+.metric-row:last-child{border-bottom:none;}
+.metric-icon{width:36px;height:36px;border-radius:8px;background:#0D0D0D;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.metric-text{flex:1;}
+.metric-title{font-size:13px;font-weight:500;color:var(--nt-white);margin-bottom:2px;}
+.metric-desc{font-size:12px;font-weight:300;color:var(--nt-muted);}
+.metric-val{font-family:var(--font-display);font-size:28px;color:var(--nt-green);}
+.step-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--nt-border);}
+.step-item:last-child{border-bottom:none;}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--nt-green-l);border:1px solid rgba(204,255,0,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:var(--nt-green);flex-shrink:0;margin-top:1px;}
+.step-body{}
+.step-title{font-size:13px;font-weight:500;color:var(--nt-white);margin-bottom:3px;}
+.step-desc{font-size:12px;font-weight:300;color:var(--nt-muted);line-height:1.5;}
+
+/* MARKETING VIEW */
+.mkt-hero{background:linear-gradient(135deg,#0D0D0D 0%,#1A1A1A 100%);border:1px solid var(--nt-border-strong);border-radius:16px;padding:48px 40px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden;}
+.mkt-hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(204,255,0,0.02) 39px,rgba(204,255,0,0.02) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(204,255,0,0.02) 39px,rgba(204,255,0,0.02) 40px);pointer-events:none;}
+.mkt-tagline{font-family:var(--font-display);font-size:clamp(42px,6vw,80px);letter-spacing:.04em;color:var(--nt-white);line-height:.9;margin-bottom:20px;position:relative;}
+.mkt-tagline em{color:var(--nt-green);font-style:normal;}
+.mkt-name{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:32px;position:relative;}
+.mkt-pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;position:relative;}
+.mkt-pillar{background:rgba(255,255,255,0.04);border:1px solid var(--nt-border);border-radius:10px;padding:20px;}
+.mkt-pillar-title{font-family:var(--font-display);font-size:22px;letter-spacing:.04em;color:var(--nt-green);margin-bottom:4px;}
+.mkt-pillar-desc{font-size:12px;font-weight:300;color:var(--nt-muted);line-height:1.55;}
+
+/* PENDING STATE */
+.pending-state{text-align:center;padding:72px 32px;}
+.pending-icon{width:72px;height:72px;border-radius:50%;background:var(--nt-green-l);border:1px solid rgba(204,255,0,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;}
+.pending-title{font-family:var(--font-display);font-size:36px;letter-spacing:.04em;color:var(--nt-white);margin-bottom:12px;}
+.pending-sub{font-size:14px;font-weight:300;color:var(--nt-muted);max-width:440px;margin:0 auto 32px;line-height:1.65;}
+.progress-steps{display:flex;justify-content:center;gap:0;margin-bottom:40px;}
+.progress-step{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.progress-step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:500;}
+.progress-step-dot.done{background:var(--nt-green);color:#000;}
+.progress-step-dot.active{background:#2A2000;border:1px solid rgba(204,255,0,0.3);color:var(--nt-amber);}
+.progress-step-dot.todo{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:var(--nt-muted);}
+.progress-step-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);max-width:72px;text-align:center;line-height:1.4;}
+.progress-connector{height:1px;width:48px;background:rgba(255,255,255,0.08);margin-top:16px;}
+
+/* BUTTONS */
+.btn{border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);text-decoration:none;display:inline-block;transition:background .15s,color .15s;padding:10px 22px;}
+.btn-primary{background:var(--nt-green);color:#000;}
+.btn-primary:hover{background:#B8E600;}
+.btn-outline{background:transparent;color:var(--nt-slate);border:1px solid var(--nt-border-strong);}
+.btn-outline:hover{background:rgba(255,255,255,0.06);}
+.btn-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+
+/* PRINT */
+@media print{nav,.view-bar,.btn-row,.btn{display:none!important;}.page-body{padding:0;max-width:100%;}.card{break-inside:avoid;}.player-header{break-inside:avoid;}}
+
+@media(max-width:700px){
+  .player-header{flex-direction:column;align-items:flex-start;gap:20px;}.player-number{font-size:56px;min-width:unset;}
+  .skill-grid{grid-template-columns:1fr;}.info-grid{grid-template-columns:1fr 1fr;}.mkt-pillars{grid-template-columns:1fr;}
+  .page-body{padding:24px 16px 60px;}nav{padding:0 16px;}.view-bar{padding:0 16px;}
+  .progress-steps{gap:0;}.progress-connector{width:24px;}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div><img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></div>
+</div>
+
+<nav>
+  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:40px;width:auto;"></a>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar" id="navAvatar">—</div>
+      <div>
+        <div class="nav-name" id="navName">—</div>
+        <div class="nav-role" id="navRole">—</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="NT.logout()">Log out</button>
+  </div>
+</nav>
+
+<!-- View tabs — only shown when report is active -->
+<div class="view-bar" id="viewBar" style="display:none;">
+  <button class="view-tab active" data-view="scout" onclick="switchView('scout',this)">Coach / Scout</button>
+  <button class="view-tab" data-view="parent" onclick="switchView('parent',this)">Parent</button>
+  <button class="view-tab" data-view="marketing" onclick="switchView('marketing',this)">Player Marketing</button>
+</div>
+
+<div class="page-body">
+
+  <!-- PENDING STATE -->
+  <div id="statePending" style="display:none;">
+    <div class="card">
+      <div class="pending-state">
+        <div class="pending-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <div class="pending-title">REPORT IN PREPARATION</div>
+        <div class="pending-sub">Your player profile has been received. Our evaluators are reviewing your film and compiling your Player Development Score.</div>
+
+        <div class="progress-steps">
+          <div class="progress-step">
+            <div class="progress-step-dot done">✓</div>
+            <div class="progress-step-label">Profile submitted</div>
+          </div>
+          <div class="progress-connector"></div>
+          <div class="progress-step">
+            <div class="progress-step-dot active">2</div>
+            <div class="progress-step-label">Film review</div>
+          </div>
+          <div class="progress-connector"></div>
+          <div class="progress-step">
+            <div class="progress-step-dot todo">3</div>
+            <div class="progress-step-label">Score calculated</div>
+          </div>
+          <div class="progress-connector"></div>
+          <div class="progress-step">
+            <div class="progress-step-dot todo">4</div>
+            <div class="progress-step-label">Report ready</div>
+          </div>
+        </div>
+
+        <!-- Player details submitted -->
+        <div id="pendingDetails"></div>
+
+        <div class="btn-row" style="justify-content:center;">
+          <a href="dashboard player" class="btn btn-outline">← Dashboard</a>
+          <a href="contact" class="btn btn-outline">Questions? Contact us</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE REPORT — COACH/SCOUT VIEW -->
+  <div id="viewScout" style="display:none;">
+
+    <!-- Player header -->
+    <div class="player-header" id="playerHeader">
+      <div class="player-number" id="hdrNumber">#00</div>
+      <div class="player-info">
+        <div class="player-name" id="hdrName">—</div>
+        <div class="player-meta-row">
+          <div class="player-meta-item"><strong id="hdrPosition">—</strong></div>
+          <div class="player-meta-sep"></div>
+          <div class="player-meta-item"><strong id="hdrTeam">—</strong></div>
+          <div class="player-meta-sep"></div>
+          <div class="player-meta-item"><strong id="hdrLeague">—</strong></div>
+        </div>
+        <div id="hdrPill" class="pill pill-active"><span class="pill-dot"></span><span id="hdrStatus">Active</span></div>
+      </div>
+      <div class="player-header-right">
+        <div class="pds-ring">
+          <div class="pds-label">PDS</div>
+          <div class="pds-score" id="hdrPDS">—</div>
+          <div class="tier-badge" id="hdrTier">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info grid -->
+    <div class="card" id="cardInfo">
+      <div class="card-head">
+        <div class="card-title">PLAYER INFO</div>
+        <div class="card-eyebrow" id="infoReportDate">—</div>
+      </div>
+      <div class="card-body">
+        <div class="info-grid" id="infoGrid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills breakdown -->
+    <div class="card" id="cardSkills" style="display:none;">
+      <div class="card-head">
+        <div class="card-title">14-METRIC SKILL BREAKDOWN</div>
+        <div class="card-eyebrow" id="skillsSubtitle">PDS Components</div>
+      </div>
+      <div class="card-body">
+        <div class="skill-grid" id="skillGrid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Career stats -->
+    <div class="card" id="cardStats" style="display:none;">
+      <div class="card-head"><div class="card-title">CAREER STATS</div></div>
+      <div class="card-body" style="padding:0 24px;">
+        <table class="stats-table" id="statsTable">
+          <thead>
+            <tr>
+              <th>Season</th>
+              <th>Team</th>
+              <th>League</th>
+              <th>GP</th>
+              <th>G</th>
+              <th>A</th>
+              <th>PTS</th>
+              <th>PIM</th>
+              <th>PPG</th>
+              <th>Pts/GP</th>
+            </tr>
+          </thead>
+          <tbody id="statsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Pathways -->
+    <div class="card" id="cardPathways" style="display:none;">
+      <div class="card-head"><div class="card-title">PATHWAY PROBABILITY</div></div>
+      <div class="card-body" style="padding:0 24px;">
+        <table class="pathway-table" id="pathwayTable">
+          <thead>
+            <tr>
+              <th>Pathway</th>
+              <th>Probability</th>
+              <th>Timeline</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="pathwayBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Dev notes -->
+    <div class="card" id="cardDev" style="display:none;">
+      <div class="card-head"><div class="card-title">DEVELOPMENT NOTES</div></div>
+      <div class="card-body" id="devNotesBody"></div>
+    </div>
+
+    <!-- Executive summary (fallback when no full data) -->
+    <div class="card" id="cardExec" style="display:none;">
+      <div class="card-head"><div class="card-title">EVALUATOR SUMMARY</div></div>
+      <div class="card-body">
+        <div class="narrative" id="execSummaryText"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <a href="dashboard player" class="btn btn-outline">← Dashboard</a>
+      <button class="btn btn-outline" onclick="window.print()">Print / Save PDF</button>
+      <a href="contact" class="btn btn-outline">Contact support</a>
+    </div>
+  </div>
+
+  <!-- PARENT VIEW -->
+  <div id="viewParent" style="display:none;">
+    <div class="player-header">
+      <div class="player-number" id="p_hdrNumber">#00</div>
+      <div class="player-info">
+        <div class="player-name" id="p_hdrName">—</div>
+        <div class="player-meta-row">
+          <div class="player-meta-item"><strong id="p_hdrPosition">—</strong></div>
+          <div class="player-meta-sep"></div>
+          <div class="player-meta-item"><strong id="p_hdrTeam">—</strong></div>
+        </div>
+      </div>
+      <div class="player-header-right">
+        <div class="pds-ring">
+          <div class="pds-label">PDS</div>
+          <div class="pds-score" id="p_hdrPDS">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title">WHAT THIS SCORE MEANS</div></div>
+      <div class="card-body">
+        <div class="narrative" id="parentNarrativeIntro"></div>
+        <div id="parentMetricsList"></div>
+      </div>
+    </div>
+
+    <div class="card" id="cardParentVerdict" style="display:none;">
+      <div class="card-head"><div class="card-title">OVERALL VERDICT</div></div>
+      <div class="card-body">
+        <div class="narrative" id="parentVerdictText"></div>
+      </div>
+    </div>
+
+    <div class="card" id="cardParentSteps" style="display:none;">
+      <div class="card-head"><div class="card-title">RECOMMENDED NEXT STEPS</div></div>
+      <div class="card-body" id="parentStepsList"></div>
+    </div>
+
+    <div class="btn-row">
+      <a href="dashboard player" class="btn btn-outline">← Dashboard</a>
+      <a href="contact" class="btn btn-outline">Contact support</a>
+    </div>
+  </div>
+
+  <!-- MARKETING VIEW -->
+  <div id="viewMarketing" style="display:none;">
+    <div class="mkt-hero">
+      <div class="mkt-tagline" id="mktTagline">BUILT FOR<br><em>NEXT LEVEL</em></div>
+      <div class="mkt-name" id="mktName">—</div>
+      <div class="mkt-pillars" id="mktPillars">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title">AT A GLANCE</div></div>
+      <div class="card-body">
+        <div class="info-grid" id="mktInfoGrid"></div>
+      </div>
+    </div>
+
+    <div class="card" id="cardMktSkills" style="display:none;">
+      <div class="card-head"><div class="card-title">TOP SKILLS</div></div>
+      <div class="card-body">
+        <div class="skill-grid" id="mktSkillGrid"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="window.print()">Download PDF</button>
+      <a href="dashboard player" class="btn btn-outline">← Dashboard</a>
+    </div>
+  </div>
+
+</div><!-- /page-body -->
+
+<script>
+// ─── View switching ──────────────────────────────────────────────────────────
+function switchView(name, btn) {
+  ['Scout','Parent','Marketing'].forEach(v => {
+    document.getElementById('view' + v).style.display = 'none';
+  });
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1)).style.display = '';
+  btn.classList.add('active');
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str ?? '—';
+  return d.innerHTML;
+}
+
+function barClass(score) {
+  if (score >= 70) return '';
+  if (score >= 45) return 'mid';
+  return 'low';
+}
+
+function tierFromPDS(pds) {
+  if (pds >= 85) return 'A+';
+  if (pds >= 75) return 'A';
+  if (pds >= 65) return 'B+';
+  if (pds >= 55) return 'B';
+  if (pds >= 45) return 'C+';
+  if (pds >= 35) return 'C';
+  return 'D';
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-CA', { year:'numeric', month:'short', day:'numeric' });
+}
+
+// ─── Render from full PLAYER JSON object ─────────────────────────────────────
+function renderFull(P, product) {
+  document.getElementById('viewBar').style.display = '';
+
+  const pds    = P.pds   ?? product.pdsScore ?? '—';
+  const tier   = P.tier  ?? tierFromPDS(+pds);
+  const num    = P.number ?? product.jerseyNumber ?? '—';
+  const name   = [P.firstName ?? product.firstName, P.lastName ?? product.lastName].filter(Boolean).join(' ') || '—';
+  const pos    = P.position  ?? product.position  ?? '—';
+  const team   = P.team      ?? product.team      ?? '—';
+  const league = P.league    ?? product.league    ?? '—';
+
+  // ── Scout view header ──
+  ['','p_'].forEach(pfx => {
+    const n = document.getElementById(pfx + 'hdrName');    if (n) n.textContent = name;
+    const u = document.getElementById(pfx + 'hdrNumber');  if (u) u.textContent = '#' + num;
+    const o = document.getElementById(pfx + 'hdrPosition');if (o) o.textContent = pos;
+    const t = document.getElementById(pfx + 'hdrTeam');    if (t) t.textContent = team;
+    const l = document.getElementById(pfx + 'hdrLeague');  if (l) l.textContent = league;
+    const s = document.getElementById(pfx + 'hdrPDS');     if (s) s.textContent = pds;
+  });
+
+  const tierEl = document.getElementById('hdrTier');
+  if (tierEl) tierEl.textContent = tier;
+
+  document.getElementById('infoReportDate').textContent = P.reportDate ? 'Report: ' + P.reportDate : 'Submitted ' + fmtDate(product.createdAt);
+
+  // ── Info grid ──
+  const infoRows = P.infoRows || [
+    { label:'Position', value: pos },
+    { label:'Team',     value: team },
+    { label:'League',   value: league },
+    { label:'Jersey #', value: num ? '#' + num : '—' },
+    { label:'Season',   value: P.season   || '—' },
+    { label:'Next Level',value: P.nextLevel|| '—' },
+  ];
+  const infoGrid = document.getElementById('infoGrid');
+  infoGrid.innerHTML = infoRows.map(r =>
+    `<div class="info-item"><div class="info-label">${esc(r.label)}</div><div class="info-val">${esc(r.value)}</div></div>`
+  ).join('');
+
+  // Mirror to marketing info grid
+  document.getElementById('mktInfoGrid').innerHTML = infoGrid.innerHTML;
+
+  // ── Skills ──
+  if (P.skills && P.skills.length) {
+    const sg = document.getElementById('skillGrid');
+    sg.innerHTML = P.skills.map(sk => {
+      const pct = Math.round(sk.score ?? sk.value ?? 0);
+      const cls = barClass(pct);
+      return `<div class="skill-item">
+        <div class="skill-row"><span class="skill-name">${esc(sk.label ?? sk.name)}</span><span class="skill-score">${pct}</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill ${cls}" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+    document.getElementById('cardSkills').style.display = '';
+
+    // Top skills for marketing (top 6 by score)
+    const top = [...P.skills].sort((a,b) => (b.score ?? b.value ?? 0) - (a.score ?? a.value ?? 0)).slice(0,6);
+    const mktSG = document.getElementById('mktSkillGrid');
+    mktSG.innerHTML = top.map(sk => {
+      const pct = Math.round(sk.score ?? sk.value ?? 0);
+      return `<div class="skill-item">
+        <div class="skill-row"><span class="skill-name">${esc(sk.label ?? sk.name)}</span><span class="skill-score">${pct}</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+    document.getElementById('cardMktSkills').style.display = '';
+  }
+
+  // ── Career stats ──
+  if (P.career && P.career.length) {
+    const tbody = document.getElementById('statsBody');
+    tbody.innerHTML = P.career.map(r => `<tr>
+      <td class="season-col">${esc(r.season)}</td>
+      <td>${esc(r.team)}</td>
+      <td class="season-col">${esc(r.league)}</td>
+      <td class="highlight">${r.gp ?? '—'}</td>
+      <td>${r.g ?? '—'}</td>
+      <td>${r.a ?? '—'}</td>
+      <td class="highlight">${r.pts ?? '—'}</td>
+      <td>${r.pim ?? '—'}</td>
+      <td>${r.ppg ?? '—'}</td>
+      <td>${r.ptsPerGP ?? '—'}</td>
+    </tr>`).join('');
+    document.getElementById('cardStats').style.display = '';
+  } else if (P.stats) {
+    const s = P.stats;
+    document.getElementById('statsBody').innerHTML = `<tr>
+      <td class="season-col">${esc(P.season || '—')}</td>
+      <td>${esc(team)}</td>
+      <td class="season-col">${esc(league)}</td>
+      <td class="highlight">${s.gp ?? '—'}</td>
+      <td>${s.g ?? '—'}</td>
+      <td>${s.a ?? '—'}</td>
+      <td class="highlight">${s.pts ?? '—'}</td>
+      <td>${s.pim ?? '—'}</td>
+      <td>${s.ppg ?? '—'}</td>
+      <td>${s.ptsPerGP ?? '—'}</td>
+    </tr>`;
+    document.getElementById('cardStats').style.display = '';
+  }
+
+  // ── Pathways ──
+  if (P.pathways && P.pathways.length) {
+    const pb = document.getElementById('pathwayBody');
+    pb.innerHTML = P.pathways.map(p => {
+      const pct = Math.round(+p.probability || 0);
+      return `<tr>
+        <td><strong style="color:var(--nt-white)">${esc(p.label ?? p.pathway ?? p.name)}</strong></td>
+        <td><div class="pct-bar"><span class="pct-num">${pct}%</span><div class="pct-track"><div class="pct-fill" style="width:${pct}%"></div></div></div></td>
+        <td style="color:var(--nt-muted);font-size:12px;">${esc(p.timeline ?? '—')}</td>
+        <td style="font-size:12px;">${esc(p.notes ?? p.note ?? '—')}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('cardPathways').style.display = '';
+  }
+
+  // ── Dev notes ──
+  const devNotes = P.devNotes || P.htrItems;
+  if (devNotes && devNotes.length) {
+    const dn = document.getElementById('devNotesBody');
+    dn.innerHTML = devNotes.map(n => {
+      if (typeof n === 'string') return `<div class="dev-note"><div class="dev-note-text">${esc(n)}</div></div>`;
+      return `<div class="dev-note">
+        ${n.label ? `<div class="dev-note-label">${esc(n.label)}</div>` : ''}
+        <div class="dev-note-text">${esc(n.text ?? n.note ?? n)}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('cardDev').style.display = '';
+  }
+
+  // ── Exec summary ──
+  if (P.execSummary) {
+    document.getElementById('execSummaryText').textContent = P.execSummary;
+    document.getElementById('cardExec').style.display = '';
+  }
+
+  // ── Parent view ──
+  const pn = P.parentNarrative || {};
+  document.getElementById('parentNarrativeIntro').innerHTML =
+    esc(pn.intro || `Your player has earned a Player Development Score of <strong>${pds}</strong>, placing them in the ${tier} tier. This score reflects their current skill level and development trajectory across 14 evaluated metrics.`);
+
+  if (P.parentMetrics && P.parentMetrics.length) {
+    const pm = document.getElementById('parentMetricsList');
+    pm.innerHTML = P.parentMetrics.map(m => `
+      <div class="metric-row">
+        <div class="metric-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="metric-text"><div class="metric-title">${esc(m.label ?? m.title)}</div><div class="metric-desc">${esc(m.desc ?? m.description ?? '')}</div></div>
+        ${m.value !== undefined ? `<div class="metric-val">${esc(m.value)}</div>` : ''}
+      </div>`).join('');
+  }
+
+  if (P.parentVerdict) {
+    document.getElementById('parentVerdictText').textContent = P.parentVerdict;
+    document.getElementById('cardParentVerdict').style.display = '';
+  }
+
+  if (P.parentSteps && P.parentSteps.length) {
+    const ps = document.getElementById('parentStepsList');
+    ps.innerHTML = P.parentSteps.map((s, i) => {
+      const title = typeof s === 'string' ? s : (s.title ?? s.step ?? '');
+      const desc  = typeof s === 'string' ? '' : (s.desc ?? s.description ?? '');
+      return `<div class="step-item">
+        <div class="step-num">${i+1}</div>
+        <div class="step-body"><div class="step-title">${esc(title)}</div>${desc ? `<div class="step-desc">${esc(desc)}</div>` : ''}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('cardParentSteps').style.display = '';
+  }
+
+  // ── Marketing view ──
+  const tagWord1 = P.mktTaglineWord1 || 'BUILT FOR';
+  const tagEm    = P.mktTaglineEm1  || 'NEXT LEVEL';
+  document.getElementById('mktTagline').innerHTML = `${esc(tagWord1)}<br><em>${esc(tagEm)}</em>`;
+  document.getElementById('mktName').textContent  = name + ' · ' + pos + ' · ' + team;
+
+  if (P.mktPillars && P.mktPillars.length) {
+    document.getElementById('mktPillars').innerHTML = P.mktPillars.map(p =>
+      `<div class="mkt-pillar"><div class="mkt-pillar-title">${esc(p.title ?? p.label)}</div><div class="mkt-pillar-desc">${esc(p.desc ?? p.description ?? '')}</div></div>`
+    ).join('');
+  } else {
+    document.getElementById('mktPillars').innerHTML = `
+      <div class="mkt-pillar"><div class="mkt-pillar-title">PDS ${pds}</div><div class="mkt-pillar-desc">Player Development Score — top-${100 - Math.round(+pds)}% of evaluated players</div></div>
+      <div class="mkt-pillar"><div class="mkt-pillar-title">TIER ${tier}</div><div class="mkt-pillar-desc">Rating tier based on 14-metric evaluation</div></div>
+      <div class="mkt-pillar"><div class="mkt-pillar-title">${esc(pos)}</div><div class="mkt-pillar-desc">Evaluated position — ${esc(league)}</div></div>`;
+  }
+}
+
+// ─── Render simplified (plain number pdsScore only) ───────────────────────────
+function renderSimple(product) {
+  document.getElementById('viewBar').style.display = '';
+
+  const pds    = product.pdsScore || '—';
+  const tier   = isNaN(+pds) ? '—' : tierFromPDS(+pds);
+  const name   = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
+  const num    = product.jerseyNumber || '—';
+  const pos    = product.position  || '—';
+  const team   = product.team      || '—';
+  const league = product.league    || '—';
+
+  ['','p_'].forEach(pfx => {
+    const n = document.getElementById(pfx + 'hdrName');   if (n) n.textContent = name;
+    const u = document.getElementById(pfx + 'hdrNumber'); if (u) u.textContent = '#' + num;
+    const o = document.getElementById(pfx + 'hdrPosition'); if (o) o.textContent = pos;
+    const t = document.getElementById(pfx + 'hdrTeam');   if (t) t.textContent = team;
+    const l = document.getElementById(pfx + 'hdrLeague'); if (l) l.textContent = league;
+    const s = document.getElementById(pfx + 'hdrPDS');    if (s) s.textContent = pds;
+  });
+
+  const tierEl = document.getElementById('hdrTier');
+  if (tierEl) { tierEl.textContent = tier; if (tier === '—') tierEl.classList.add('dim'); }
+
+  document.getElementById('infoReportDate').textContent = 'Submitted ' + fmtDate(product.createdAt);
+
+  const infoRows = [
+    { label:'Player',   value: name },
+    { label:'Position', value: pos },
+    { label:'Jersey #', value: num !== '—' ? '#' + num : '—' },
+    { label:'Team',     value: team },
+    { label:'League',   value: league },
+    { label:'Package',  value: product.package || '—' },
+  ];
+  const html = infoRows.map(r => `<div class="info-item"><div class="info-label">${esc(r.label)}</div><div class="info-val">${esc(r.value)}</div></div>`).join('');
+  document.getElementById('infoGrid').innerHTML = html;
+  document.getElementById('mktInfoGrid').innerHTML = html;
+
+  document.getElementById('parentNarrativeIntro').innerHTML =
+    `Your player has earned a Player Development Score of <strong>${pds}</strong>, placing them in the ${tier} tier. A detailed breakdown and development roadmap will be available once our evaluators complete the full review.`;
+
+  const tagline = document.getElementById('mktTagline');
+  tagline.innerHTML = `BUILT FOR<br><em>NEXT LEVEL</em>`;
+  document.getElementById('mktName').textContent = name + ' · ' + pos + ' · ' + team;
+  document.getElementById('mktPillars').innerHTML = `
+    <div class="mkt-pillar"><div class="mkt-pillar-title">PDS ${pds}</div><div class="mkt-pillar-desc">Player Development Score — evaluated across key performance metrics</div></div>
+    <div class="mkt-pillar"><div class="mkt-pillar-title">TIER ${tier}</div><div class="mkt-pillar-desc">Rating tier assigned by Next Tier evaluators</div></div>
+    <div class="mkt-pillar"><div class="mkt-pillar-title">${esc(pos)}</div><div class="mkt-pillar-desc">Evaluated position — ${esc(league)}</div></div>`;
+}
+
+// ─── Render pending state ─────────────────────────────────────────────────────
+function renderPending(product) {
+  document.getElementById('statePending').style.display = '';
+
+  const name   = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
+  const details = [
+    { label:'Player',   value: name },
+    { label:'Position', value: product.position   || '—' },
+    { label:'Team',     value: product.team        || '—' },
+    { label:'League',   value: product.league      || '—' },
+    { label:'Jersey #', value: product.jerseyNumber ? '#' + product.jerseyNumber : '—' },
+    { label:'Package',  value: product.package     || '—' },
+    { label:'Submitted',value: fmtDate(product.createdAt) },
+  ];
+  document.getElementById('pendingDetails').innerHTML = `
+    <div class="card" style="margin:0 0 28px;text-align:left;">
+      <div class="card-head"><div class="card-title">SUBMITTED PROFILE</div></div>
+      <div class="card-body"><div class="info-grid">${
+        details.map(r => `<div class="info-item"><div class="info-label">${esc(r.label)}</div><div class="info-val">${esc(r.value)}</div></div>`).join('')
+      }</div></div>
+    </div>`;
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = await NT.guard(['player', 'parent']);
+  if (!user) return;
+
+  document.getElementById('navAvatar').textContent = (user.firstName || '?')[0].toUpperCase();
+  document.getElementById('navName').textContent   = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email || '—';
+  document.getElementById('navRole').textContent   = user.role || '—';
+
+  let product = null;
+  try {
+    const res = await NT.api({ type: 'getProduct', token: NT.getToken() });
+    if (res.status === 'ok') product = res.product;
+  } catch (_) {}
+
+  document.getElementById('loadingOverlay').style.display = 'none';
+
+  if (!product) {
+    window.location.href = 'checkout';
+    return;
+  }
+
+  if (product.status !== 'active') {
+    renderPending(product);
+    return;
+  }
+
+  // Active — try to parse pdsScore as full PLAYER JSON
+  let playerObj = null;
+  if (product.pdsScore && typeof product.pdsScore === 'string' && product.pdsScore.trim().startsWith('{')) {
+    try { playerObj = JSON.parse(product.pdsScore); } catch (_) {}
+  } else if (product.pdsScore && typeof product.pdsScore === 'object') {
+    playerObj = product.pdsScore;
+  }
+
+  document.getElementById('viewScout').style.display = '';
+
+  if (playerObj) {
+    renderFull(playerObj, product);
+  } else {
+    renderSimple(product);
+  }
+});
+</script>
+</body>
+</html>
