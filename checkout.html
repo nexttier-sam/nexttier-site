@@ -104,13 +104,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 
 <div class="page-body">
 
-  <!-- Auth nudge (shown when not logged in) -->
-  <div class="auth-nudge" id="authNudge" style="display:none;">
-    <div class="auth-nudge-text"><strong>Have an account?</strong> Sign in first so your purchase links to your profile.</div>
-    <a href="login?redirect=checkout" class="btn-nudge">Sign in →</a>
-  </div>
-
-  <div class="product-grid">
+  <div class="product-grid" id="productGrid" style="display:none;">
 
     <!-- Player Card -->
     <div class="product-card featured">
@@ -167,7 +161,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 
   </div>
 
-  <div class="trust-strip">
+  <div class="trust-strip" id="trustStrip" style="display:none;">
     <div class="trust-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
       Secure checkout via Stripe
@@ -185,20 +179,37 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 </div>
 
 <script>
+const STRIPE_URLS = {
+  playerCard:  'https://buy.stripe.com/test_00w28teAq1sO0pNbO77ss00',
+  videoReview: 'https://buy.stripe.com/test_eVq6oJ77Y3AW5K7cSb7ss01'
+};
+
 window.addEventListener('DOMContentLoaded', async () => {
-  // Show auth nudge if not logged in
+  // Hard auth gate — redirect to login if no session
   const user = NT.getUser();
   if (!user) {
-    document.getElementById('authNudge').style.display = 'flex';
+    window.location.href = 'login?redirect=checkout';
     return;
   }
 
-  // Validate session; if expired, still show nudge
   const valid = await NT.validate();
   if (!valid) {
     NT.clearSession();
-    document.getElementById('authNudge').style.display = 'flex';
+    window.location.href = 'login?redirect=checkout';
+    return;
   }
+
+  // Build Stripe URLs with user ID and email so the purchase is tied to the account
+  const params = new URLSearchParams({
+    client_reference_id: valid.id,
+    prefilled_email:     valid.email || ''
+  });
+
+  document.getElementById('btnPlayerCard').href  = STRIPE_URLS.playerCard  + '?' + params;
+  document.getElementById('btnVideoReview').href = STRIPE_URLS.videoReview + '?' + params;
+
+  document.getElementById('productGrid').style.display = '';
+  document.getElementById('trustStrip').style.display  = '';
 });
 </script>
 </body>
