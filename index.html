@@ -1567,7 +1567,7 @@ text-transform: uppercase;
 
 <div class="nav-links">
 
-<a onclick="openGlossary(event)">How it works</a>
+<a href="glossary">How it works</a>
 
 <a href="#features">Features</a>
 
@@ -1601,7 +1601,7 @@ text-transform: uppercase;
 
 <a href="intake" class="btn-primary">Build your player profile →</a>
 
-<button class="btn-outline" onclick="openGlossary(event)">See how it works</button>
+<a href="glossary" class="btn-outline">See how it works</a>
 
 </div>
 
@@ -1777,7 +1777,7 @@ text-transform: uppercase;
 
 <p>Not sure what these scores mean?</p>
 
-<button class="btn-glossary" onclick="openGlossary(event)">Read the glossary →</button>
+<a href="glossary" class="btn-glossary">Read the glossary →</a>
 
 </div>
 
@@ -2170,11 +2170,7 @@ Is Next Tier available for female hockey players?
 </footer>
 
 
-<!-- ══════════════════════════════════════════════════════
-     GLOSSARY MODAL
-══════════════════════════════════════════════════════ -->
-
-<div class="gloss-modal-overlay" id="glossaryModal">
+<div class="gloss-modal-overlay" id="glossaryModal" style="display:none!important;">
 
   <button class="gloss-modal-close" onclick="closeGlossary()">✕ Close</button>
 
@@ -2573,52 +2569,6 @@ item.classList.toggle('open');
 
 }
 
-/* ── Glossary modal ── */
-
-function openGlossary(e) {
-  if (e) e.preventDefault();
-  const overlay = document.getElementById('glossaryModal');
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  overlay.scrollTop = 0;
-}
-
-function closeGlossary() {
-  document.getElementById('glossaryModal').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-// Close on overlay click (but not modal content click)
-document.getElementById('glossaryModal').addEventListener('click', function(e) {
-  if (e.target === this) closeGlossary();
-});
-
-// Close on Escape key
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeGlossary();
-});
-
-function glossSetActive(el) {
-  document.querySelectorAll('.gloss-nav-item').forEach(n => n.classList.remove('active'));
-  el.classList.add('active');
-}
-
-// Highlight glossary nav on scroll within the modal overlay
-const glossSections = document.querySelectorAll('.gloss-section');
-const glossNavItems = document.querySelectorAll('.gloss-nav-item');
-
-const glossObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const id = entry.target.id;
-      glossNavItems.forEach(n => {
-        n.classList.toggle('active', n.getAttribute('href') === '#' + id);
-      });
-    }
-  });
-}, { root: document.getElementById('glossaryModal'), rootMargin: '-20% 0px -70% 0px' });
-
-glossSections.forEach(s => glossObserver.observe(s));
 
 </script>
 

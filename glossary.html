@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Glossary</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&family=Barlow:wght@400;600&family=Barlow+Condensed:wght@700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="/config.js"></script>
+<script src="/nt-auth.js"></script>
+<style>
+:root {
+  --nt-black:#000000;--nt-white:#FFFFFF;
+  --nt-green:#CCFF00;
+  --nt-border:rgba(204,255,0,0.08);--nt-border-strong:rgba(204,255,0,0.18);
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-body);background:#0d0d0f;color:#e8eaed;-webkit-font-smoothing:antialiased;}
+
+/* NAV */
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--nt-border);}
+.nav-logo{display:flex;align-items:center;text-decoration:none;}
+.nav-links{display:flex;align-items:center;gap:24px;}
+.nav-links a{font-size:13px;font-weight:400;color:rgba(255,255,255,0.5);text-decoration:none;transition:color .15s;}
+.nav-links a:hover{color:#fff;}
+.nav-cta{background:var(--nt-green)!important;color:#000!important;border-radius:7px;padding:8px 18px;font-weight:600!important;font-size:13px;}
+.nav-cta:hover{background:#B8E600!important;}
+
+/* GLOSSARY VARS */
+.gloss-wrap {
+  --bg-primary: #0d0d0f;
+  --bg-card: #111214;
+  --bg-elevated: #17191c;
+  --bg-row: #1a1c20;
+  --bg-row-alt: #141618;
+  --border: #2a2d32;
+  --border-subtle: #1e2124;
+  --text-primary: #e8eaed;
+  --text-secondary: #8a8f98;
+  --text-muted: #555a63;
+  --accent-green: #4ade6e;
+  --accent-green-dim: #2a5c38;
+  --accent-orange: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-blue: #60a5fa;
+  --bar-green: #4ade6e;
+  --bar-yellow: #f59e0b;
+  --bar-red: #ef4444;
+  font-family: 'Barlow', sans-serif;
+  color: var(--text-primary);
+}
+
+/* HERO */
+.gloss-hero {
+  position: relative;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  padding: 64px 0 0;
+}
+.gloss-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(74,222,110,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74,222,110,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+.gloss-hero::after {
+  content: '';
+  position: absolute;
+  top: -80px; left: -80px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(74,222,110,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.gloss-hero-inner {
+  position: relative;
+  max-width: 900px; margin: 0 auto;
+  padding: 0 24px;
+}
+.gloss-hero-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--accent-green);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.gloss-hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 24px; height: 1px;
+  background: var(--accent-green);
+}
+.gloss-hero-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(42px, 7vw, 80px);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+.gloss-hero-title em { font-style: normal; color: var(--accent-green); }
+.gloss-hero-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 560px;
+  margin-bottom: 32px;
+}
+.gloss-hero-meta-row {
+  display: flex; gap: 0;
+  border-top: 1px solid var(--border-subtle);
+  border-left: 1px solid var(--border-subtle);
+}
+.gloss-hero-meta-cell {
+  flex: 1; padding: 14px 18px;
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.gloss-hero-meta-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.gloss-hero-meta-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--text-primary);
+}
+.gloss-hero-meta-val.green { color: var(--accent-green); }
+
+/* STICKY SECTION NAV */
+.gloss-section-nav {
+  position: sticky; top: 56px; z-index: 90;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.gloss-section-nav-inner {
+  max-width: 900px; margin: 0 auto;
+  padding: 0 24px;
+  display: flex; gap: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.gloss-section-nav-inner::-webkit-scrollbar { display: none; }
+.gloss-nav-item {
+  padding: 14px 18px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color .2s, border-color .2s;
+  text-decoration: none; display: block;
+}
+.gloss-nav-item:hover { color: var(--text-primary); }
+.gloss-nav-item.active { color: var(--accent-green); border-bottom-color: var(--accent-green); }
+
+/* BODY */
+.gloss-page-body {
+  max-width: 900px; margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+.gloss-intro-banner {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-green);
+  border-radius: 4px;
+  padding: 18px 22px;
+  margin-bottom: 32px;
+  font-size: 13px; color: var(--text-secondary);
+  line-height: 1.7;
+}
+.gloss-intro-banner strong { color: var(--text-primary); }
+
+/* SECTION */
+.gloss-section { margin-bottom: 48px; scroll-margin-top: 112px; }
+.gloss-section-head {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 2px;
+  padding: 12px 20px;
+  background: var(--bg-row);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+}
+.gloss-section-icon { font-size: 14px; flex-shrink: 0; }
+.gloss-section-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--accent-green);
+  flex: 1;
+}
+.gloss-section-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; color: var(--text-muted);
+  letter-spacing: .08em;
+}
+.gloss-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0 0 4px 4px;
+  overflow: hidden;
+}
+.gloss-item {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background .15s;
+}
+.gloss-item:last-child { border-bottom: none; }
+.gloss-item:hover { background: var(--bg-elevated); }
+.gloss-term {
+  padding: 18px 20px;
+  background: var(--bg-elevated);
+  border-right: 1px solid var(--border-subtle);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-primary);
+  display: flex; flex-direction: column; gap: 5px;
+  transition: background .15s;
+}
+.gloss-item:hover .gloss-term { background: var(--bg-row); }
+.gloss-score {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; color: var(--text-muted);
+  letter-spacing: .06em; font-weight: 400;
+  text-transform: none; line-height: 1.5;
+}
+.pip { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+.pip-green { background: var(--bar-green); }
+.pip-yellow { background: var(--bar-yellow); }
+.pip-red { background: var(--bar-red); }
+.gloss-def {
+  padding: 18px 22px;
+  font-size: 12.5px; color: var(--text-secondary);
+  line-height: 1.75;
+}
+.gloss-def strong { color: var(--text-primary); font-weight: 600; }
+.thirty-sec {
+  display: flex; align-items: flex-start; gap: 8px;
+  margin-top: 10px;
+  padding: 9px 13px;
+  background: var(--bg-row);
+  border-left: 3px solid var(--accent-orange);
+  border-radius: 0 3px 3px 0;
+  font-size: 11px; color: var(--accent-orange);
+  font-style: italic; line-height: 1.6;
+}
+.thirty-sec-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px; letter-spacing: .12em;
+  text-transform: uppercase;
+  font-style: normal;
+  color: var(--accent-orange);
+  opacity: .7;
+  white-space: nowrap;
+  margin-top: 1px;
+}
+
+/* FOOTER */
+.gloss-page-footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding: 20px 24px;
+}
+.gloss-page-footer-inner {
+  max-width: 900px; margin: 0 auto;
+  display: flex; justify-content: space-between;
+  align-items: center; flex-wrap: wrap; gap: 10px;
+}
+.gloss-footer-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px; color: var(--text-muted);
+  letter-spacing: .1em;
+}
+.gloss-footer-brand {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 800;
+  letter-spacing: .1em; color: var(--accent-green);
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .gloss-item { grid-template-columns: 1fr; }
+  .gloss-term { border-right: none; border-bottom: 1px solid var(--border-subtle); }
+  .gloss-hero-meta-row { flex-wrap: wrap; }
+  .gloss-hero-meta-cell { min-width: 50%; }
+  nav { padding: 0 16px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:40px;width:auto;"></a>
+  <div class="nav-links">
+    <a href="/#features">Features</a>
+    <a href="/#tiers">Pricing</a>
+    <a href="checkout">Purchase</a>
+    <a href="login" id="navLoginLink">Login</a>
+    <a href="intake" class="nav-cta">Get started</a>
+  </div>
+</nav>
+
+<div class="gloss-wrap">
+
+  <!-- HERO -->
+  <div class="gloss-hero">
+    <div class="gloss-hero-inner">
+      <div class="gloss-hero-eyebrow">Next Tier · Glossary</div>
+      <h1 class="gloss-hero-title">How to Read<br>Your <em>Card</em></h1>
+      <p class="gloss-hero-desc">Every term on the Next Tier card, explained in plain language. If you cannot explain it to another parent in 30 seconds, we have not done our job. The <strong style="color:#f59e0b">30-second version</strong> under each definition is exactly that.</p>
+      <div class="gloss-hero-meta-row">
+        <div class="gloss-hero-meta-cell">
+          <div class="gloss-hero-meta-label">Glossary</div>
+          <div class="gloss-hero-meta-val">Next Tier · Card Terms</div>
+        </div>
+        <div class="gloss-hero-meta-cell">
+          <div class="gloss-hero-meta-label">Sections</div>
+          <div class="gloss-hero-meta-val">4</div>
+        </div>
+        <div class="gloss-hero-meta-cell">
+          <div class="gloss-hero-meta-label">Terms defined</div>
+          <div class="gloss-hero-meta-val green">17</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STICKY SECTION NAV -->
+  <nav class="gloss-section-nav">
+    <div class="gloss-section-nav-inner">
+      <a class="gloss-nav-item active" href="#gloss-scores">Scores &amp; Tiers</a>
+      <a class="gloss-nav-item" href="#gloss-stats">Production Stats</a>
+      <a class="gloss-nav-item" href="#gloss-skills">Skill Ratings</a>
+      <a class="gloss-nav-item" href="#gloss-pathway">Pathway &amp; Projections</a>
+    </div>
+  </nav>
+
+  <!-- BODY -->
+  <div class="gloss-page-body">
+
+    <div class="gloss-intro-banner">
+      <strong>This glossary explains every term you'll see on a Next Tier card.</strong> Numbers in parentheses within definitions are illustrative examples — they help explain what a score means in context, not universal benchmarks.
+    </div>
+
+    <!-- SCORES & TIERS -->
+    <div class="gloss-section" id="gloss-scores">
+      <div class="gloss-section-head">
+        <span class="gloss-section-icon">◈</span>
+        <span class="gloss-section-title">Scores &amp; Tiers</span>
+        <span class="gloss-section-count">3 terms</span>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-item">
+          <div class="gloss-term">PDS<div class="gloss-score">Player Dev Score · 0–100</div></div>
+          <div class="gloss-def">
+            A single number from 0 to 100 that summarises how ready a player is for the next level right now. It combines all five skill scores, weighted for what actually predicts success at the junior level.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"It's the overall readiness score. 68 out of 100 means good shape for Junior A."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">Tier<div class="gloss-score">Tier A / B / C / D</div></div>
+          <div class="gloss-def">
+            A letter grade for overall readiness. <strong>Tier A</strong> = elite, major junior or top NCAA path. <strong>Tier B</strong> = strong junior candidate, post-secondary pathway is realistic. <strong>Tier C</strong> = needs development. <strong>Tier D</strong> = not yet ready for junior hockey.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"Tier B means the data says this is a real Junior A candidate. Not elite, but legitimately on track."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">Percentile<div class="gloss-score">e.g. 72nd percentile</div></div>
+          <div class="gloss-def">
+            Where a player ranks compared to all players at the same age and level. 72nd percentile means scoring better than 72% of comparable players. It is not a grade — a player can be 50th percentile and still be an excellent fit for junior hockey depending on the metric.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"72nd percentile means better than 72 out of every 100 players that age at that specific thing."</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTION STATS -->
+    <div class="gloss-section" id="gloss-stats">
+      <div class="gloss-section-head">
+        <span class="gloss-section-icon">◈</span>
+        <span class="gloss-section-title">Production Stats</span>
+        <span class="gloss-section-count">4 terms</span>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-item">
+          <div class="gloss-term">Pts / GP<div class="gloss-score">Points per game</div></div>
+          <div class="gloss-def">
+            Total points (goals + assists) divided by games played. The single most widely used measure of offensive output at the junior-eligible level. <strong>1.00 pts/GP</strong> is the informal scout benchmark for next-level readiness.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"Did they get at least one point every game? 1.00 means yes — that's the number scouts look for."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">G / A / PTS<div class="gloss-score">Goals · Assists · Total Points</div></div>
+          <div class="gloss-def">
+            Goals = pucks put in the net. Assists = passes that directly led to a goal. Points = goals + assists total. A balanced G/A split is generally considered a positive sign — it suggests the player contributes both as a scorer and a playmaker.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"Goals are goals. Assists are set-up passes. Points are the total. An even split means they do both."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">GP<div class="gloss-score">Games played</div></div>
+          <div class="gloss-def">
+            Total games played in the season. More games = more reliable data. Under 15 games, per-game stats become less reliable. A sample of 20+ GP is solid for drawing conclusions from a season.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"How many games they played. More games means the stats are more reliable."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">PIM<div class="gloss-score">Penalty minutes</div></div>
+          <div class="gloss-def">
+            Total minutes spent in the penalty box during the season. Some PIM is expected (especially for physical players or those on checking lines). Very high PIM can indicate discipline issues. Very low PIM on a physical player can indicate they are playing smart.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"Time spent in the penalty box. Some is fine. A lot is a flag."</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKILL RATINGS -->
+    <div class="gloss-section" id="gloss-skills">
+      <div class="gloss-section-head">
+        <span class="gloss-section-icon">◈</span>
+        <span class="gloss-section-title">Skill Ratings — the bar chart</span>
+        <span class="gloss-section-count">8 terms</span>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-item">
+          <div class="gloss-term">Trajectory<div class="gloss-score"><span class="pip pip-green"></span>Green range</div></div>
+          <div class="gloss-def">
+            Is the player improving year over year? This is calculated by comparing points-per-game rate across each season, adjusted for league difficulty. It is the single strongest long-term predictor of success — more predictive than current point totals.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"Are they getting better every year? Green means yes, faster than most players their age."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">Power Play<div class="gloss-score"><span class="pip pip-green"></span>Green range</div></div>
+          <div class="gloss-def">
+            Production and involvement when the team has a one-man advantage. Power play production signals hockey sense, precision passing, and the ability to perform under elevated pressure with fewer available passes.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"How good are they when the team has the advantage? Green means they contribute well in those situations."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">Offensive IQ<div class="gloss-score"><span class="pip pip-green"></span>Green range</div></div>
+          <div class="gloss-def">
+            A modelled estimate of hockey sense and play-reading ability, derived from shot generation rate, assist-to-goal ratio, and production consistency. It is not directly tracked at most minor levels — the model infers it from statistical patterns.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"Do they read the game well and create chances? Modelled from shot and production data."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">Frame Proj.<div class="gloss-score"><span class="pip pip-green"></span>Green range</div></div>
+          <div class="gloss-def">
+            How current height and weight compare to the average AJHL forward, and how the player projects physically as they fill out over the next 2–3 years. Size relative to the average at the target league level is the key signal here.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"Are they big enough for the next level? Green means already at or above average size for junior."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">Shooting<div class="gloss-score"><span class="pip pip-yellow"></span>Yellow range</div></div>
+          <div class="gloss-def">
+            A combined measure of shot rate (how often they shoot) and shot quality (how dangerous those shots are). Above-average shot rate at this level is a meaningful signal of offensive intent and net-front presence.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"Do they shoot enough, and are the shots good? Yellow is above average — shoots well and often."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">Compete<div class="gloss-score"><span class="pip pip-yellow"></span>Yellow · Role-Based</div></div>
+          <div class="gloss-def">
+            Board battles, net-front presence, and physical engagement. The <strong>Role-Based</strong> flag appears when coaching deployment context matters. The flag means physical context is factored into the score, not that compete is a deficit.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"How physical and hard-working are they along the boards? Role-Based means their deployment context matters."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">Skating<div class="gloss-score"><span class="pip pip-yellow"></span>Yellow range</div></div>
+          <div class="gloss-def">
+            Speed, edge work, and agility. This is AI-modelled from available data — most minor leagues do not track skating metrics directly. It is derived from positional context, shift patterns, and production tendencies. Treat it as an estimate, not a measured value.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"How fast and agile are they? This number is estimated, not directly measured."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">Defensive Zone<div class="gloss-score"><span class="pip pip-red"></span>Red range</div></div>
+          <div class="gloss-def">
+            Engagement and awareness when the team does not have the puck and is defending their own end. Junior coaches care about this because forwards who do not defend get fewer minutes, which limits development.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"Do they work hard when the team is defending? Red means this is the main thing to work on before junior tryouts."</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PATHWAY & PROJECTIONS -->
+    <div class="gloss-section" id="gloss-pathway">
+      <div class="gloss-section-head">
+        <span class="gloss-section-icon">◈</span>
+        <span class="gloss-section-title">Pathway &amp; Projection Terms</span>
+        <span class="gloss-section-count">5 terms</span>
+      </div>
+      <div class="gloss-card">
+        <div class="gloss-item">
+          <div class="gloss-term">Match %<div class="gloss-score">e.g. 82%</div></div>
+          <div class="gloss-def">
+            The percentage of players with a similar statistical profile who successfully played at that level. 82% AJHL match means 82 out of 100 players with that profile earned an AJHL roster spot. It is a probability, not a promise.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"Out of 100 players who looked like them statistically, 82 made a junior team. Good odds."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">AJHL<div class="gloss-score">Alberta Junior Hockey League</div></div>
+          <div class="gloss-def">
+            The top-tier Junior A hockey league in Alberta and one of the premier junior leagues in Canada. Playing in the AJHL is the standard development path for Alberta players pursuing USports or NCAA hockey at the post-secondary level.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"The main junior hockey league in Alberta. This is the next level after Midget/U18."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">USports / CIS<div class="gloss-score">Canadian university hockey</div></div>
+          <div class="gloss-def">
+            University-level hockey in Canada, played through USports (formerly CIS). Top Canadian university programs recruit from the AJHL and comparable leagues. Typically requires 1–2 strong junior seasons to enter the recruiting conversation.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"University hockey in Canada. Think U of A, U of C, UBC. Realistic after a good junior career."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">NCAA D3 / ACHA<div class="gloss-score">American college hockey</div></div>
+          <div class="gloss-def">
+            Division 3 and club-level college hockey in the United States. Less competitive than NCAA D1 but still a meaningful post-secondary hockey pathway, often with strong academic programs attached.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"College hockey in the US — not the top division, but real college hockey at schools with good academics."</span></div>
+          </div>
+        </div>
+        <div class="gloss-item">
+          <div class="gloss-term">WHL<div class="gloss-score">Western Hockey League · Major Junior</div></div>
+          <div class="gloss-def">
+            The top major junior league in Western Canada. WHL players are drafted as young as 15. It is a more intensive development environment than the AJHL, with more travel and higher competition.
+            <div class="thirty-sec"><span class="thirty-sec-label">30 sec</span><span>"The big league before the pros — think Kelowna Rockets or Edmonton Oil Kings. High bar."</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /gloss-page-body -->
+
+  <footer class="gloss-page-footer">
+    <div class="gloss-page-footer-inner">
+      <div class="gloss-footer-id">NEXT TIER · GLOSSARY · NEXTTIERSTATS.COM · 2026</div>
+      <div class="gloss-footer-brand">Next Tier</div>
+    </div>
+  </footer>
+
+</div><!-- /gloss-wrap -->
+
+<script>
+// Highlight section nav on scroll
+const glossSections = document.querySelectorAll('.gloss-section');
+const glossNavItems = document.querySelectorAll('.gloss-nav-item');
+
+const glossObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      glossNavItems.forEach(n => {
+        n.classList.toggle('active', n.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+glossSections.forEach(s => glossObserver.observe(s));
+
+// Swap Login → Dashboard if logged in
+window.addEventListener('DOMContentLoaded', () => {
+  const user = NT.getUser();
+  if (user) {
+    const link = document.getElementById('navLoginLink');
+    if (link) { link.textContent = 'Dashboard'; link.href = 'dashboard%20' + (user.role || 'player'); }
+  }
+});
+</script>
+</body>
+</html>
