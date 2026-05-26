@@ -10,9 +10,9 @@
 <style>
 :root {
   --nt-black:#000000;--nt-ice:#1A1A1A;--nt-white:#FFFFFF;
-  --nt-green:#CCFF00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;
+  --nt-green:#AADD00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;
   --nt-slate:#CCCCCC;--nt-muted:#888888;--nt-red:#E8344A;
-  --nt-border:rgba(204,255,0,0.08);--nt-border-strong:rgba(204,255,0,0.18);
+  --nt-border:rgba(170,221,0,0.08);--nt-border-strong:rgba(170,221,0,0.18);
   --font-display:'Bebas Neue',sans-serif;
   --font-body:'DM Sans',sans-serif;
   --font-mono:'DM Mono',monospace;
@@ -42,7 +42,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 /* STATUS PILL */
 .pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
 .pill-pending{background:#2A2000;color:#CCAA00;}
-.pill-active{background:#1C2200;color:#CCFF00;}
+.pill-active{background:#1C2200;color:#AADD00;}
 .pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
 
 /* PRODUCT CARD */
@@ -59,7 +59,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .detail-val.empty{color:var(--nt-muted);font-size:14px;font-weight:300;}
 .product-card-foot{padding:20px 28px;border-top:1px solid var(--nt-border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .btn-sm{background:var(--nt-green);color:#000000;border:none;border-radius:6px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);text-decoration:none;display:inline-block;transition:background .15s;}
-.btn-sm:hover{background:#B8E600;}
+.btn-sm:hover{background:#99CC00;}
 .btn-sm.outline{background:transparent;color:var(--nt-slate);border:1px solid var(--nt-border-strong);}
 .btn-sm.outline:hover{background:rgba(255,255,255,0.06);}
 
@@ -105,7 +105,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
   <!-- No product state -->
   <div class="empty-state" id="emptyState" style="display:none;">
     <div class="empty-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#CCFF00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 5v14M5 12h14"/>
       </svg>
     </div>

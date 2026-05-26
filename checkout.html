@@ -10,9 +10,9 @@
 <style>
 :root {
   --nt-black:#000000;--nt-ice:#1A1A1A;--nt-white:#FFFFFF;
-  --nt-green:#CCFF00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;
+  --nt-green:#AADD00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;
   --nt-slate:#CCCCCC;--nt-muted:#888888;--nt-red:#E8344A;
-  --nt-border:rgba(204,255,0,0.08);--nt-border-strong:rgba(204,255,0,0.18);
+  --nt-border:rgba(170,221,0,0.08);--nt-border-strong:rgba(170,221,0,0.18);
   --font-display:'Bebas Neue',sans-serif;
   --font-body:'DM Sans',sans-serif;
   --font-mono:'DM Mono',monospace;
@@ -27,11 +27,11 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .nav-links a{font-size:13px;font-weight:400;color:rgba(255,255,255,0.5);text-decoration:none;transition:color .15s;}
 .nav-links a:hover{color:var(--nt-white);}
 .nav-cta{background:var(--nt-green)!important;color:#000000!important;border-radius:7px;padding:8px 18px;font-weight:600!important;font-size:13px;}
-.nav-cta:hover{background:#B8E600!important;}
+.nav-cta:hover{background:#99CC00!important;}
 
 /* PAGE HEADER */
 .page-header{background:var(--nt-black);padding:56px 32px 52px;position:relative;overflow:hidden;border-bottom:1px solid var(--nt-border);}
-.page-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(204,255,0,0.03) 39px,rgba(204,255,0,0.03) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(204,255,0,0.03) 39px,rgba(204,255,0,0.03) 40px);pointer-events:none;}
+.page-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(170,221,0,0.03) 39px,rgba(170,221,0,0.03) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(170,221,0,0.03) 39px,rgba(170,221,0,0.03) 40px);pointer-events:none;}
 .page-header-inner{max-width:860px;margin:0 auto;position:relative;}
 .page-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--nt-green);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
 .page-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-green);}
@@ -46,7 +46,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 /* PRODUCT CARD */
 .product-card{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s;}
 .product-card:hover{border-color:var(--nt-border-strong);}
-.product-card.featured{border-color:rgba(204,255,0,0.3);}
+.product-card.featured{border-color:rgba(170,221,0,0.3);}
 .product-card-head{padding:28px 28px 20px;border-bottom:1px solid var(--nt-border);}
 .product-badge{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:4px;margin-bottom:14px;}
 .product-badge.featured{background:var(--nt-green-l);color:var(--nt-green);}
@@ -64,7 +64,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .product-card-foot{padding:20px 28px;border-top:1px solid var(--nt-border);}
 .btn-buy{width:100%;padding:14px;border:none;border-radius:9px;font-size:14px;font-weight:600;font-family:var(--font-body);cursor:pointer;transition:background .15s;text-decoration:none;display:block;text-align:center;}
 .btn-buy.primary{background:var(--nt-green);color:#000000;}
-.btn-buy.primary:hover{background:#B8E600;}
+.btn-buy.primary:hover{background:#99CC00;}
 .btn-buy.secondary{background:rgba(255,255,255,0.07);color:var(--nt-white);border:1px solid var(--nt-border-strong);}
 .btn-buy.secondary:hover{background:rgba(255,255,255,0.12);}
 .btn-note{text-align:center;font-size:11px;font-weight:300;color:var(--nt-muted);margin-top:10px;}
@@ -75,7 +75,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .trust-item svg{width:16px;height:16px;flex-shrink:0;}
 
 /* AUTH NUDGE */
-.auth-nudge{background:var(--nt-green-l);border:1px solid rgba(204,255,0,0.15);border-radius:10px;padding:16px 20px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.auth-nudge{background:var(--nt-green-l);border:1px solid rgba(170,221,0,0.15);border-radius:10px;padding:16px 20px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 .auth-nudge-text{font-size:13px;font-weight:300;color:rgba(255,255,255,0.6);}
 .auth-nudge-text strong{color:var(--nt-white);font-weight:500;}
 .btn-nudge{background:var(--nt-green);color:#000;border:none;border-radius:6px;padding:8px 18px;font-size:12px;font-weight:600;font-family:var(--font-body);cursor:pointer;text-decoration:none;white-space:nowrap;}
@@ -148,7 +148,6 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
           <li>Full film analysis session</li>
           <li>Live recruiting profile</li>
           <li>Active scout matching</li>
-          <li>Monthly advisor call</li>
           <li>Priority 24h turnaround</li>
           <li>NCAA / USHL benchmarks</li>
         </ul>
@@ -169,7 +168,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
     </div>
     <div class="trust-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      No subscriptions, cancel anytime
+      One-time payment, no hidden fees
     </div>
     <div class="trust-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
