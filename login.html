@@ -288,6 +288,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     const valid = await NT.validate();
     if (valid) { window.location.href = dashboardFor(valid.role); }
   }
+
+  // Auto-switch to register tab if ?mode=register
+  if (new URLSearchParams(window.location.search).get('mode') === 'register') {
+    switchTab('register');
+  }
 });
 
 // Enter key support
