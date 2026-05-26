@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Player Card Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="/config.js"></script>
+<script src="/nt-auth.js"></script>
+<style>
+:root {
+  --nt-black: #000000;
+  --nt-ice: #161616;
+  --nt-white: #FFFFFF;
+  --nt-green: #AADD00;
+  --nt-green-d: #99BF00;
+  --nt-green-l: #1C2200;
+  --nt-red: #E8344A;
+  --nt-slate: #CCCCCC;
+  --nt-muted: #777777;
+  --nt-border: rgba(170,221,0,0.1);
+  --nt-border-strong: rgba(170,221,0,0.2);
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: #111111;
+  color: var(--nt-white);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--nt-black);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 56px;
+}
+.nav-logo { display:flex; align-items:center; text-decoration:none; }
+.nav-back {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: rgba(255,255,255,0.4);
+  text-decoration: none; transition: color .15s;
+}
+.nav-back:hover { color: rgba(255,255,255,0.7); }
+.nav-back svg { width: 14px; height: 14px; }
+
+/* HEADER */
+.intake-header {
+  background: var(--nt-black);
+  padding: 48px 32px 44px;
+  position: relative; overflow: hidden;
+}
+.intake-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(170,221,0,0.03) 39px, rgba(170,221,0,0.03) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(170,221,0,0.03) 39px, rgba(170,221,0,0.03) 40px);
+  pointer-events: none;
+}
+.intake-header-inner { max-width: 680px; margin: 0 auto; position: relative; }
+.intake-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: .1em;
+  color: var(--nt-green); text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.intake-eyebrow::before { content: ''; width: 16px; height: 1px; background: var(--nt-green); }
+.intake-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 5vw, 58px);
+  line-height: .95; letter-spacing: .02em;
+  color: var(--nt-white);
+}
+.intake-header h1 em { color: var(--nt-green); font-style: normal; }
+.intake-header-sub {
+  margin-top: 14px;
+  font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.4);
+}
+
+/* PACKAGE BANNER */
+.package-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--nt-green-l);
+  border: 1px solid rgba(170,221,0,0.2);
+  border-radius: 12px;
+  padding: 18px 24px;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.package-banner-left { display: flex; align-items: center; gap: 14px; }
+.package-icon {
+  width: 44px; height: 44px; border-radius: 8px;
+  background: var(--nt-green); color: #000;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 22px; flex-shrink: 0;
+}
+.package-name { font-family: var(--font-display); font-size: 22px; letter-spacing: .04em; color: var(--nt-white); }
+.package-desc { font-size: 12px; font-weight: 300; color: var(--nt-muted); margin-top: 2px; }
+.package-price {
+  font-family: var(--font-display); font-size: 36px;
+  letter-spacing: .02em; color: var(--nt-green);
+  white-space: nowrap;
+}
+.package-price span { font-size: 18px; vertical-align: top; margin-top: 6px; display: inline-block; }
+
+/* BODY */
+.intake-body {
+  max-width: 680px; margin: 0 auto;
+  padding: 36px 24px 80px;
+}
+
+/* FORM BLOCKS */
+.form-block {
+  background: #1E1E1E;
+  border: 1px solid var(--nt-border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.form-block-header {
+  padding: 20px 26px 16px;
+  border-bottom: 1px solid var(--nt-border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.form-block-title { font-family: var(--font-display); font-size: 20px; letter-spacing: .02em; color: var(--nt-white); }
+.form-block-sub { font-size: 12px; font-weight: 300; color: var(--nt-muted); margin-top: 2px; }
+.form-block-tag {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 4px;
+  background: var(--nt-green-l); color: var(--nt-green-d);
+  flex-shrink: 0; margin-top: 4px;
+}
+.form-block-tag.optional { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); }
+.form-block-body { padding: 22px 26px; }
+
+/* FIELDS */
+.form-group { margin-bottom: 16px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-group label {
+  display: block;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--nt-muted); margin-bottom: 7px;
+  font-family: var(--font-mono);
+}
+.form-group label .req { color: var(--nt-green); margin-left: 2px; }
+.form-group label .opt { color: var(--nt-muted); font-weight: 300; text-transform: none; letter-spacing: 0; font-family: var(--font-body); font-size: 11px; margin-left: 4px; }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  background: #111111;
+  border: 1px solid var(--nt-border-strong);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px; font-weight: 300;
+  color: var(--nt-white);
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color .15s, background .15s;
+  -webkit-appearance: none;
+}
+.form-group input::placeholder { color: var(--nt-muted); }
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--nt-green);
+  background: #1E1E1E;
+}
+.form-group select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238896A8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* PHOTO UPLOAD */
+.photo-upload-zone {
+  display: flex; align-items: center; gap: 20px;
+  border: 1px dashed var(--nt-border-strong);
+  border-radius: 10px; padding: 18px 20px;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.photo-upload-zone:hover { border-color: var(--nt-green); background: var(--nt-green-l); }
+.photo-preview-area {
+  width: 64px; height: 64px; border-radius: 8px;
+  background: #111111; border: 1px solid var(--nt-border);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
+}
+.photo-preview-area img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.upload-text { font-size: 13px; font-weight: 500; color: #CCCCCC; margin-bottom: 2px; }
+.upload-hint { font-size: 11px; color: var(--nt-muted); font-weight: 300; }
+
+/* CONSENT */
+.check-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--nt-border);
+}
+.check-row:last-child { border-bottom: none; padding-bottom: 0; }
+.check-row input[type="checkbox"] {
+  width: 16px; height: 16px; flex-shrink: 0;
+  margin-top: 3px; accent-color: var(--nt-green); cursor: pointer;
+}
+.check-row span { font-size: 13px; color: #CCCCCC; font-weight: 300; line-height: 1.6; }
+
+/* SUBMIT */
+.submit-wrap { margin-top: 8px; }
+.btn-submit {
+  width: 100%;
+  background: var(--nt-green); color: #000000;
+  border: none; border-radius: 9px;
+  padding: 16px; font-size: 15px; font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer; transition: background .15s;
+  letter-spacing: .01em;
+}
+.btn-submit:hover { background: #99CC00; }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.submit-note {
+  text-align: center; margin-top: 10px;
+  font-size: 11px; color: var(--nt-muted); font-weight: 300;
+}
+.submit-error {
+  margin-top: 12px; padding: 12px 16px;
+  background: #2A0A0C; border: 1px solid rgba(232,52,74,0.2);
+  border-radius: 8px; font-size: 13px; color: var(--nt-red);
+  display: none;
+}
+
+/* LOADING OVERLAY */
+.loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:20px;}
+.loading-overlay.active{display:flex;}
+.loading-text{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-muted);}
+
+@media (max-width: 640px) {
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+  nav { padding: 0 16px; }
+  .intake-header { padding: 36px 20px 32px; }
+  .intake-body { padding: 24px 16px 60px; }
+  .package-banner { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <img src="/nexttierlogo.png" alt="Next Tier" style="height:48px;width:auto;opacity:.6;">
+  <div class="loading-text">Saving profile…</div>
+</div>
+
+<nav>
+  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:40px;width:auto;"></a>
+  <a href="checkout" class="nav-back">
+    <svg viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to packages
+  </a>
+</nav>
+
+<div class="intake-header">
+  <div class="intake-header-inner">
+    <div class="intake-eyebrow">Step 1 of 2 — Player profile</div>
+    <h1>BUILD YOUR<br>PLAYER <em>PROFILE.</em></h1>
+    <p class="intake-header-sub">Fill in your details below. You'll be taken to secure payment once submitted. Takes about 2 minutes.</p>
+  </div>
+</div>
+
+<div class="intake-body">
+
+  <!-- Package banner — locked to Player Card -->
+  <div class="package-banner">
+    <div class="package-banner-left">
+      <div class="package-icon">PC</div>
+      <div>
+        <div class="package-name">PLAYER CARD</div>
+        <div class="package-desc">PDS score · 14-metric breakdown · 12-month roadmap · 1 film evaluation</div>
+      </div>
+    </div>
+    <div class="package-price"><span>$</span>75</div>
+  </div>
+
+  <!-- 1. PLAYER INFORMATION -->
+  <div class="form-block">
+    <div class="form-block-header">
+      <div>
+        <div class="form-block-title">PLAYER INFORMATION</div>
+        <div class="form-block-sub">Basic details for the player profile</div>
+      </div>
+      <div class="form-block-tag">Required</div>
+    </div>
+    <div class="form-block-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First name <span class="req">*</span></label>
+          <input type="text" id="firstName" placeholder="e.g. Tyler">
+        </div>
+        <div class="form-group">
+          <label>Last name <span class="req">*</span></label>
+          <input type="text" id="lastName" placeholder="e.g. Keating">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date of birth <span class="req">*</span></label>
+          <input type="date" id="dob">
+        </div>
+        <div class="form-group">
+          <label>Position <span class="req">*</span></label>
+          <select id="position">
+            <option value="">Select position</option>
+            <option>Centre</option>
+            <option>Left Wing</option>
+            <option>Right Wing</option>
+            <option>Left Defense</option>
+            <option>Right Defense</option>
+            <option>Goaltender</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Height <span class="opt">(optional)</span></label>
+          <input type="text" id="height" placeholder="e.g. 5'11&quot;">
+        </div>
+        <div class="form-group">
+          <label>Weight (lbs) <span class="opt">(optional)</span></label>
+          <input type="number" id="weight" placeholder="e.g. 170">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. CONTACT INFORMATION -->
+  <div class="form-block">
+    <div class="form-block-header">
+      <div>
+        <div class="form-block-title">CONTACT INFORMATION</div>
+        <div class="form-block-sub">Who should receive the PDS report?</div>
+      </div>
+      <div class="form-block-tag">Required</div>
+    </div>
+    <div class="form-block-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your name <span class="req">*</span></label>
+          <input type="text" id="contactName" placeholder="Parent, guardian, or player">
+        </div>
+        <div class="form-group">
+          <label>Relationship to player <span class="req">*</span></label>
+          <select id="relationship">
+            <option value="">Select</option>
+            <option>Parent / Guardian</option>
+            <option>The player</option>
+            <option>Coach / Trainer</option>
+            <option>Agent</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email address <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="you@email.com">
+        </div>
+        <div class="form-group">
+          <label>Phone <span class="opt">(optional)</span></label>
+          <input type="tel" id="phone" placeholder="+1 780 555 0123">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label>How did you hear about Next Tier? <span class="opt">(optional)</span></label>
+        <select id="hearAbout">
+          <option value="">Select</option>
+          <option>Coach / Trainer recommendation</option>
+          <option>Social media</option>
+          <option>Word of mouth</option>
+          <option>Search engine</option>
+          <option>Team / league partnership</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TEAM -->
+  <div class="form-block">
+    <div class="form-block-header">
+      <div>
+        <div class="form-block-title">TEAM</div>
+        <div class="form-block-sub">Where is the player competing right now?</div>
+      </div>
+      <div class="form-block-tag">Required</div>
+    </div>
+    <div class="form-block-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Team name <span class="req">*</span></label>
+          <input type="text" id="teamName" placeholder="e.g. Sherwood Park Crusaders">
+        </div>
+        <div class="form-group">
+          <label>Current league <span class="req">*</span></label>
+          <select id="currentLeague">
+            <option value="">Select league</option>
+            <optgroup label="Alberta">
+              <option>AEHL U18</option>
+              <option>AEHL U15</option>
+              <option>AJHL</option>
+              <option>AMHL U18 AAA</option>
+              <option>AMHL U15 AAA</option>
+            </optgroup>
+            <optgroup label="BC / West">
+              <option>BCHL</option>
+              <option>PJHL</option>
+              <option>BCEHL U18</option>
+            </optgroup>
+            <optgroup label="National / US">
+              <option>USHL</option>
+              <option>NAHL</option>
+              <option>OJHL</option>
+              <option>NCAA D1</option>
+              <option>NCAA D2/D3</option>
+              <option>ACHA</option>
+            </optgroup>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label>Season</label>
+          <select id="season">
+            <option>2025–26</option>
+            <option>2024–25</option>
+            <option>2026–27 (upcoming)</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>Jersey number <span class="opt">(optional)</span></label>
+          <input type="number" id="jerseyNum" placeholder="e.g. 14" min="1" max="99">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. PLAYER PHOTO (optional) -->
+  <div class="form-block">
+    <div class="form-block-header">
+      <div>
+        <div class="form-block-title">PLAYER PHOTO</div>
+        <div class="form-block-sub">Used on your recruiting card — headshot or action photo</div>
+      </div>
+      <div class="form-block-tag optional">Optional</div>
+    </div>
+    <div class="form-block-body">
+      <div class="photo-upload-zone" onclick="document.getElementById('photoUpload').click()">
+        <div class="photo-preview-area" id="photoPreviewArea">
+          <img id="photoPreviewImg" src="" alt="Player photo preview">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="12" r="5" stroke="#888888" stroke-width="1.5"/>
+            <path d="M5 26c0-5 4.5-9 11-9s11 4 11 9" stroke="#888888" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="upload-text">Upload player photo</div>
+          <div class="upload-hint">JPG, PNG, WEBP up to 10MB · Headshot or action photo</div>
+        </div>
+      </div>
+      <input type="file" id="photoUpload" style="display:none" accept="image/*" onchange="previewPhoto(this)">
+    </div>
+  </div>
+
+  <!-- 5. CONSENT & PAYMENT -->
+  <div class="form-block">
+    <div class="form-block-header">
+      <div>
+        <div class="form-block-title">CONSENT & PAYMENT</div>
+        <div class="form-block-sub">Review and continue to secure checkout</div>
+      </div>
+    </div>
+    <div class="form-block-body">
+      <div class="check-row">
+        <input type="checkbox" id="consentData">
+        <span>I consent to Next Tier collecting and processing the player's performance data for the purpose of generating a Player Development Score and development recommendations.</span>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="consentContact">
+        <span>I agree to receive the PDS report and occasional development insights from Next Tier at the email address provided. Unsubscribe anytime.</span>
+      </div>
+      <div class="submit-wrap" style="margin-top:20px">
+        <button class="btn-submit" id="btnSubmit" onclick="submitForm()">Continue to payment — $75 →</button>
+        <div class="submit-note">Your profile is saved first, then you'll be taken to secure checkout via Stripe.</div>
+        <div class="submit-error" id="submitError"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /intake-body -->
+
+<script>
+const STRIPE_PLAYER_CARD = 'https://buy.stripe.com/test_00w28teAq1sO0pNbO77ss00';
+
+let _stripeParams = '';
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = NT.getUser();
+  if (!user) {
+    window.location.href = 'login?redirect=intake-player-card';
+    return;
+  }
+  const valid = await NT.validate();
+  if (!valid) {
+    NT.clearSession();
+    window.location.href = 'login?redirect=intake-player-card';
+    return;
+  }
+  // Build Stripe params now so they're ready after submit
+  _stripeParams = new URLSearchParams({
+    client_reference_id: valid.id,
+    prefilled_email:     valid.email || ''
+  }).toString();
+
+  // Pre-fill email if available
+  const emailEl = document.getElementById('email');
+  if (emailEl && valid.email) emailEl.value = valid.email;
+});
+
+function v(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+function isChecked(id) {
+  const el = document.getElementById(id);
+  return el ? (el.checked ? 'Yes' : 'No') : 'No';
+}
+
+function collectRow() {
+  return [
+    new Date().toLocaleString('en-CA', { timeZone: 'America/Edmonton' }),
+    v('firstName'), v('lastName'), v('dob'), v('position'),
+    v('height'), v('weight'), v('contactName'), v('relationship'),
+    v('email'), v('phone'), v('hearAbout'), v('teamName'),
+    v('currentLeague'), v('season'), v('jerseyNum'),
+    'Player Card — $75',
+    isChecked('consentData'), isChecked('consentContact')
+  ];
+}
+
+async function submitForm() {
+  if (!v('firstName'))                                  { alert('Please enter the player\'s first name.'); return; }
+  if (!v('lastName'))                                   { alert('Please enter the player\'s last name.'); return; }
+  if (!document.getElementById('dob').value)            { alert('Please enter the player\'s date of birth.'); return; }
+  if (!document.getElementById('position').value)       { alert('Please select a position.'); return; }
+  if (!v('contactName'))                                { alert('Please enter your name.'); return; }
+  if (!document.getElementById('relationship').value)   { alert('Please select your relationship to the player.'); return; }
+  if (!v('email'))                                      { alert('Please enter your email address.'); return; }
+  if (!v('teamName'))                                   { alert('Please enter the team name.'); return; }
+  if (!document.getElementById('currentLeague').value)  { alert('Please select a league.'); return; }
+  if (!document.getElementById('consentData').checked)  { alert('Please accept the data consent to continue.'); return; }
+
+  document.getElementById('submitError').style.display = 'none';
+  document.getElementById('btnSubmit').disabled = true;
+  document.getElementById('loadingOverlay').classList.add('active');
+
+  try {
+    const user    = NT.getUser();
+    const payload = { type: 'intake', row: collectRow() };
+    if (user && user.id) payload.userId = user.id;
+
+    const encoded = encodeURIComponent(JSON.stringify(payload));
+    const url     = NT_API_URL + '?payload=' + encoded;
+
+    await new Promise(resolve => {
+      const img = new Image();
+      img.onload = img.onerror = resolve;
+      img.src = url;
+      setTimeout(resolve, 6000);
+    });
+
+    // Profile saved — send to Stripe
+    window.location.href = STRIPE_PLAYER_CARD + '?' + _stripeParams;
+
+  } catch (err) {
+    document.getElementById('loadingOverlay').classList.remove('active');
+    document.getElementById('btnSubmit').disabled = false;
+    const errEl = document.getElementById('submitError');
+    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+function previewPhoto(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById('photoPreviewImg');
+      const svg = document.querySelector('#photoPreviewArea svg');
+      img.src = e.target.result;
+      img.style.display = 'block';
+      if (svg) svg.style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+</script>
+</body>
+</html>
