@@ -26,13 +26,25 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .nav-links{display:flex;align-items:center;gap:24px;}
 .nav-links a{font-size:13px;font-weight:400;color:rgba(255,255,255,0.5);text-decoration:none;transition:color .15s;}
 .nav-links a:hover{color:var(--nt-white);}
-.nav-cta{background:var(--nt-green)!important;color:#000000!important;border-radius:7px;padding:8px 18px;font-weight:600!important;font-size:13px;}
-.nav-cta:hover{background:#99CC00!important;}
+.nav-cta{
+  background:var(--nt-green)!important;
+  color:#000000!important;
+  border-radius:8px;
+  padding:10px 28px!important;
+  font-weight:700!important;
+  font-size:15px!important;
+  font-family:var(--font-display)!important;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  box-shadow:0 0 16px rgba(170,221,0,0.25);
+  transition:background .15s,box-shadow .15s!important;
+}
+.nav-cta:hover{background:#99CC00!important;box-shadow:0 0 24px rgba(170,221,0,0.4)!important;}
 
 /* PAGE HEADER */
 .page-header{background:var(--nt-black);padding:56px 32px 52px;position:relative;overflow:hidden;border-bottom:1px solid var(--nt-border);}
 .page-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(170,221,0,0.03) 39px,rgba(170,221,0,0.03) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(170,221,0,0.03) 39px,rgba(170,221,0,0.03) 40px);pointer-events:none;}
-.page-header-inner{max-width:860px;margin:0 auto;position:relative;}
+.page-header-inner{max-width:960px;margin:0 auto;position:relative;}
 .page-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--nt-green);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
 .page-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-green);}
 .page-title{font-family:var(--font-display);font-size:clamp(38px,5vw,60px);letter-spacing:.02em;color:var(--nt-white);line-height:.95;margin-bottom:14px;}
@@ -40,17 +52,19 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .page-sub{font-size:14px;font-weight:300;color:var(--nt-muted);max-width:480px;line-height:1.7;}
 
 /* LAYOUT */
-.page-body{max-width:860px;margin:0 auto;padding:48px 24px 80px;}
-.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:40px;}
+.page-body{max-width:960px;margin:0 auto;padding:48px 24px 80px;}
+
+/* PRODUCT ROW — cards + upgrade connector */
+.product-row{display:flex;align-items:stretch;gap:0;margin-bottom:40px;}
 
 /* PRODUCT CARD */
-.product-card{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s;}
+.product-card{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s;flex:1;}
 .product-card:hover{border-color:var(--nt-border-strong);}
-.product-card.featured{border-color:rgba(170,221,0,0.3);}
+.product-card.featured{border-color:rgba(170,221,0,0.35);box-shadow:0 0 32px rgba(170,221,0,0.06);}
 .product-card-head{padding:28px 28px 20px;border-bottom:1px solid var(--nt-border);}
 .product-badge{display:inline-flex;align-items:center;font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:4px;margin-bottom:14px;}
 .product-badge.featured{background:var(--nt-green-l);color:var(--nt-green);}
-.product-badge.standard{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);}
+.product-badge.advanced{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);}
 .product-name{font-family:var(--font-display);font-size:30px;letter-spacing:.04em;color:var(--nt-white);margin-bottom:6px;}
 .product-price{font-family:var(--font-display);font-size:52px;letter-spacing:.02em;color:var(--nt-green);line-height:1;}
 .product-price sup{font-size:24px;vertical-align:top;margin-top:8px;display:inline-block;}
@@ -58,7 +72,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .product-card-body{padding:22px 28px;flex:1;}
 .product-desc{font-size:13px;font-weight:300;color:var(--nt-muted);line-height:1.7;margin-bottom:20px;}
 .product-includes{list-style:none;}
-.product-includes li{font-size:13px;font-weight:300;color:var(--nt-slate);padding:6px 0;display:flex;align-items:flex-start;gap:10px;border-bottom:1px solid var(--nt-border);}
+.product-includes li{font-size:13px;font-weight:300;color:var(--nt-slate);padding:7px 0;display:flex;align-items:flex-start;gap:10px;border-bottom:1px solid var(--nt-border);}
 .product-includes li:last-child{border-bottom:none;}
 .product-includes li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--nt-green);flex-shrink:0;margin-top:6px;}
 .product-card-foot{padding:20px 28px;border-top:1px solid var(--nt-border);}
@@ -69,18 +83,75 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .btn-buy.secondary:hover{background:rgba(255,255,255,0.12);}
 .btn-note{text-align:center;font-size:11px;font-weight:300;color:var(--nt-muted);margin-top:10px;}
 
+/* UPGRADE CONNECTOR */
+.upgrade-connector{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:0 12px;
+  min-width:88px;
+  flex-shrink:0;
+  position:relative;
+}
+.upgrade-connector::before{
+  content:'';
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:1px;
+  height:60%;
+  background:linear-gradient(to bottom,transparent,rgba(170,221,0,0.2),transparent);
+}
+.upgrade-badge{
+  background:var(--nt-green);
+  color:#000000;
+  font-family:var(--font-display);
+  font-size:13px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  padding:8px 14px;
+  border-radius:8px;
+  text-align:center;
+  white-space:nowrap;
+  position:relative;
+  z-index:1;
+}
+.upgrade-arrow{
+  font-size:20px;
+  color:var(--nt-green);
+  position:relative;
+  z-index:1;
+}
+.upgrade-diff{
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:var(--nt-muted);
+  text-align:center;
+  line-height:1.4;
+  position:relative;
+  z-index:1;
+}
+.upgrade-diff strong{color:var(--nt-slate);display:block;font-size:13px;font-weight:500;}
+
 /* TRUST STRIP */
 .trust-strip{display:flex;align-items:center;justify-content:center;gap:32px;padding:28px;background:#1A1A1A;border:1px solid var(--nt-border);border-radius:12px;flex-wrap:wrap;}
 .trust-item{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:300;color:rgba(255,255,255,0.4);}
 .trust-item svg{width:16px;height:16px;flex-shrink:0;}
 
-/* AUTH NUDGE */
-.auth-nudge{background:var(--nt-green-l);border:1px solid rgba(170,221,0,0.15);border-radius:10px;padding:16px 20px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-.auth-nudge-text{font-size:13px;font-weight:300;color:rgba(255,255,255,0.6);}
-.auth-nudge-text strong{color:var(--nt-white);font-weight:500;}
-.btn-nudge{background:var(--nt-green);color:#000;border:none;border-radius:6px;padding:8px 18px;font-size:12px;font-weight:600;font-family:var(--font-body);cursor:pointer;text-decoration:none;white-space:nowrap;}
-
-@media(max-width:640px){.product-grid{grid-template-columns:1fr;}.page-body{padding:32px 16px 60px;}nav{padding:0 16px;}.page-header{padding:40px 20px 36px;}.trust-strip{gap:18px;}}
+@media(max-width:720px){
+  .product-row{flex-direction:column;gap:16px;}
+  .upgrade-connector{flex-direction:row;min-width:unset;padding:4px 0;gap:12px;}
+  .upgrade-connector::before{width:60%;height:1px;top:50%;left:50%;}
+  .page-body{padding:32px 16px 60px;}
+  nav{padding:0 16px;}
+  .page-header{padding:40px 20px 36px;}
+  .trust-strip{gap:18px;}
+}
 </style>
 </head>
 <body>
@@ -105,7 +176,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 
 <div class="page-body">
 
-  <div class="product-grid" id="productGrid" style="display:none;">
+  <div class="product-row" id="productGrid" style="display:none;">
 
     <!-- Player Card -->
     <div class="product-card featured">
@@ -127,16 +198,22 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
         </ul>
       </div>
       <div class="product-card-foot">
-        <!-- Replace STRIPE_PLAYER_CARD_URL with your Stripe Payment Link -->
         <a href="https://buy.stripe.com/test_00w28teAq1sO0pNbO77ss00" class="btn-buy primary" id="btnPlayerCard">Buy Player Card →</a>
         <div class="btn-note">Secure checkout via Stripe</div>
       </div>
     </div>
 
+    <!-- Upgrade connector -->
+    <div class="upgrade-connector">
+      <div class="upgrade-badge">Upgrade</div>
+      <div class="upgrade-arrow">↓</div>
+      <div class="upgrade-diff"><strong>+$225</strong>add on</div>
+    </div>
+
     <!-- Video Review -->
     <div class="product-card">
       <div class="product-card-head">
-        <div class="product-badge standard">Advanced</div>
+        <div class="product-badge advanced">Advanced</div>
         <div class="product-name">VIDEO REVIEW</div>
         <div class="product-price"><sup>$</sup>300</div>
         <div class="product-price-note">One-time payment</div>
@@ -153,7 +230,6 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
         </ul>
       </div>
       <div class="product-card-foot">
-        <!-- Replace STRIPE_VIDEO_REVIEW_URL with your Stripe Payment Link -->
         <a href="https://buy.stripe.com/test_eVq6oJ77Y3AW5K7cSb7ss01" class="btn-buy secondary" id="btnVideoReview">Buy Video Review →</a>
         <div class="btn-note">Secure checkout via Stripe</div>
       </div>
@@ -185,7 +261,6 @@ const STRIPE_URLS = {
 };
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // Hard auth gate — redirect to login if no session
   const user = NT.getUser();
   if (!user) {
     window.location.href = 'login?redirect=checkout';
@@ -199,7 +274,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // Build Stripe URLs with user ID and email so the purchase is tied to the account
   const params = new URLSearchParams({
     client_reference_id: valid.id,
     prefilled_email:     valid.email || ''
