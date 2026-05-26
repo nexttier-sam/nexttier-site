@@ -1,15 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Next Tier — Player Dashboard</title>
+<title>Next Tier — Player Home</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="/config.js"></script>
 <script src="/nt-auth.js"></script>
 <style>
 :root {
-  --nt-black:#000000;--nt-ice:#1A1A1A;--nt-white:#FFFFFF;
+  --nt-black:#000000;--nt-white:#FFFFFF;
   --nt-green:#AADD00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;
   --nt-slate:#CCCCCC;--nt-muted:#888888;
   --nt-border:rgba(170,221,0,0.08);--nt-border-strong:rgba(170,221,0,0.18);
@@ -19,162 +19,413 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--font-body);background:#0D0D0D;color:var(--nt-white);-webkit-font-smoothing:antialiased;}
+
 /* NAV */
-nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;}
-.nav-logo{font-family:var(--font-display);font-size:26px;letter-spacing:.04em;color:#fff;text-decoration:none;}
-.nav-logo span{color:var(--nt-green);}
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--nt-border);}
+.nav-logo{display:flex;align-items:center;text-decoration:none;}
 .nav-right{display:flex;align-items:center;gap:16px;}
 .nav-user{display:flex;align-items:center;gap:10px;}
-.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--nt-green);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:var(--nt-white);}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--nt-green);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:#000;}
 .nav-name{font-size:13px;color:rgba(255,255,255,0.6);}
 .nav-role{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-green);}
 .btn-logout{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:7px 14px;font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;font-family:var(--font-body);transition:all .15s;}
 .btn-logout:hover{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);}
-.nav-cta{
-  background:var(--nt-green)!important;
-  color:#000000!important;
-  font-weight:700!important;
-  font-size:15px!important;
-  font-family:var(--font-display)!important;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  padding:10px 28px!important;
-  border-radius:8px;
-  box-shadow:0 0 16px rgba(170,221,0,0.25);
-  transition:background .15s,box-shadow .15s!important;
-}
+.nav-cta{background:var(--nt-green)!important;color:#000!important;font-weight:700!important;font-size:15px!important;font-family:var(--font-display)!important;letter-spacing:.06em;text-transform:uppercase;padding:10px 28px!important;border-radius:8px;box-shadow:0 0 16px rgba(170,221,0,0.25);transition:background .15s,box-shadow .15s!important;text-decoration:none;display:inline-block;}
 .nav-cta:hover{background:#99CC00!important;box-shadow:0 0 24px rgba(170,221,0,0.4)!important;}
-/* LAYOUT */
-.page-body{max-width:960px;margin:0 auto;padding:36px 24px 80px;}
-.page-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--nt-green);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
-.page-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-green);}
-.page-title{font-family:var(--font-display);font-size:clamp(32px,4vw,48px);letter-spacing:.02em;color:var(--nt-white);margin-bottom:6px;}
-.page-title em{color:var(--nt-green);font-style:normal;}
-.page-sub{font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:32px;}
-/* CARDS */
-.card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
-.stat-card{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:12px;padding:20px;}
-.stat-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:8px;}
-.stat-val{font-family:var(--font-display);font-size:36px;letter-spacing:.02em;color:var(--nt-white);line-height:1;}
-.stat-val em{color:var(--nt-green);font-style:normal;}
-.stat-note{font-size:12px;font-weight:300;color:var(--nt-muted);margin-top:6px;}
-/* SECTION */
-.section{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
-.section-head{padding:20px 24px 16px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;}
-.section-title{font-family:var(--font-display);font-size:18px;letter-spacing:.02em;}
-.section-body{padding:22px 24px;}
-/* STATUS PILL */
-.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
-.pill-pending{background:#2A2000;color:#CCAA00;}
-.pill-ready{background:#1C2200;color:#AADD00;}
-.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
-/* LIST */
-.report-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--nt-border);}
-.report-row:last-child{border-bottom:none;padding-bottom:0;}
-.report-icon{width:38px;height:38px;border-radius:8px;background:#0D0D0D;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.report-icon svg{width:18px;height:18px;}
-.report-info{flex:1;}
-.report-name{font-size:14px;font-weight:500;color:var(--nt-white);}
-.report-meta{font-size:12px;font-weight:300;color:var(--nt-muted);margin-top:2px;}
-.btn-sm{background:var(--nt-green);color:#000000;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);white-space:nowrap;}
-.btn-sm.outline{background:transparent;color:#CCCCCC;border:1px solid var(--nt-border-strong);}
+
 /* LOADING */
 .loading-overlay{position:fixed;inset:0;background:var(--nt-black);display:flex;align-items:center;justify-content:center;z-index:999;}
-.loading-logo{font-family:var(--font-display);font-size:36px;letter-spacing:.04em;color:#fff;}
-.loading-logo span{color:var(--nt-green);}
-@media(max-width:640px){.card-grid{grid-template-columns:1fr 1fr;}.page-body{padding:24px 16px 60px;}nav{padding:0 16px;}}
+
+/* HERO */
+.hero{background:var(--nt-black);padding:72px 32px 64px;position:relative;overflow:hidden;border-bottom:1px solid var(--nt-border);}
+.hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(170,221,0,0.03) 39px,rgba(170,221,0,0.03) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(170,221,0,0.03) 39px,rgba(170,221,0,0.03) 40px);pointer-events:none;}
+.hero::after{content:'';position:absolute;right:-120px;top:-120px;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(170,221,0,0.07) 0%,transparent 65%);pointer-events:none;}
+.hero-inner{max-width:960px;margin:0 auto;position:relative;}
+.hero-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--nt-green);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.hero-eyebrow::before{content:'';width:20px;height:1px;background:var(--nt-green);}
+.hero-name{font-family:var(--font-display);font-size:clamp(52px,8vw,96px);letter-spacing:.02em;line-height:.9;color:var(--nt-white);margin-bottom:20px;}
+.hero-name em{color:var(--nt-green);font-style:normal;}
+.hero-sub{font-size:16px;font-weight:300;color:rgba(255,255,255,0.45);max-width:500px;line-height:1.65;margin-bottom:36px;}
+.hero-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.btn-hero{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:9px;font-size:15px;font-weight:600;font-family:var(--font-body);text-decoration:none;transition:all .15s;border:none;cursor:pointer;}
+.btn-hero-primary{background:var(--nt-green);color:#000;}
+.btn-hero-primary:hover{background:#99CC00;}
+.btn-hero-outline{background:transparent;color:var(--nt-slate);border:1px solid var(--nt-border-strong);}
+.btn-hero-outline:hover{background:rgba(255,255,255,0.05);}
+
+/* JOURNEY STRIP */
+.journey{background:#111;border-bottom:1px solid var(--nt-border);padding:0 32px;}
+.journey-inner{max-width:960px;margin:0 auto;display:flex;align-items:stretch;}
+.journey-step{flex:1;padding:20px 0;display:flex;align-items:center;gap:12px;border-right:1px solid var(--nt-border);padding-right:24px;padding-left:0;}
+.journey-step:first-child{padding-left:0;}
+.journey-step:last-child{border-right:none;padding-right:0;}
+.journey-step+.journey-step{padding-left:24px;}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:600;flex-shrink:0;}
+.step-num.done{background:var(--nt-green);color:#000;}
+.step-num.active{background:#2A2000;border:1px solid rgba(170,221,0,0.3);color:#CCAA00;}
+.step-num.todo{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:var(--nt-muted);}
+.step-label{font-size:12px;font-weight:500;color:var(--nt-white);}
+.step-sub{font-size:11px;font-weight:300;color:var(--nt-muted);margin-top:1px;}
+
+/* PAGE SECTIONS */
+.page-body{max-width:960px;margin:0 auto;padding:52px 24px 100px;}
+
+/* PRODUCT SHOWCASE — shown when product exists */
+.showcase{border-radius:20px;overflow:hidden;margin-bottom:36px;border:1px solid var(--nt-border-strong);background:#1A1A1A;position:relative;}
+.showcase::before{content:'';position:absolute;top:0;right:0;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(170,221,0,0.06) 0%,transparent 70%);pointer-events:none;}
+.showcase-head{padding:36px 40px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.showcase-left{}
+.showcase-package{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--nt-green);margin-bottom:8px;}
+.showcase-title{font-family:var(--font-display);font-size:clamp(28px,4vw,44px);letter-spacing:.03em;color:var(--nt-white);line-height:.95;}
+.showcase-date{font-size:13px;font-weight:300;color:var(--nt-muted);margin-top:8px;}
+.showcase-right{text-align:right;flex-shrink:0;}
+.pds-display{font-family:var(--font-display);font-size:88px;color:var(--nt-green);line-height:1;}
+.pds-display.dim{color:rgba(255,255,255,0.08);font-size:72px;}
+.pds-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-muted);margin-top:-4px;}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
+.pill-pending{background:#2A2000;color:#CCAA00;}
+.pill-active{background:#1C2200;color:#AADD00;}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+.showcase-body{padding:28px 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
+.showcase-stat{padding:16px 0;border-right:1px solid var(--nt-border);}
+.showcase-stat:last-child{border-right:none;}
+.showcase-stat+.showcase-stat{padding-left:28px;}
+.stat-lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:6px;}
+.stat-val{font-size:16px;font-weight:500;color:var(--nt-white);}
+.showcase-foot{padding:24px 40px;border-top:1px solid var(--nt-border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+
+/* GET STARTED — shown when no product */
+.get-started{border-radius:20px;background:linear-gradient(135deg,#1A1A1A 0%,#111 100%);border:1px solid var(--nt-border-strong);padding:56px 48px;margin-bottom:36px;position:relative;overflow:hidden;}
+.get-started::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(170,221,0,0.02) 39px,rgba(170,221,0,0.02) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(170,221,0,0.02) 39px,rgba(170,221,0,0.02) 40px);pointer-events:none;}
+.get-started::after{content:'';position:absolute;right:-80px;bottom:-80px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(170,221,0,0.05) 0%,transparent 70%);pointer-events:none;}
+.gs-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-green);margin-bottom:14px;position:relative;}
+.gs-title{font-family:var(--font-display);font-size:clamp(36px,5vw,60px);letter-spacing:.03em;color:var(--nt-white);line-height:.92;margin-bottom:16px;position:relative;}
+.gs-title em{color:var(--nt-green);font-style:normal;}
+.gs-sub{font-size:15px;font-weight:300;color:rgba(255,255,255,0.4);max-width:480px;line-height:1.65;margin-bottom:36px;position:relative;}
+.gs-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:relative;}
+
+/* PILLARS */
+.pillars-head{margin-bottom:24px;}
+.pillars-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-green);margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.pillars-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-green);}
+.pillars-title{font-family:var(--font-display);font-size:clamp(24px,3vw,36px);letter-spacing:.03em;color:var(--nt-white);}
+.pillars-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:52px;}
+.pillar{background:#1A1A1A;border:1px solid var(--nt-border);border-radius:14px;padding:28px 24px;transition:border-color .2s;}
+.pillar:hover{border-color:var(--nt-border-strong);}
+.pillar-icon{width:44px;height:44px;border-radius:10px;background:var(--nt-green-l);display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.pillar-icon svg{width:22px;height:22px;}
+.pillar-title{font-family:var(--font-display);font-size:20px;letter-spacing:.03em;color:var(--nt-white);margin-bottom:6px;}
+.pillar-desc{font-size:13px;font-weight:300;color:var(--nt-muted);line-height:1.6;}
+
+/* LINKS STRIP */
+.links-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.link-card{background:#1A1A1A;border:1px solid var(--nt-border);border-radius:12px;padding:20px 22px;text-decoration:none;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:border-color .2s,background .2s;}
+.link-card:hover{border-color:var(--nt-border-strong);background:#1E1E1E;}
+.link-card-text{}
+.link-card-label{font-size:14px;font-weight:500;color:var(--nt-white);margin-bottom:2px;}
+.link-card-sub{font-size:12px;font-weight:300;color:var(--nt-muted);}
+.link-card-arrow{color:var(--nt-muted);font-size:18px;flex-shrink:0;transition:color .15s;}
+.link-card:hover .link-card-arrow{color:var(--nt-green);}
+
+/* BTN */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:8px;font-size:14px;font-weight:600;font-family:var(--font-body);text-decoration:none;transition:all .15s;border:none;cursor:pointer;}
+.btn-primary{background:var(--nt-green);color:#000;}
+.btn-primary:hover{background:#99CC00;}
+.btn-outline{background:transparent;color:var(--nt-slate);border:1px solid var(--nt-border-strong);}
+.btn-outline:hover{background:rgba(255,255,255,0.05);}
+
+@media(max-width:700px){
+  .hero{padding:48px 20px 44px;}
+  .journey{padding:0 20px;overflow-x:auto;}
+  .journey-inner{min-width:560px;}
+  .page-body{padding:36px 16px 72px;}
+  .showcase-head{flex-direction:column;align-items:flex-start;padding:28px 24px;}
+  .showcase-body{grid-template-columns:1fr 1fr;padding:20px 24px;}
+  .showcase-foot{padding:20px 24px;}
+  .showcase-stat:last-child{display:none;}
+  .pillars-grid{grid-template-columns:1fr;}
+  .links-strip{grid-template-columns:1fr;}
+  .get-started{padding:36px 24px;}
+  nav{padding:0 16px;}
+}
 </style>
 </head>
 <body>
 
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></div>
+  <img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;">
 </div>
 
 <nav>
-  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></a>
-  <a href="checkout" class="nav-cta">Purchase</a>
+  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:40px;width:auto;"></a>
+  <a href="/checkout" class="nav-cta">Purchase</a>
   <div class="nav-right">
     <div class="nav-user">
-      <div class="nav-avatar" data-nt-initial>?</div>
+      <div class="nav-avatar" id="navAvatar">?</div>
       <div>
-        <div class="nav-name" data-nt-name>Loading…</div>
-        <div class="nav-role" data-nt-role>Player</div>
+        <div class="nav-name" id="navName">Loading…</div>
+        <div class="nav-role">Player</div>
       </div>
     </div>
     <button class="btn-logout" onclick="NT.logout()">Sign out</button>
   </div>
 </nav>
 
-<div class="page-body">
-  <div class="page-eyebrow">Player Dashboard</div>
-  <div class="page-title">YOUR <em>PROFILE.</em></div>
-  <div class="page-sub">Everything related to your player profile and reports in one place.</div>
-
-  <div class="card-grid">
-    <div class="stat-card">
-      <div class="stat-label">Package</div>
-      <div class="stat-val" style="font-size:22px;">Player <em>Card</em></div>
-      <div class="stat-note">$75 one-time</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Profile status</div>
-      <div style="margin-top:4px"><span class="pill pill-pending"><span class="pill-dot"></span>In review</span></div>
-      <div class="stat-note">Submitted 2 days ago</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Delivery ETA</div>
-      <div class="stat-val">48<em>h</em></div>
-      <div class="stat-note">Player card</div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-head">
-      <div class="section-title">MY REPORTS</div>
-      <span class="pill pill-pending"><span class="pill-dot"></span>1 pending</span>
-    </div>
-    <div class="section-body">
-      <div class="report-row">
-        <div class="report-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--nt-muted)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h6"/></svg>
-        </div>
-        <div class="report-info">
-          <div class="report-name">Player Card</div>
-          <div class="report-meta">Submitted — in production</div>
-        </div>
-        <span class="pill pill-pending"><span class="pill-dot"></span>Pending</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-head">
-      <div class="section-title">MY PRODUCT</div>
-    </div>
-    <div class="section-body">
-      <p style="font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:16px;">View your submitted player profile, package details, and PDS score when it's ready.</p>
-      <a href="my-product" class="btn-sm" style="text-decoration:none;display:inline-block;margin-right:10px">View player card →</a>
-      <a href="intake" class="btn-sm outline" style="text-decoration:none;display:inline-block">Submit new profile →</a>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-head">
-      <div class="section-title">MY PROFILE SUBMISSION</div>
-    </div>
-    <div class="section-body">
-      <p style="font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:16px;">Your intake form has been received. Need to update any details?</p>
-      <a href="intake" class="btn-sm outline" style="text-decoration:none;display:inline-block">Re-submit profile →</a>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Next Tier · Player Home</div>
+    <div class="hero-name" id="heroName">WELCOME<br><em>BACK.</em></div>
+    <div class="hero-sub" id="heroSub">Your development journey starts here. Get your Player Development Score and see exactly where you stand.</div>
+    <div class="hero-actions" id="heroActions">
+      <!-- populated by JS -->
     </div>
   </div>
 </div>
 
+<!-- JOURNEY STRIP -->
+<div class="journey">
+  <div class="journey-inner" id="journeyStrip">
+    <div class="journey-step">
+      <div class="step-num done">✓</div>
+      <div><div class="step-label">Account created</div><div class="step-sub">You're signed in</div></div>
+    </div>
+    <div class="journey-step" id="stepProfile">
+      <div class="step-num todo" id="stepProfileNum">2</div>
+      <div><div class="step-label">Player profile</div><div class="step-sub" id="stepProfileSub">Submit your details</div></div>
+    </div>
+    <div class="journey-step" id="stepPayment">
+      <div class="step-num todo" id="stepPaymentNum">3</div>
+      <div><div class="step-label">Payment</div><div class="step-sub" id="stepPaymentSub">Secure checkout</div></div>
+    </div>
+    <div class="journey-step">
+      <div class="step-num todo" id="stepReportNum">4</div>
+      <div><div class="step-label">PDS Report</div><div class="step-sub" id="stepReportSub">Delivered within 48h</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <!-- PRODUCT SHOWCASE (shown when product exists) -->
+  <div id="showcase" style="display:none;">
+    <div class="showcase">
+      <div class="showcase-head">
+        <div class="showcase-left">
+          <div class="showcase-package" id="scPackage">Player Card</div>
+          <div class="showcase-title" id="scName">—</div>
+          <div class="showcase-date" id="scDate">Submitted —</div>
+          <div style="margin-top:12px;">
+            <span class="pill" id="scPill"><span class="pill-dot"></span><span id="scStatus">Pending</span></span>
+          </div>
+        </div>
+        <div class="showcase-right">
+          <div class="pds-display" id="scPDS">—</div>
+          <div class="pds-label">PDS Score</div>
+        </div>
+      </div>
+      <div class="showcase-body">
+        <div class="showcase-stat">
+          <div class="stat-lbl">Position</div>
+          <div class="stat-val" id="scPosition">—</div>
+        </div>
+        <div class="showcase-stat">
+          <div class="stat-lbl">Team</div>
+          <div class="stat-val" id="scTeam">—</div>
+        </div>
+        <div class="showcase-stat">
+          <div class="stat-lbl">League</div>
+          <div class="stat-val" id="scLeague">—</div>
+        </div>
+      </div>
+      <div class="showcase-foot">
+        <a href="/player-card" class="btn btn-primary" id="scBtnReport" style="display:none;">View Full Report →</a>
+        <a href="/my-product" class="btn btn-outline">View profile status</a>
+        <a href="/contact" class="btn btn-outline">Contact support</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- GET STARTED (shown when no product) -->
+  <div id="getStarted" style="display:none;">
+    <div class="get-started">
+      <div class="gs-eyebrow">Your next step</div>
+      <div class="gs-title">GET YOUR<br><em>PLAYER CARD.</em></div>
+      <div class="gs-sub">Submit your player profile and receive your Player Development Score — a comprehensive 14-metric breakdown that shows exactly where you stand and where you're headed.</div>
+      <div class="gs-actions">
+        <a href="/intake-player-card" class="btn-hero btn-hero-primary">Get Player Card — $75 →</a>
+        <a href="/checkout" class="btn-hero btn-hero-outline">View all packages</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PILLARS -->
+  <div class="pillars-head">
+    <div class="pillars-eyebrow">What you get</div>
+    <div class="pillars-title">BUILT TO GET YOU NOTICED.</div>
+  </div>
+  <div class="pillars-grid">
+    <div class="pillar">
+      <div class="pillar-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="pillar-title">PDS SCORE</div>
+      <div class="pillar-desc">A single 0–100 score that benchmarks your development across 14 evaluated metrics — from skating to compete level.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="pillar-title">14-METRIC BREAKDOWN</div>
+      <div class="pillar-desc">Detailed skill ratings across skating, puck handling, compete level, hockey IQ, and more. Know exactly what to work on.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18"/></svg>
+      </div>
+      <div class="pillar-title">12-MONTH ROADMAP</div>
+      <div class="pillar-desc">A personalised development plan with specific milestones for the next year, built around your current trajectory.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="pillar-title">PATHWAY PROBABILITY</div>
+      <div class="pillar-desc">See your projected probability of reaching USHL, NCAA, or pro levels based on your current PDS and development rate.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h6M7 16h8"/></svg>
+      </div>
+      <div class="pillar-title">FILM EVALUATION</div>
+      <div class="pillar-desc">One full film review included. Our evaluators watch your game footage and score each metric with specific timestamps.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="pillar-title">TIER RATING</div>
+      <div class="pillar-desc">Placed in Tier A through D with your percentile rank among all evaluated players — a clear, honest assessment.</div>
+    </div>
+  </div>
+
+  <!-- QUICK LINKS -->
+  <div class="links-strip">
+    <a href="/glossary" class="link-card">
+      <div class="link-card-text">
+        <div class="link-card-label">Glossary</div>
+        <div class="link-card-sub">Understand your PDS metrics</div>
+      </div>
+      <div class="link-card-arrow">→</div>
+    </a>
+    <a href="/checkout" class="link-card">
+      <div class="link-card-text">
+        <div class="link-card-label">Packages</div>
+        <div class="link-card-sub">Player Card &amp; Video Review</div>
+      </div>
+      <div class="link-card-arrow">→</div>
+    </a>
+    <a href="/contact" class="link-card">
+      <div class="link-card-text">
+        <div class="link-card-label">Contact us</div>
+        <div class="link-card-sub">Questions about your report</div>
+      </div>
+      <div class="link-card-arrow">→</div>
+    </a>
+  </div>
+
+</div><!-- /page-body -->
+
 <script>
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-CA', { year:'numeric', month:'short', day:'numeric' });
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   const user = await NT.guard(['player', 'admin']);
+  if (!user) return;
+
+  // Nav
+  document.getElementById('navAvatar').textContent = (user.firstName || '?')[0].toUpperCase();
+  document.getElementById('navName').textContent   = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+
+  // Hero greeting
+  if (user.firstName) {
+    document.getElementById('heroName').innerHTML =
+      'WELCOME BACK,<br><em>' + user.firstName.toUpperCase() + '.</em>';
+  }
+
+  // Fetch product
+  let product = null;
+  try {
+    const res = await NT.api({ type: 'getProduct', token: NT.getToken() });
+    if (res.status === 'ok') product = res.product;
+  } catch (_) {}
+
   document.getElementById('loadingOverlay').style.display = 'none';
-  if (user) NT.renderUser();
+
+  if (!product) {
+    // No product — show get-started block, update journey
+    document.getElementById('getStarted').style.display = '';
+    document.getElementById('heroSub').textContent = 'Submit your player profile to receive your Player Development Score and personalised 12-month development roadmap.';
+    document.getElementById('heroActions').innerHTML =
+      '<a href="/intake-player-card" class="btn-hero btn-hero-primary">Get Player Card — $75 →</a>' +
+      '<a href="/checkout" class="btn-hero btn-hero-outline">View all packages</a>';
+    // Journey: step 2 is active
+    document.getElementById('stepProfileNum').className = 'step-num active';
+    return;
+  }
+
+  // Has product — populate showcase
+  document.getElementById('showcase').style.display = '';
+  const isActive = product.status === 'active';
+  const name = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
+
+  document.getElementById('scPackage').textContent  = product.package  || 'Player Card';
+  document.getElementById('scName').textContent     = name.toUpperCase();
+  document.getElementById('scDate').textContent     = 'Submitted ' + fmtDate(product.createdAt);
+  document.getElementById('scPosition').textContent = product.position      || '—';
+  document.getElementById('scTeam').textContent     = product.team          || '—';
+  document.getElementById('scLeague').textContent   = product.league        || '—';
+
+  const pds = product.pdsScore || '—';
+  const pdsEl = document.getElementById('scPDS');
+  pdsEl.textContent = pds;
+  if (pds === '—') pdsEl.classList.add('dim');
+
+  const pill = document.getElementById('scPill');
+  pill.className = 'pill ' + (isActive ? 'pill-active' : 'pill-pending');
+  document.getElementById('scStatus').textContent = isActive ? 'Report ready' : 'In review';
+
+  if (isActive) {
+    document.getElementById('scBtnReport').style.display = '';
+    document.getElementById('heroSub').textContent = 'Your Player Card is ready. View your full report, skill breakdown, and 12-month development roadmap.';
+    document.getElementById('heroActions').innerHTML =
+      '<a href="/player-card" class="btn-hero btn-hero-primary">View Full Report →</a>' +
+      '<a href="/my-product" class="btn-hero btn-hero-outline">Profile status</a>';
+  } else {
+    document.getElementById('heroSub').textContent = 'Your profile is in review. Our evaluators are working on your Player Development Score — expect delivery within 48 hours.';
+    document.getElementById('heroActions').innerHTML =
+      '<a href="/my-product" class="btn-hero btn-hero-primary">View profile status →</a>' +
+      '<a href="/contact" class="btn-hero btn-hero-outline">Contact support</a>';
+  }
+
+  // Journey steps
+  document.getElementById('stepProfileNum').className = 'step-num done';
+  document.getElementById('stepProfileNum').textContent = '✓';
+  document.getElementById('stepProfileSub').textContent = 'Profile submitted';
+  document.getElementById('stepPaymentNum').className = 'step-num done';
+  document.getElementById('stepPaymentNum').textContent = '✓';
+  document.getElementById('stepPaymentSub').textContent = 'Payment received';
+  if (isActive) {
+    document.getElementById('stepReportNum').className = 'step-num done';
+    document.getElementById('stepReportNum').textContent = '✓';
+    document.getElementById('stepReportSub').textContent = 'Report delivered';
+  } else {
+    document.getElementById('stepReportNum').className = 'step-num active';
+    document.getElementById('stepReportSub').textContent = 'In production';
+  }
 });
 </script>
 </body>
