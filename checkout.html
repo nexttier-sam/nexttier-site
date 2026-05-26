@@ -263,14 +263,14 @@ const STRIPE_URLS = {
 window.addEventListener('DOMContentLoaded', async () => {
   const user = NT.getUser();
   if (!user) {
-    window.location.href = 'login?redirect=checkout';
+    window.location.href = '/login?redirect=/checkout';
     return;
   }
 
   const valid = await NT.validate();
   if (!valid) {
     NT.clearSession();
-    window.location.href = 'login?redirect=checkout';
+    window.location.href = '/login?redirect=/checkout';
     return;
   }
 

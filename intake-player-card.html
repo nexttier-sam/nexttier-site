@@ -519,13 +519,13 @@ let _stripeParams = '';
 window.addEventListener('DOMContentLoaded', async () => {
   const user = NT.getUser();
   if (!user) {
-    window.location.href = 'login?redirect=intake-player-card';
+    window.location.href = '/login?redirect=/intake-player-card';
     return;
   }
   const valid = await NT.validate();
   if (!valid) {
     NT.clearSession();
-    window.location.href = 'login?redirect=intake-player-card';
+    window.location.href = '/login?redirect=/intake-player-card';
     return;
   }
   // Build Stripe params now so they're ready after submit

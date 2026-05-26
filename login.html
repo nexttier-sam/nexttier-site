@@ -115,6 +115,10 @@ body {
 
 <a href="/" class="auth-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></a>
 
+<div id="purchaseBanner" style="display:none;width:100%;max-width:420px;background:#1C2200;border:1px solid rgba(170,221,0,0.2);border-radius:10px;padding:12px 18px;margin-bottom:16px;font-size:13px;color:rgba(255,255,255,0.6);text-align:center;line-height:1.5;">
+  <strong style="color:#fff;">Account required to purchase.</strong><br>Create a free account or sign in to continue.
+</div>
+
 <div class="auth-card">
   <div class="auth-tabs">
     <button class="auth-tab active" onclick="switchTab('login')">Sign in</button>
@@ -223,10 +227,8 @@ async function doLogin() {
     const res = await NT.login(email, password);
     if (res.status === 'ok') {
       NT.setSession(res.token, res.user);
-      // Redirect based on role
-      const dest = new URLSearchParams(window.location.search).get('redirect');
-      if (dest) { window.location.href = dest; return; }
-      window.location.href = dashboardFor(res.user.role);
+      const dest = getRedirect();
+      window.location.href = dest || dashboardFor(res.user.role);
     } else {
       showErr(errEl, res.message);
       btn.disabled = false; btn.textContent = 'Sign in →';
@@ -261,7 +263,8 @@ async function doRegister() {
       NT.setSession(res.token, res.user);
       succEl.textContent = 'Account created! Redirecting…';
       succEl.style.display = 'block';
-      setTimeout(() => { window.location.href = dashboardFor(role); }, 800);
+      const dest = getRedirect();
+      setTimeout(() => { window.location.href = dest || dashboardFor(role); }, 800);
     } else {
       showErr(errEl, res.message);
       btn.disabled = false; btn.textContent = 'Create account →';
@@ -281,17 +284,32 @@ function showErr(el, msg) {
   el.textContent = msg; el.style.display = 'block';
 }
 
-// If already logged in, redirect to dashboard
+// Normalize redirect: ensure it's an absolute path from root
+function getRedirect() {
+  const raw = new URLSearchParams(window.location.search).get('redirect');
+  if (!raw) return null;
+  if (raw.startsWith('http')) return null; // don't follow external URLs
+  return raw.startsWith('/') ? raw : '/' + raw;
+}
+
+const PURCHASE_REDIRECTS = ['/checkout', '/intake-player-card', '/intake'];
+
 window.addEventListener('DOMContentLoaded', async () => {
   const user = NT.getUser();
   if (user) {
     const valid = await NT.validate();
-    if (valid) { window.location.href = dashboardFor(valid.role); }
+    if (valid) { window.location.href = dashboardFor(valid.role); return; }
   }
 
-  // Auto-switch to register tab if ?mode=register
-  if (new URLSearchParams(window.location.search).get('mode') === 'register') {
+  const params = new URLSearchParams(window.location.search);
+  const mode   = params.get('mode');
+  const dest   = getRedirect();
+
+  // Show purchase banner and default to Create Account for purchase flows
+  const isPurchase = dest && PURCHASE_REDIRECTS.some(p => dest.startsWith(p));
+  if (isPurchase || mode === 'register') {
     switchTab('register');
+    if (isPurchase) document.getElementById('purchaseBanner').style.display = '';
   }
 });
 

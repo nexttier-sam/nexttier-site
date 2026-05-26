@@ -636,12 +636,12 @@ const APPS_SCRIPT_URL = NT_API_URL;
 window.addEventListener('DOMContentLoaded', async () => {
   const user = NT.getUser();
   if (!user) {
-    window.location.href = 'login?redirect=intake';
+    window.location.href = '/login?redirect=/intake';
     return;
   }
   const valid = await NT.validate();
   if (!valid) {
-    window.location.href = 'login?redirect=intake';
+    window.location.href = '/login?redirect=/intake';
   }
 });
 
