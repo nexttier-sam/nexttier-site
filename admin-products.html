@@ -197,10 +197,12 @@ function renderTable() {
     const name    = [p.firstName, p.lastName].filter(Boolean).join(' ') || '—';
     const date    = p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-CA') : '—';
     const isPend  = p.status !== 'active';
-    const scoreDisp = p.pdsScore ? `<span style="color:var(--nt-green);font-weight:500;">${p.pdsScore}</span>` : '<span style="color:var(--nt-muted);">—</span>';
+    const fileDisp = p.reportUrl
+      ? `<a href="${p.reportUrl}" target="_blank" style="color:var(--nt-green);font-size:12px;">View file ↗</a>`
+      : '<span style="color:var(--nt-muted);">—</span>';
     const deliverBtn = isPend
       ? `<button class="action-btn deliver" onclick="toggleDeliver('${p.id}')">Deliver →</button>`
-      : `<button class="action-btn" onclick="toggleDeliver('${p.id}')">Update</button>`;
+      : `<button class="action-btn" onclick="toggleDeliver('${p.id}')">Replace file</button>`;
 
     return `
       <tr>
@@ -209,26 +211,21 @@ function renderTable() {
         <td>${escHtml(p.position || '—')}</td>
         <td>${escHtml(p.team || '—')}</td>
         <td>${date}</td>
-        <td>${scoreDisp}</td>
+        <td>${fileDisp}</td>
         <td><span class="status-pill ${p.status === 'active' ? 'active' : 'pending'}">${p.status || 'pending'}</span></td>
         <td>${deliverBtn}</td>
       </tr>
       <tr id="panel-${p.id}" style="display:none;">
         <td colspan="8" style="padding:0;">
           <div class="deliver-panel open" id="panelBody-${p.id}">
-            <div class="deliver-panel-title">Deliver report — ${escHtml(name)}</div>
-            <div class="deliver-grid">
-              <div class="deliver-field">
-                <label>PDS Score (0–100) <span style="color:var(--nt-green)">*</span></label>
-                <input type="number" id="score-${p.id}" min="0" max="100" placeholder="e.g. 72" value="${p.pdsScore || ''}">
-              </div>
-              <div class="deliver-field">
-                <label>Package</label>
-                <input type="text" value="${escHtml(p.package || '')}" disabled style="opacity:.4;">
-              </div>
+            <div class="deliver-panel-title">Upload report file — ${escHtml(name)}</div>
+            <div class="deliver-field" style="margin-bottom:16px;">
+              <label>Report file (PDF, Word, image) <span style="color:var(--nt-green)">*</span></label>
+              <input type="file" id="file-${p.id}" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="background:#111;border:1px solid var(--nt-border-strong);border-radius:8px;padding:10px 14px;width:100%;color:var(--nt-slate);font-family:var(--font-body);font-size:13px;cursor:pointer;">
             </div>
+            <div id="uploadProgress-${p.id}" style="display:none;font-size:12px;color:var(--nt-muted);margin-bottom:12px;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;"></div>
             <div class="deliver-actions">
-              <button class="btn-deliver" onclick="deliverProduct('${p.id}')">Mark as Delivered</button>
+              <button class="btn-deliver" id="btnDeliver-${p.id}" onclick="deliverProduct('${p.id}')">Upload & Deliver</button>
               <button class="btn-cancel-deliver" onclick="toggleDeliver('${p.id}')">Cancel</button>
             </div>
             <div id="panelMsg-${p.id}" style="margin-top:10px;font-size:12px;display:none;"></div>
@@ -242,7 +239,7 @@ function renderTable() {
       <thead>
         <tr>
           <th>Player</th><th>Package</th><th>Position</th><th>Team</th>
-          <th>Submitted</th><th>PDS Score</th><th>Status</th><th>Action</th>
+          <th>Submitted</th><th>Report</th><th>Status</th><th>Action</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -260,33 +257,85 @@ function toggleDeliver(id) {
 }
 
 async function deliverProduct(id) {
-  const scoreEl = document.getElementById('score-' + id);
-  const score   = scoreEl ? scoreEl.value.trim() : '';
-  if (!score) { alert('Please enter a PDS score.'); return; }
-  if (isNaN(score) || +score < 0 || +score > 100) { alert('Score must be a number between 0 and 100.'); return; }
-
-  const btn = document.querySelector(`#panelBody-${id} .btn-deliver`);
-  if (btn) btn.disabled = true;
-
-  const msg = document.getElementById('panelMsg-' + id);
-
-  const encoded = encodeURIComponent(JSON.stringify({
-    type:      'deliverProduct',
-    token:     _token,
-    productId: id,
-    pdsScore:  score
-  }));
-
-  const res = await fetch(NT_API_URL + '?payload=' + encoded).then(r => r.json()).catch(() => ({ status: 'error' }));
-
-  if (res.status === 'ok') {
-    const p = _allProducts.find(x => x.id === id);
-    if (p) { p.status = 'active'; p.pdsScore = score; }
-    renderTable();
-  } else {
-    if (msg) { msg.textContent = 'Error: ' + (res.message || 'unknown'); msg.style.display = ''; msg.style.color = 'var(--nt-red)'; }
-    if (btn) btn.disabled = false;
+  const fileInput = document.getElementById('file-' + id);
+  if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+    alert('Please select a report file to upload.');
+    return;
   }
+
+  const file = fileInput.files[0];
+  if (file.size > 10 * 1024 * 1024) { alert('File must be under 10MB.'); return; }
+
+  const btn      = document.getElementById('btnDeliver-' + id);
+  const progress = document.getElementById('uploadProgress-' + id);
+  const msg      = document.getElementById('panelMsg-' + id);
+
+  btn.disabled = true;
+  btn.textContent = 'Reading file…';
+  progress.textContent = 'Reading file…';
+  progress.style.display = '';
+  msg.style.display = 'none';
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result.split(',')[1];
+    progress.textContent = 'Uploading to server…';
+    btn.textContent = 'Uploading…';
+
+    // POST with text/plain (no-cors compatible — body still reaches Apps Script)
+    try {
+      fetch(NT_API_URL, {
+        method:  'POST',
+        mode:    'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          type:      'uploadReport',
+          token:     _token,
+          productId: id,
+          fileName:  file.name,
+          mimeType:  file.type || 'application/pdf',
+          fileData:  base64
+        })
+      });
+    } catch (_) {}
+
+    // Poll until status flips to active (max 20s)
+    progress.textContent = 'Saving to Drive…';
+    let attempts = 0;
+    while (attempts < 8) {
+      await new Promise(r => setTimeout(r, 2500));
+      attempts++;
+      const encoded = encodeURIComponent(JSON.stringify({ type: 'listProducts', token: _token }));
+      const res = await fetch(NT_API_URL + '?payload=' + encoded).then(r => r.json()).catch(() => null);
+      if (res && res.products) {
+        const updated = res.products.find(x => x.id === id);
+        if (updated && updated.status === 'active') {
+          _allProducts = res.products;
+          renderTable();
+          return;
+        }
+      }
+    }
+
+    // Timeout — show manual confirm option
+    progress.style.display = 'none';
+    btn.disabled = false;
+    btn.textContent = 'Upload & Deliver';
+    msg.textContent = 'Upload sent — the file may still be processing. Refresh in a moment to confirm.';
+    msg.style.display = '';
+    msg.style.color = 'var(--nt-muted)';
+  };
+
+  reader.onerror = () => {
+    btn.disabled = false;
+    btn.textContent = 'Upload & Deliver';
+    progress.style.display = 'none';
+    msg.textContent = 'Could not read the file. Please try again.';
+    msg.style.display = '';
+    msg.style.color = 'var(--nt-red)';
+  };
+
+  reader.readAsDataURL(file);
 }
 
 function escHtml(str) {

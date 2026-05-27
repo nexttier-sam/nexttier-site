@@ -63,7 +63,7 @@ function initSheets() {
 
   ensureTab(ss, TABS.products, [
     'ID','User ID','Created At','Package','Status',
-    'First Name','Last Name','Position','Team','League','Jersey Number','PDS Score'
+    'First Name','Last Name','Position','Team','League','Jersey Number','PDS Score','Report URL'
   ]);
 }
 
@@ -116,6 +116,7 @@ function doPost(e) {
       case 'getProduct':      return handleGetProduct(payload);
       case 'listProducts':    return handleListProducts(payload);
       case 'deliverProduct':  return handleDeliverProduct(payload);
+      case 'uploadReport':    return handleUploadReport(payload);
       default:
         return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
     }
@@ -142,6 +143,7 @@ function doGet(e) {
         case 'getProduct':      return handleGetProduct(payload);
         case 'listProducts':    return handleListProducts(payload);
         case 'deliverProduct':  return handleDeliverProduct(payload);
+        case 'uploadReport':    return handleUploadReport(payload);
         default:                return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
       }
     } catch (err) {
@@ -355,7 +357,8 @@ function handleGetProduct(payload) {
           team:        r[8],
           league:      r[9],
           jerseyNumber: r[10],
-          pdsScore:    r[11]
+          pdsScore:    r[11],
+          reportUrl:   r[12] || ''
         }
       });
     }
@@ -388,10 +391,48 @@ function handleListProducts(payload) {
       team:        r[8],
       league:      r[9],
       jerseyNumber: r[10],
-      pdsScore:    r[11]
+      pdsScore:    r[11],
+      reportUrl:   r[12] || ''
     });
   }
   return jsonCors({ status: 'ok', products });
+}
+
+function handleUploadReport(payload) {
+  const auth = requireRole(payload.token, ['admin']);
+  if (auth.status === 'error') return jsonCors(auth);
+
+  const { productId, fileName, fileData, mimeType } = payload;
+  if (!productId || !fileData) return jsonCors({ status: 'error', message: 'productId and fileData required' });
+
+  try {
+    const decoded = Utilities.base64Decode(fileData);
+    const blob    = Utilities.newBlob(decoded, mimeType || 'application/pdf', fileName || 'report.pdf');
+
+    const folders = DriveApp.getFoldersByName('NT Reports');
+    const folder  = folders.hasNext() ? folders.next() : DriveApp.createFolder('NT Reports');
+
+    const file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+    const reportUrl = 'https://drive.google.com/file/d/' + file.getId() + '/view';
+
+    const ss    = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(TABS.products);
+    if (!sheet) return jsonCors({ status: 'error', message: 'Products sheet not found' });
+
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === productId) {
+        sheet.getRange(i + 1, 5).setValue('active');
+        sheet.getRange(i + 1, 13).setValue(reportUrl);
+        return jsonCors({ status: 'ok', reportUrl });
+      }
+    }
+    return jsonCors({ status: 'error', message: 'Product not found' });
+  } catch (err) {
+    return jsonCors({ status: 'error', message: 'Upload failed: ' + err.message });
+  }
 }
 
 function handleDeliverProduct(payload) {

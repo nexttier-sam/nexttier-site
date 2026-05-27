@@ -239,7 +239,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
         </div>
       </div>
       <div class="showcase-foot">
-        <a href="/player-card" class="btn btn-primary" id="scBtnReport" style="display:none;">View Full Report →</a>
+        <a href="#" class="btn btn-primary" id="scBtnReport" style="display:none;" target="_blank">Download Report →</a>
         <a href="/my-product" class="btn btn-outline">View profile status</a>
         <a href="/contact" class="btn btn-outline">Contact support</a>
       </div>
@@ -399,10 +399,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('scStatus').textContent = isActive ? 'Report ready' : 'In review';
 
   if (isActive) {
-    document.getElementById('scBtnReport').style.display = '';
-    document.getElementById('heroSub').textContent = 'Your Player Card is ready. View your full report, skill breakdown, and 12-month development roadmap.';
+    const reportUrl = product.reportUrl || '/my-product';
+    const reportBtn = document.getElementById('scBtnReport');
+    reportBtn.href = reportUrl;
+    reportBtn.style.display = '';
+    document.getElementById('heroSub').textContent = 'Your Player Card report is ready. Download your full evaluation below.';
     document.getElementById('heroActions').innerHTML =
-      '<a href="/player-card" class="btn-hero btn-hero-primary">View Full Report →</a>' +
+      `<a href="${reportUrl}" class="btn-hero btn-hero-primary" target="_blank">Download Report →</a>` +
       '<a href="/my-product" class="btn-hero btn-hero-outline">Profile status</a>';
   } else {
     document.getElementById('heroSub').textContent = 'Your profile is in review. Our evaluators are working on your Player Development Score — expect delivery within 48 hours.';
