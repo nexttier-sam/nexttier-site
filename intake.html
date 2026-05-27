@@ -279,6 +279,19 @@ nav {
   display: none;
 }
 
+/* REGION PICKER */
+.region-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.region-card{position:relative;border:2px solid var(--nt-border-strong);border-radius:12px;padding:18px 20px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:14px;background:#111111;}
+.region-card:hover{border-color:rgba(170,221,0,0.35);background:#161616;}
+.region-card input[type="radio"]{position:absolute;opacity:0;width:0;height:0;}
+.region-card.selected{border-color:var(--nt-green);background:var(--nt-green-l);}
+.region-flag{font-size:32px;line-height:1;flex-shrink:0;}
+.region-label{font-family:var(--font-display);font-size:22px;letter-spacing:.04em;color:var(--nt-white);}
+.region-sub{font-size:11px;font-weight:300;color:var(--nt-muted);margin-top:2px;}
+.region-check{margin-left:auto;flex-shrink:0;width:20px;height:20px;border-radius:50%;border:2px solid var(--nt-border-strong);display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s;}
+.region-card.selected .region-check{border-color:var(--nt-green);background:var(--nt-green);}
+.region-card.selected .region-check::after{content:'';width:6px;height:6px;border-radius:50%;background:#000;}
+
 /* ── SUCCESS ── */
 .success-panel {
   display: none; text-align: center;
@@ -599,7 +612,34 @@ nav {
       </div>
     </div>
 
-    <!-- 6. CONSENT & SUBMISSION -->
+    <!-- 6. REGION -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">YOUR REGION</div>
+          <div class="form-block-sub">Determines your payment currency and processing</div>
+        </div>
+        <div class="form-block-tag">Required</div>
+      </div>
+      <div class="form-block-body">
+        <div class="region-grid">
+          <label class="region-card" id="regionCA" onclick="selectRegion('CA')">
+            <input type="radio" name="region" value="CA">
+            <div class="region-flag">🇨🇦</div>
+            <div><div class="region-label">CANADA</div><div class="region-sub">Pay in CAD</div></div>
+            <div class="region-check"></div>
+          </label>
+          <label class="region-card" id="regionUS" onclick="selectRegion('US')">
+            <input type="radio" name="region" value="US">
+            <div class="region-flag">🇺🇸</div>
+            <div><div class="region-label">USA</div><div class="region-sub">Pay in USD</div></div>
+            <div class="region-check"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. CONSENT & SUBMISSION -->
     <div class="form-block">
       <div class="form-block-header">
         <div>
@@ -628,21 +668,31 @@ nav {
 </div><!-- /intake-body -->
 
 <script>
-// ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ───────────────────────
 const APPS_SCRIPT_URL = NT_API_URL;
-// ─────────────────────────────────────────────────────────────────
 
-// Require login — redirect to login page if not authenticated
+const STRIPE_URLS = {
+  playerCard:  { CA: 'https://buy.stripe.com/dRmbJ31NE4F00pNcSb7ss03', US: 'https://buy.stripe.com/5kQ5kF1NE8Vg2xV9FZ7ss02' },
+  videoReview: { CA: 'https://buy.stripe.com/dRmbJ31NE4F00pNcSb7ss03', US: 'https://buy.stripe.com/5kQ5kF1NE8Vg2xV9FZ7ss02' }
+};
+
+let _selectedRegion = '';
+let _stripeParams = '';
+
+function selectRegion(code) {
+  _selectedRegion = code;
+  document.getElementById('regionCA').classList.toggle('selected', code === 'CA');
+  document.getElementById('regionUS').classList.toggle('selected', code === 'US');
+  document.querySelector(`input[value="${code}"]`).checked = true;
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   const user = NT.getUser();
-  if (!user) {
-    window.location.href = '/login?redirect=/intake';
-    return;
-  }
+  if (!user) { window.location.href = '/login?redirect=/intake'; return; }
   const valid = await NT.validate();
-  if (!valid) {
-    window.location.href = '/login?redirect=/intake';
-  }
+  if (!valid) { window.location.href = '/login?redirect=/intake'; return; }
+  _stripeParams = new URLSearchParams({ client_reference_id: valid.id, prefilled_email: valid.email || '' }).toString();
+  const emailEl = document.getElementById('email');
+  if (emailEl && valid.email) emailEl.value = valid.email;
 });
 
 function v(id) {
@@ -699,6 +749,7 @@ async function submitForm() {
   if (!v('teamName'))                                        { alert('Please enter the team name.'); return; }
   if (!document.getElementById('currentLeague').value)       { alert('Please select a league.'); return; }
   if (!document.querySelector('input[name="plan"]:checked')) { alert('Please select a package.'); return; }
+  if (!_selectedRegion)                                       { alert('Please select your region (Canada or USA).'); return; }
   if (!document.getElementById('consentData').checked)       { alert('Please accept the data consent to submit.'); return; }
 
   document.getElementById('submitError').style.display = 'none';
@@ -727,7 +778,10 @@ async function submitForm() {
       setTimeout(resolve, 6000);
     });
 
-    window.location.href = 'my-product';
+    const planEl  = document.querySelector('input[name="plan"]:checked');
+    const isVideo = planEl && planEl.value === 'video_review';
+    const stripeBase = isVideo ? STRIPE_URLS.videoReview[_selectedRegion] : STRIPE_URLS.playerCard[_selectedRegion];
+    window.location.href = stripeBase + '?' + _stripeParams;
 
   } catch (err) {
     showSubmitError('Submission failed: ' + err.message);
