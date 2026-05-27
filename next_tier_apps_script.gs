@@ -113,7 +113,9 @@ function doPost(e) {
       case 'validate':    return handleValidate(payload);
       case 'getUsers':    return handleGetUsers(payload);
       case 'updateUser':  return handleUpdateUser(payload);
-      case 'getProduct':  return handleGetProduct(payload);
+      case 'getProduct':      return handleGetProduct(payload);
+      case 'listProducts':    return handleListProducts(payload);
+      case 'deliverProduct':  return handleDeliverProduct(payload);
       default:
         return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
     }
@@ -137,8 +139,10 @@ function doGet(e) {
         case 'validate':    return handleValidate(payload);
         case 'getUsers':    return handleGetUsers(payload);
         case 'updateUser':  return handleUpdateUser(payload);
-        case 'getProduct':  return handleGetProduct(payload);
-        default:            return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
+        case 'getProduct':      return handleGetProduct(payload);
+        case 'listProducts':    return handleListProducts(payload);
+        case 'deliverProduct':  return handleDeliverProduct(payload);
+        default:                return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
       }
     } catch (err) {
       return jsonCors({ status: 'error', message: 'GET parse error: ' + err.message });
@@ -357,6 +361,59 @@ function handleGetProduct(payload) {
     }
   }
   return jsonCors({ status: 'ok', product: null });
+}
+
+function handleListProducts(payload) {
+  const auth = requireRole(payload.token, ['admin']);
+  if (auth.status === 'error') return jsonCors(auth);
+
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(TABS.products);
+  if (!sheet) return jsonCors({ status: 'ok', products: [] });
+
+  const data = sheet.getDataRange().getValues();
+  const products = [];
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    if (!r[0]) continue;
+    products.push({
+      id:          r[0],
+      userId:      r[1],
+      createdAt:   r[2] ? r[2].toString() : '',
+      package:     r[3],
+      status:      r[4],
+      firstName:   r[5],
+      lastName:    r[6],
+      position:    r[7],
+      team:        r[8],
+      league:      r[9],
+      jerseyNumber: r[10],
+      pdsScore:    r[11]
+    });
+  }
+  return jsonCors({ status: 'ok', products });
+}
+
+function handleDeliverProduct(payload) {
+  const auth = requireRole(payload.token, ['admin']);
+  if (auth.status === 'error') return jsonCors(auth);
+
+  const { productId, pdsScore } = payload;
+  if (!productId) return jsonCors({ status: 'error', message: 'productId required' });
+
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(TABS.products);
+  if (!sheet) return jsonCors({ status: 'error', message: 'Products sheet not found' });
+
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === productId) {
+      sheet.getRange(i + 1, 5).setValue('active');        // Status → active
+      sheet.getRange(i + 1, 12).setValue(pdsScore || ''); // PDS Score
+      return jsonCors({ status: 'ok', message: 'Product delivered' });
+    }
+  }
+  return jsonCors({ status: 'error', message: 'Product not found' });
 }
 
 // ── Helpers ───────────────────────────────────────────────────────

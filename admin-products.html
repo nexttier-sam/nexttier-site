@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Product Delivery</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="/config.js"></script>
+<script src="/nt-auth.js"></script>
+<style>
+:root {
+  --nt-black:#000000;--nt-ice:#1A1A1A;--nt-white:#FFFFFF;
+  --nt-green:#AADD00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;
+  --nt-slate:#CCCCCC;--nt-muted:#888888;--nt-red:#E8344A;--nt-red-l:#2A0A0C;
+  --nt-border:rgba(170,221,0,0.08);--nt-border-strong:rgba(170,221,0,0.18);
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:#0D0D0D;color:var(--nt-white);-webkit-font-smoothing:antialiased;min-height:100vh;}
+
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;border-bottom:1px solid var(--nt-border);position:sticky;top:0;z-index:100;}
+.nav-logo{display:flex;align-items:center;text-decoration:none;}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.btn-logout{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 14px;font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;font-family:var(--font-body);}
+.btn-logout:hover{color:var(--nt-white);}
+.nav-back{font-size:12px;color:rgba(255,255,255,.4);text-decoration:none;display:flex;align-items:center;gap:6px;}
+.nav-back:hover{color:var(--nt-white);}
+
+.page-header{background:var(--nt-black);padding:40px 28px 36px;border-bottom:1px solid var(--nt-border);position:relative;overflow:hidden;}
+.page-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(170,221,0,0.03) 39px,rgba(170,221,0,0.03) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(170,221,0,0.03) 39px,rgba(170,221,0,0.03) 40px);pointer-events:none;}
+.page-header-inner{max-width:960px;margin:0 auto;position:relative;}
+.page-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--nt-green);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.page-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-green);}
+.page-title{font-family:var(--font-display);font-size:clamp(32px,4vw,52px);letter-spacing:.02em;line-height:.95;}
+.page-title em{color:var(--nt-green);font-style:normal;}
+
+.page-body{max-width:960px;margin:0 auto;padding:36px 24px 80px;}
+
+.section{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.section-head{padding:20px 24px 16px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.section-title{font-family:var(--font-display);font-size:18px;letter-spacing:.02em;}
+.section-count{font-family:var(--font-mono);font-size:11px;color:var(--nt-muted);letter-spacing:.06em;}
+
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;}
+.filter-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--nt-border-strong);background:transparent;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;font-family:var(--font-body);transition:all .15s;}
+.filter-btn:hover{color:var(--nt-white);}
+.filter-btn.active{border-color:var(--nt-green);background:var(--nt-green-l);color:var(--nt-white);}
+
+table{width:100%;border-collapse:collapse;}
+th{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-muted);padding:10px 16px;text-align:left;border-bottom:1px solid var(--nt-border);}
+td{padding:14px 16px;font-size:13px;font-weight:300;color:var(--nt-slate);border-bottom:1px solid var(--nt-border);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+
+.status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;}
+.status-pill.pending{background:rgba(255,180,0,.1);color:#FFB400;}
+.status-pill.active{background:rgba(170,221,0,.1);color:var(--nt-green);}
+.status-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;}
+
+.action-btn{background:none;border:1px solid var(--nt-border-strong);border-radius:5px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:var(--font-body);color:#CCCCCC;transition:all .15s;}
+.action-btn:hover{background:#0D0D0D;}
+.action-btn.deliver{border-color:rgba(170,221,0,.3);color:var(--nt-green);}
+.action-btn.deliver:hover{background:var(--nt-green-l);}
+
+/* DELIVERY PANEL */
+.deliver-panel{display:none;background:#161616;border-top:1px solid var(--nt-border);padding:20px 24px;}
+.deliver-panel.open{display:block;}
+.deliver-panel-title{font-family:var(--font-display);font-size:16px;letter-spacing:.02em;margin-bottom:16px;}
+.deliver-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.deliver-field label{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:6px;}
+.deliver-field input,.deliver-field textarea{width:100%;background:#111111;border:1px solid var(--nt-border-strong);border-radius:8px;padding:10px 14px;font-size:13px;font-weight:300;color:var(--nt-white);font-family:var(--font-body);outline:none;transition:border-color .15s;}
+.deliver-field input:focus,.deliver-field textarea:focus{border-color:var(--nt-green);}
+.deliver-field textarea{resize:vertical;min-height:80px;}
+.deliver-actions{display:flex;gap:10px;margin-top:4px;}
+.btn-deliver{background:var(--nt-green);color:#000;border:none;border-radius:7px;padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .15s;}
+.btn-deliver:hover{background:#99CC00;}
+.btn-deliver:disabled{opacity:.6;cursor:not-allowed;}
+.btn-cancel-deliver{background:transparent;color:rgba(255,255,255,.4);border:1px solid var(--nt-border-strong);border-radius:7px;padding:10px 18px;font-size:13px;cursor:pointer;font-family:var(--font-body);}
+
+.empty-state{padding:48px;text-align:center;color:var(--nt-muted);font-size:13px;font-weight:300;}
+
+.loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px;}
+.loading-overlay.active{display:flex;}
+.loading-text{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-muted);}
+
+@media(max-width:720px){
+  .deliver-grid{grid-template-columns:1fr;}
+  table{display:block;overflow-x:auto;}
+  .page-body{padding:24px 16px 60px;}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <img src="/nexttierlogo.png" alt="" style="height:40px;opacity:.5;">
+  <div class="loading-text" id="loadingText">Loading…</div>
+</div>
+
+<nav>
+  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:40px;width:auto;"></a>
+  <div class="nav-right">
+    <a href="/dashboard%20admin" class="nav-back">← Admin dashboard</a>
+    <button class="btn-logout" onclick="NT.logout()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-eyebrow">Admin</div>
+    <div class="page-title">PRODUCT <em>DELIVERY</em></div>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <div class="section">
+    <div class="section-head">
+      <div>
+        <div class="section-title">ALL PRODUCTS</div>
+        <div class="section-count" id="productCount">—</div>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="setFilter('all')">All</button>
+        <button class="filter-btn" onclick="setFilter('pending')">Pending</button>
+        <button class="filter-btn" onclick="setFilter('active')">Delivered</button>
+      </div>
+    </div>
+    <div id="tableWrap">
+      <div class="empty-state">Loading products…</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let _allProducts = [];
+let _filter = 'all';
+let _openProductId = null;
+let _token = '';
+
+window.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('loadingOverlay').classList.add('active');
+
+  const user = NT.getUser();
+  if (!user) { window.location.href = '/login?redirect=/admin-products'; return; }
+
+  const valid = await NT.validate();
+  if (!valid || valid.role !== 'admin') {
+    window.location.href = '/dashboard%20' + (valid?.role || 'player');
+    return;
+  }
+
+  _token = NT.getToken();
+  document.getElementById('loadingOverlay').classList.remove('active');
+
+  await loadProducts();
+});
+
+async function loadProducts() {
+  const encoded = encodeURIComponent(JSON.stringify({ type: 'listProducts', token: _token }));
+  const res = await fetch(NT_API_URL + '?payload=' + encoded).then(r => r.json()).catch(() => ({ status: 'error' }));
+
+  if (res.status !== 'ok') {
+    document.getElementById('tableWrap').innerHTML = '<div class="empty-state">Failed to load products.</div>';
+    return;
+  }
+
+  _allProducts = res.products || [];
+  renderTable();
+}
+
+function setFilter(f) {
+  _filter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  const products = _filter === 'all'
+    ? _allProducts
+    : _allProducts.filter(p => (_filter === 'active' ? p.status === 'active' : p.status !== 'active'));
+
+  const pending = _allProducts.filter(p => p.status !== 'active').length;
+  const total   = _allProducts.length;
+  document.getElementById('productCount').textContent = `${total} total · ${pending} pending`;
+
+  if (!products.length) {
+    document.getElementById('tableWrap').innerHTML = '<div class="empty-state">No products found.</div>';
+    return;
+  }
+
+  const rows = products.map(p => {
+    const name    = [p.firstName, p.lastName].filter(Boolean).join(' ') || '—';
+    const date    = p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-CA') : '—';
+    const isPend  = p.status !== 'active';
+    const scoreDisp = p.pdsScore ? `<span style="color:var(--nt-green);font-weight:500;">${p.pdsScore}</span>` : '<span style="color:var(--nt-muted);">—</span>';
+    const deliverBtn = isPend
+      ? `<button class="action-btn deliver" onclick="toggleDeliver('${p.id}')">Deliver →</button>`
+      : `<button class="action-btn" onclick="toggleDeliver('${p.id}')">Update</button>`;
+
+    return `
+      <tr>
+        <td style="font-weight:400;color:#fff;">${escHtml(name)}</td>
+        <td>${escHtml(p.package || '—')}</td>
+        <td>${escHtml(p.position || '—')}</td>
+        <td>${escHtml(p.team || '—')}</td>
+        <td>${date}</td>
+        <td>${scoreDisp}</td>
+        <td><span class="status-pill ${p.status === 'active' ? 'active' : 'pending'}">${p.status || 'pending'}</span></td>
+        <td>${deliverBtn}</td>
+      </tr>
+      <tr id="panel-${p.id}" style="display:none;">
+        <td colspan="8" style="padding:0;">
+          <div class="deliver-panel open" id="panelBody-${p.id}">
+            <div class="deliver-panel-title">Deliver report — ${escHtml(name)}</div>
+            <div class="deliver-grid">
+              <div class="deliver-field">
+                <label>PDS Score (0–100) <span style="color:var(--nt-green)">*</span></label>
+                <input type="number" id="score-${p.id}" min="0" max="100" placeholder="e.g. 72" value="${p.pdsScore || ''}">
+              </div>
+              <div class="deliver-field">
+                <label>Package</label>
+                <input type="text" value="${escHtml(p.package || '')}" disabled style="opacity:.4;">
+              </div>
+            </div>
+            <div class="deliver-actions">
+              <button class="btn-deliver" onclick="deliverProduct('${p.id}')">Mark as Delivered</button>
+              <button class="btn-cancel-deliver" onclick="toggleDeliver('${p.id}')">Cancel</button>
+            </div>
+            <div id="panelMsg-${p.id}" style="margin-top:10px;font-size:12px;display:none;"></div>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('tableWrap').innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Player</th><th>Package</th><th>Position</th><th>Team</th>
+          <th>Submitted</th><th>PDS Score</th><th>Status</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function toggleDeliver(id) {
+  if (_openProductId && _openProductId !== id) {
+    document.getElementById('panel-' + _openProductId).style.display = 'none';
+  }
+  const row = document.getElementById('panel-' + id);
+  const isOpen = row.style.display !== 'none';
+  row.style.display = isOpen ? 'none' : '';
+  _openProductId = isOpen ? null : id;
+}
+
+async function deliverProduct(id) {
+  const scoreEl = document.getElementById('score-' + id);
+  const score   = scoreEl ? scoreEl.value.trim() : '';
+  if (!score) { alert('Please enter a PDS score.'); return; }
+  if (isNaN(score) || +score < 0 || +score > 100) { alert('Score must be a number between 0 and 100.'); return; }
+
+  const btn = document.querySelector(`#panelBody-${id} .btn-deliver`);
+  if (btn) btn.disabled = true;
+
+  const msg = document.getElementById('panelMsg-' + id);
+
+  const encoded = encodeURIComponent(JSON.stringify({
+    type:      'deliverProduct',
+    token:     _token,
+    productId: id,
+    pdsScore:  score
+  }));
+
+  const res = await fetch(NT_API_URL + '?payload=' + encoded).then(r => r.json()).catch(() => ({ status: 'error' }));
+
+  if (res.status === 'ok') {
+    const p = _allProducts.find(x => x.id === id);
+    if (p) { p.status = 'active'; p.pdsScore = score; }
+    renderTable();
+  } else {
+    if (msg) { msg.textContent = 'Error: ' + (res.message || 'unknown'); msg.style.display = ''; msg.style.color = 'var(--nt-red)'; }
+    if (btn) btn.disabled = false;
+  }
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
