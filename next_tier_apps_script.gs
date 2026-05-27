@@ -191,6 +191,48 @@ function handleIntake(payload) {
     }
   }
 
+  // Send purchase notification email
+  try {
+    const r           = payload.row;
+    const playerName  = [r[1], r[2]].filter(Boolean).join(' ') || 'Unknown';
+    const contactName = r[7]  || '—';
+    const email       = r[9]  || '—';
+    const phone       = r[10] || '—';
+    const team        = r[12] || '—';
+    const league      = r[13] || '—';
+    const position    = r[4]  || '—';
+    const pkg         = r[16] || '—';
+    const submitted   = r[0]  || new Date().toLocaleString();
+
+    const subject = '🏒 New Purchase — ' + playerName + ' (' + pkg + ')';
+    const body =
+      'A new product has been purchased on Next Tier.\n\n' +
+      '─────────────────────────────\n' +
+      'PACKAGE\n' +
+      pkg + '\n\n' +
+      'PLAYER\n' +
+      'Name:     ' + playerName  + '\n' +
+      'Position: ' + position    + '\n' +
+      'Team:     ' + team        + '\n' +
+      'League:   ' + league      + '\n\n' +
+      'CONTACT\n' +
+      'Name:     ' + contactName + '\n' +
+      'Email:    ' + email       + '\n' +
+      'Phone:    ' + phone       + '\n\n' +
+      'Submitted: ' + submitted  + '\n' +
+      '─────────────────────────────\n' +
+      'View all submissions in Google Sheets.';
+
+    MailApp.sendEmail({
+      to:      'sam.mclean@nexttierstats.com,pearce.fraser@nexttierstats.com',
+      subject: subject,
+      body:    body
+    });
+  } catch (mailErr) {
+    // Non-fatal — log but don't fail the intake submission
+    Logger.log('Email notification failed: ' + mailErr.message);
+  }
+
   return jsonCors({ status: 'ok', message: 'Row written to Intake tab.' });
 }
 
