@@ -244,6 +244,49 @@ nav {
   display: none;
 }
 
+/* REGION PICKER */
+.region-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+}
+.region-card {
+  position: relative;
+  border: 2px solid var(--nt-border-strong);
+  border-radius: 12px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  display: flex; align-items: center; gap: 14px;
+  background: #111111;
+}
+.region-card:hover { border-color: rgba(170,221,0,0.35); background: #161616; }
+.region-card input[type="radio"] {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+.region-card.selected {
+  border-color: var(--nt-green);
+  background: var(--nt-green-l);
+}
+.region-flag {
+  font-size: 32px; line-height: 1; flex-shrink: 0;
+}
+.region-label { font-family: var(--font-display); font-size: 22px; letter-spacing: .04em; color: var(--nt-white); }
+.region-sub { font-size: 11px; font-weight: 300; color: var(--nt-muted); margin-top: 2px; }
+.region-check {
+  margin-left: auto; flex-shrink: 0;
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--nt-border-strong);
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, background .15s;
+}
+.region-card.selected .region-check {
+  border-color: var(--nt-green);
+  background: var(--nt-green);
+}
+.region-card.selected .region-check::after {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%; background: #000;
+}
+
 /* LOADING OVERLAY */
 .loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:20px;}
 .loading-overlay.active{display:flex;}
@@ -484,7 +527,40 @@ nav {
     </div>
   </div>
 
-  <!-- 5. CONSENT & PAYMENT -->
+  <!-- 5. REGION -->
+  <div class="form-block">
+    <div class="form-block-header">
+      <div>
+        <div class="form-block-title">YOUR REGION</div>
+        <div class="form-block-sub">Determines your payment currency and processing</div>
+      </div>
+      <div class="form-block-tag">Required</div>
+    </div>
+    <div class="form-block-body">
+      <div class="region-grid">
+        <label class="region-card" id="regionCA" onclick="selectRegion('CA')">
+          <input type="radio" name="region" value="CA">
+          <div class="region-flag">🇨🇦</div>
+          <div>
+            <div class="region-label">CANADA</div>
+            <div class="region-sub">Pay in CAD</div>
+          </div>
+          <div class="region-check"></div>
+        </label>
+        <label class="region-card" id="regionUS" onclick="selectRegion('US')">
+          <input type="radio" name="region" value="US">
+          <div class="region-flag">🇺🇸</div>
+          <div>
+            <div class="region-label">USA</div>
+            <div class="region-sub">Pay in USD</div>
+          </div>
+          <div class="region-check"></div>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. CONSENT & PAYMENT -->
   <div class="form-block">
     <div class="form-block-header">
       <div>
@@ -512,9 +588,13 @@ nav {
 </div><!-- /intake-body -->
 
 <script>
-const STRIPE_PLAYER_CARD = 'https://buy.stripe.com/test_00w28teAq1sO0pNbO77ss00';
+const STRIPE_URLS = {
+  CA: 'https://buy.stripe.com/test_00w28teAq1sO0pNbO77ss00', // Canada — replace with live CAD link
+  US: 'https://buy.stripe.com/test_00w28teAq1sO0pNbO77ss00'  // USA    — replace with live USD link
+};
 
 let _stripeParams = '';
+let _selectedRegion = '';
 
 window.addEventListener('DOMContentLoaded', async () => {
   const user = NT.getUser();
@@ -539,6 +619,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (emailEl && valid.email) emailEl.value = valid.email;
 });
 
+function selectRegion(code) {
+  _selectedRegion = code;
+  document.getElementById('regionCA').classList.toggle('selected', code === 'CA');
+  document.getElementById('regionUS').classList.toggle('selected', code === 'US');
+  document.querySelector(`input[value="${code}"]`).checked = true;
+}
+
 function v(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : '';
@@ -557,6 +644,7 @@ function collectRow() {
     v('email'), v('phone'), v('hearAbout'), v('teamName'),
     v('currentLeague'), v('season'), v('jerseyNum'),
     'Player Card — $75',
+    _selectedRegion,
     isChecked('consentData'), isChecked('consentContact')
   ];
 }
@@ -571,6 +659,7 @@ async function submitForm() {
   if (!v('email'))                                      { alert('Please enter your email address.'); return; }
   if (!v('teamName'))                                   { alert('Please enter the team name.'); return; }
   if (!document.getElementById('currentLeague').value)  { alert('Please select a league.'); return; }
+  if (!_selectedRegion)                                  { alert('Please select your region (Canada or USA).'); return; }
   if (!document.getElementById('consentData').checked)  { alert('Please accept the data consent to continue.'); return; }
 
   document.getElementById('submitError').style.display = 'none';
@@ -592,8 +681,8 @@ async function submitForm() {
       setTimeout(resolve, 6000);
     });
 
-    // Profile saved — send to Stripe
-    window.location.href = STRIPE_PLAYER_CARD + '?' + _stripeParams;
+    // Profile saved — send to correct Stripe link for region
+    window.location.href = STRIPE_URLS[_selectedRegion] + '?' + _stripeParams;
 
   } catch (err) {
     document.getElementById('loadingOverlay').classList.remove('active');
