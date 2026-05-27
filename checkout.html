@@ -138,6 +138,22 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 }
 .upgrade-diff strong{color:var(--nt-slate);display:block;font-size:13px;font-weight:500;}
 
+/* REGION TOGGLE */
+.region-toggle-wrap{margin-bottom:28px;}
+.region-toggle-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:10px;}
+.region-toggle{display:inline-flex;gap:8px;flex-wrap:wrap;}
+.region-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 18px;border-radius:8px;
+  border:1px solid var(--nt-border-strong);
+  background:transparent;color:rgba(255,255,255,0.5);
+  font-family:var(--font-body);font-size:13px;font-weight:400;
+  cursor:pointer;transition:border-color .15s,background .15s,color .15s;
+}
+.region-btn:hover{border-color:rgba(170,221,0,0.35);color:var(--nt-white);}
+.region-btn.active{border-color:var(--nt-green);background:var(--nt-green-l);color:var(--nt-white);}
+.region-btn .rflag{font-size:18px;line-height:1;}
+
 /* TRUST STRIP */
 .trust-strip{display:flex;align-items:center;justify-content:center;gap:32px;padding:28px;background:#1A1A1A;border:1px solid var(--nt-border);border-radius:12px;flex-wrap:wrap;}
 .trust-item{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:300;color:rgba(255,255,255,0.4);}
@@ -175,6 +191,18 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 </div>
 
 <div class="page-body">
+
+  <div id="regionToggleWrap" class="region-toggle-wrap" style="display:none;">
+    <div class="region-toggle-label">Select your region</div>
+    <div class="region-toggle">
+      <button class="region-btn" id="regionCA" onclick="setRegion('CA')">
+        <span class="rflag">🇨🇦</span> Canada
+      </button>
+      <button class="region-btn" id="regionUS" onclick="setRegion('US')">
+        <span class="rflag">🇺🇸</span> USA
+      </button>
+    </div>
+  </div>
 
   <div class="product-row" id="productGrid" style="display:none;">
 
@@ -230,7 +258,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
         </ul>
       </div>
       <div class="product-card-foot">
-        <a href="https://buy.stripe.com/test_eVq6oJ77Y3AW5K7cSb7ss01" class="btn-buy secondary" id="btnVideoReview">Buy Video Review →</a>
+        <a href="#" class="btn-buy secondary" id="btnVideoReview">Buy Video Review →</a>
         <div class="btn-note">Secure checkout via Stripe</div>
       </div>
     </div>
@@ -256,9 +284,22 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 
 <script>
 const STRIPE_URLS = {
-  playerCard:  'https://buy.stripe.com/test_00w28teAq1sO0pNbO77ss00',
-  videoReview: 'https://buy.stripe.com/test_eVq6oJ77Y3AW5K7cSb7ss01'
+  videoReview: {
+    CA: 'https://buy.stripe.com/test_eVq6oJ77Y3AW5K7cSb7ss01', // Canada — replace with live CAD link
+    US: 'https://buy.stripe.com/test_eVq6oJ77Y3AW5K7cSb7ss01'  // USA    — replace with live USD link
+  }
 };
+
+let _region = '';
+let _stripeParams = '';
+
+function setRegion(code) {
+  _region = code;
+  document.getElementById('regionCA').classList.toggle('active', code === 'CA');
+  document.getElementById('regionUS').classList.toggle('active', code === 'US');
+  const btn = document.getElementById('btnVideoReview');
+  btn.href = STRIPE_URLS.videoReview[code] + '?' + _stripeParams;
+}
 
 window.addEventListener('DOMContentLoaded', async () => {
   const user = NT.getUser();
@@ -274,13 +315,18 @@ window.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  const params = new URLSearchParams({
+  _stripeParams = new URLSearchParams({
     client_reference_id: valid.id,
     prefilled_email:     valid.email || ''
-  });
+  }).toString();
 
-  // Player Card routes through intake-player-card.html before Stripe — no href override needed
-  document.getElementById('btnVideoReview').href = STRIPE_URLS.videoReview + '?' + params;
+  // Video Review requires region selection — guard the click
+  document.getElementById('btnVideoReview').addEventListener('click', e => {
+    if (!_region) {
+      e.preventDefault();
+      alert('Please select your region (Canada or USA) before continuing.');
+    }
+  });
 
   const loginLink = document.getElementById('navLoginLink');
   if (loginLink) {
@@ -288,6 +334,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     loginLink.href = 'dashboard%20' + (valid.role || 'player');
   }
 
+  document.getElementById('regionToggleWrap').style.display = '';
   document.getElementById('productGrid').style.display = '';
   document.getElementById('trustStrip').style.display  = '';
 });
