@@ -230,7 +230,7 @@ function renderTable() {
     const date    = p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-CA') : '—';
     const isPend  = p.status !== 'active';
     const fileDisp = p.reportUrl
-      ? `<a href="#" onclick="openReportModal(${JSON.stringify(p.reportUrl)},${JSON.stringify(name)});return false;" style="color:var(--nt-green);font-size:12px;">View ↗</a>`
+      ? `<a href="#" onclick="openReportById('${p.id}');return false;" style="color:var(--nt-green);font-size:12px;">View ↗</a>`
       : '<span style="color:var(--nt-muted);">—</span>';
     const deliverBtn = isPend
       ? `<button class="action-btn deliver" onclick="toggleDeliver('${p.id}')">Deliver →</button>`
@@ -373,10 +373,8 @@ async function deliverProduct(id) {
 
       document.getElementById('panel-' + id).style.display  = 'none';
       document.getElementById('statusCell-' + id).innerHTML = '<span class="status-pill active">active</span>';
-      const pName = (_allProducts.find(x => x.id === id) || {});
-      const dName = [pName.firstName, pName.lastName].filter(Boolean).join(' ') || id;
-      document.getElementById('fileCell-' + id).innerHTML   =
-        `<a href="#" onclick="openReportModal(${JSON.stringify(reportUrl)},${JSON.stringify(dName)});return false;" style="color:var(--nt-green);font-size:12px;">View ↗</a>`;
+      document.getElementById('fileCell-' + id).innerHTML =
+        `<a href="#" onclick="openReportById('${id}');return false;" style="color:var(--nt-green);font-size:12px;">View ↗</a>`;
       document.getElementById('actionCell-' + id).innerHTML =
         `<button class="action-btn" onclick="toggleDeliver('${id}')">Replace file</button>`;
 
@@ -432,10 +430,13 @@ function drivePreviewUrl(url) {
   return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : url;
 }
 
-function openReportModal(url, playerName) {
-  document.getElementById('reportModalFrame').src    = drivePreviewUrl(url);
-  document.getElementById('reportModalDownload').href = url;
-  document.getElementById('reportModalTitle').textContent = playerName ? 'Report — ' + playerName : 'Report preview';
+function openReportById(id) {
+  const p = _allProducts.find(x => x.id === id);
+  if (!p || !p.reportUrl) return;
+  const name = [p.firstName, p.lastName].filter(Boolean).join(' ') || '';
+  document.getElementById('reportModalFrame').src      = drivePreviewUrl(p.reportUrl);
+  document.getElementById('reportModalDownload').href  = p.reportUrl;
+  document.getElementById('reportModalTitle').textContent = name ? 'Report — ' + name : 'Report preview';
   document.getElementById('reportModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
