@@ -148,12 +148,33 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
   .get-started{padding:36px 24px;}
   nav{padding:0 16px;}
 }
+.report-modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;display:none;flex-direction:column;}
+.report-modal.open{display:flex;}
+.report-modal-bar{background:#111;border-bottom:1px solid rgba(170,221,0,0.1);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.report-modal-title{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#888;}
+.report-modal-actions{display:flex;align-items:center;gap:10px;}
+.report-modal-dl{font-size:12px;color:#AADD00;text-decoration:none;padding:6px 14px;border:1px solid rgba(170,221,0,.25);border-radius:5px;}
+.report-modal-dl:hover{background:#1E2200;}
+.btn-close-modal{background:none;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;font-family:var(--font-body);}
+.btn-close-modal:hover{color:#fff;}
+.report-modal iframe{flex:1;border:none;background:#fff;}
 </style>
 </head>
 <body>
 
 <div class="loading-overlay" id="loadingOverlay">
   <img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;">
+</div>
+
+<div class="report-modal" id="reportModal">
+  <div class="report-modal-bar">
+    <div class="report-modal-title">Your Report</div>
+    <div class="report-modal-actions">
+      <a class="report-modal-dl" id="reportModalDl" href="#" target="_blank">Download ↗</a>
+      <button class="btn-close-modal" onclick="closeReportModal()">Close ✕</button>
+    </div>
+  </div>
+  <iframe id="reportModalFrame" src="" allowfullscreen></iframe>
 </div>
 
 <nav>
@@ -239,7 +260,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
         </div>
       </div>
       <div class="showcase-foot">
-        <a href="#" class="btn btn-primary" id="scBtnReport" style="display:none;" target="_blank">Download Report →</a>
+        <button class="btn btn-primary" id="scBtnReport" style="display:none;" onclick="openReportModal()">View Report →</button>
         <a href="/my-product" class="btn btn-outline">View profile status</a>
         <a href="/contact" class="btn btn-outline">Contact support</a>
       </div>
@@ -337,10 +358,33 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 </div><!-- /page-body -->
 
 <script>
+let _reportUrl = '';
+
 function fmtDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-CA', { year:'numeric', month:'short', day:'numeric' });
 }
+
+function drivePreviewUrl(url) {
+  const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : url;
+}
+
+function openReportModal() {
+  if (!_reportUrl) return;
+  document.getElementById('reportModalFrame').src = drivePreviewUrl(_reportUrl);
+  document.getElementById('reportModalDl').href   = _reportUrl;
+  document.getElementById('reportModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReportModal() {
+  document.getElementById('reportModal').classList.remove('open');
+  document.getElementById('reportModalFrame').src = '';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReportModal(); });
 
 window.addEventListener('DOMContentLoaded', async () => {
   const user = await NT.guard(['player', 'admin']);
@@ -399,13 +443,15 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('scStatus').textContent = isActive ? 'Report ready' : 'In review';
 
   if (isActive) {
-    const reportUrl = product.reportUrl || '/my-product';
-    const reportBtn = document.getElementById('scBtnReport');
-    reportBtn.href = reportUrl;
-    reportBtn.style.display = '';
-    document.getElementById('heroSub').textContent = 'Your Player Card report is ready. Download your full evaluation below.';
+    const reportUrl = product.reportUrl || '';
+    if (reportUrl) {
+      _reportUrl = reportUrl;
+      document.getElementById('reportModalDl').href = reportUrl;
+    }
+    document.getElementById('scBtnReport').style.display = reportUrl ? '' : 'none';
+    document.getElementById('heroSub').textContent = 'Your Player Card report is ready. View your full evaluation below.';
     document.getElementById('heroActions').innerHTML =
-      `<a href="${reportUrl}" class="btn-hero btn-hero-primary" target="_blank">Download Report →</a>` +
+      (reportUrl ? '<button class="btn-hero btn-hero-primary" onclick="openReportModal()">View Report →</button>' : '') +
       '<a href="/my-product" class="btn-hero btn-hero-outline">Profile status</a>';
   } else {
     document.getElementById('heroSub').textContent = 'Your profile is in review. Our evaluators are working on your Player Development Score — expect delivery within 48 hours.';
