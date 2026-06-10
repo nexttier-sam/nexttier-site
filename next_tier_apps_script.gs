@@ -444,7 +444,7 @@ function handleUploadReport(payload) {
   const auth = requireRole(payload.token, ['admin']);
   if (auth.status === 'error') return jsonCors(auth);
 
-  const { productId, fileName, fileData, mimeType } = payload;
+  const { productId, fileName, fileData, mimeType, pdsScore } = payload;
   if (!productId || !fileData) return jsonCors({ status: 'error', message: 'productId and fileData required' });
 
   try {
@@ -468,6 +468,9 @@ function handleUploadReport(payload) {
       if (data[i][0] === productId) {
         sheet.getRange(i + 1, 5).setValue('active');
         sheet.getRange(i + 1, 13).setValue(reportUrl);
+        if (pdsScore !== undefined && pdsScore !== null) {
+          sheet.getRange(i + 1, 12).setValue(pdsScore);
+        }
         return jsonCors({ status: 'ok', reportUrl });
       }
     }
@@ -481,8 +484,9 @@ function handleDeliverProduct(payload) {
   const auth = requireRole(payload.token, ['admin']);
   if (auth.status === 'error') return jsonCors(auth);
 
-  const { productId, pdsScore } = payload;
+  const { productId, reportUrl } = payload;
   if (!productId) return jsonCors({ status: 'error', message: 'productId required' });
+  if (!reportUrl) return jsonCors({ status: 'error', message: 'reportUrl required' });
 
   const ss    = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(TABS.products);
@@ -491,8 +495,8 @@ function handleDeliverProduct(payload) {
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
     if (data[i][0] === productId) {
-      sheet.getRange(i + 1, 5).setValue('active');        // Status → active
-      sheet.getRange(i + 1, 12).setValue(pdsScore || ''); // PDS Score
+      sheet.getRange(i + 1, 5).setValue('active');     // Status → active
+      sheet.getRange(i + 1, 13).setValue(reportUrl);   // Report URL
       return jsonCors({ status: 'ok', message: 'Product delivered' });
     }
   }
