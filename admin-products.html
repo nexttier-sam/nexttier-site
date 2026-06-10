@@ -303,26 +303,6 @@ function readFileAsBase64(file) {
   });
 }
 
-async function pollForDelivery(id, timeoutMs) {
-  const start = Date.now();
-  await new Promise(r => setTimeout(r, 5000));
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const encoded = encodeURIComponent(JSON.stringify({ type: 'listProducts', token: _token }));
-      const res = await fetch(NT_API_URL + '?payload=' + encoded).then(r => r.json());
-      if (res?.products) {
-        const updated = res.products.find(x => x.id === id);
-        if (updated?.status === 'active' && updated.reportUrl) {
-          _allProducts = res.products;
-          return updated.reportUrl;
-        }
-      }
-    } catch (_) {}
-    await new Promise(r => setTimeout(r, 4000));
-  }
-  return null;
-}
-
 async function deliverProduct(id) {
   const fileInput = document.getElementById('file-' + id);
   const btn       = document.getElementById('btnDeliver-' + id);
@@ -345,13 +325,12 @@ async function deliverProduct(id) {
   msg.style.display  = 'none';
 
   try {
-    setProgress(id, 'Reading file…', 20);
+    setProgress(id, 'Reading file…', 30);
     const base64 = await readFileAsBase64(file);
 
-    setProgress(id, 'Uploading to Drive…', 50);
-    fetch(NT_API_URL, {
+    setProgress(id, 'Uploading to Drive…', 65);
+    const res = await fetch(NT_API_URL, {
       method:  'POST',
-      mode:    'no-cors',
       headers: { 'Content-Type': 'text/plain' },
       body:    JSON.stringify({
         type:      'uploadReport',
@@ -361,12 +340,12 @@ async function deliverProduct(id) {
         mimeType:  file.type || 'application/octet-stream',
         fileData:  base64
       })
-    }).catch(() => {});
+    }).then(r => r.json());
 
-    setProgress(id, 'Confirming delivery…', 75);
-    const reportUrl = await pollForDelivery(id, 45000);
+    setProgress(id, 'Finishing…', 90);
 
-    if (reportUrl) {
+    if (res.status === 'ok') {
+      const reportUrl = res.reportUrl;
       setProgress(id, 'Delivered ✓', 100);
 
       document.getElementById('panel-' + id).style.display  = 'none';
@@ -375,6 +354,9 @@ async function deliverProduct(id) {
         `<a href="${escHtml(reportUrl)}" target="_blank" style="color:var(--nt-green);font-size:12px;">View ↗</a>`;
       document.getElementById('actionCell-' + id).innerHTML =
         `<button class="action-btn" onclick="toggleDeliver('${id}')">Replace file</button>`;
+
+      const p = _allProducts.find(x => x.id === id);
+      if (p) { p.status = 'active'; p.reportUrl = reportUrl; }
 
       const row = document.getElementById('row-' + id);
       row.style.background = 'rgba(170,221,0,0.06)';
@@ -385,17 +367,15 @@ async function deliverProduct(id) {
         _allProducts.filter(x => x.status !== 'active').length + ' pending';
     } else {
       setProgress(id, '', 0);
-      showMsg(msg, 'Upload sent but not yet confirmed — refresh in a moment to check the status.', 'warn');
+      showMsg(msg, 'Error: ' + (res.message || 'Upload failed — check Apps Script logs.'), 'error');
       btn.disabled       = false;
       cancelBtn.disabled = false;
-      btn.textContent    = 'Upload & Deliver';
     }
   } catch (err) {
     setProgress(id, '', 0);
-    showMsg(msg, 'Error: ' + err.message, 'error');
+    showMsg(msg, 'Network error: ' + err.message, 'error');
     btn.disabled       = false;
     cancelBtn.disabled = false;
-    btn.textContent    = 'Upload & Deliver';
   }
 }
 
