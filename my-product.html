@@ -87,6 +87,18 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 /* LOADING */
 .loading-overlay{position:fixed;inset:0;background:var(--nt-black);display:flex;align-items:center;justify-content:center;z-index:999;}
 
+/* REPORT VIEWER MODAL */
+.report-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:none;flex-direction:column;}
+.report-modal.open{display:flex;}
+.report-modal-bar{background:#111;border-bottom:1px solid var(--nt-border);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.report-modal-title{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);}
+.report-modal-actions{display:flex;align-items:center;gap:10px;}
+.report-modal-actions a{font-size:12px;color:var(--nt-green);text-decoration:none;padding:6px 14px;border:1px solid rgba(170,221,0,.25);border-radius:5px;}
+.report-modal-actions a:hover{background:var(--nt-green-l);}
+.btn-close-modal{background:none;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;font-family:var(--font-body);}
+.btn-close-modal:hover{color:var(--nt-white);}
+.report-modal iframe{flex:1;border:none;background:#fff;}
+
 @media(max-width:640px){.detail-grid{grid-template-columns:1fr 1fr;}.page-body{padding:24px 16px 60px;}nav{padding:0 16px;}.product-card-head{flex-direction:column;}.product-card-foot{flex-direction:column;align-items:stretch;}}
 </style>
 </head>
@@ -94,6 +106,17 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 
 <div class="loading-overlay" id="loadingOverlay">
   <div><img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></div>
+</div>
+
+<div class="report-modal" id="reportModal">
+  <div class="report-modal-bar">
+    <div class="report-modal-title" id="reportModalTitle">Report</div>
+    <div class="report-modal-actions">
+      <a id="reportModalDownload" href="#" target="_blank">Download ↗</a>
+      <button class="btn-close-modal" onclick="closeReportModal()">Close ✕</button>
+    </div>
+  </div>
+  <iframe id="reportModalFrame" src="" allowfullscreen></iframe>
 </div>
 
 <nav>
@@ -169,7 +192,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
       </div>
     </div>
     <div class="product-card-foot">
-      <a href="#" class="btn-sm" id="btnViewCard" target="_blank">Download Report →</a>
+      <button class="btn-sm" id="btnViewCard" onclick="openReportModal()" style="display:none;">View Report →</button>
       <a href="dashboard player" class="btn-sm outline">← Dashboard</a>
       <a href="contact" class="btn-sm outline">Contact support</a>
     </div>
@@ -177,11 +200,36 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 </div>
 
 <script>
+let _reportUrl = '';
+
 function formatDate(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
   return d.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
 }
+
+function drivePreviewUrl(url) {
+  if (!url) return '';
+  const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : url;
+}
+
+function openReportModal() {
+  if (!_reportUrl) return;
+  document.getElementById('reportModalFrame').src    = drivePreviewUrl(_reportUrl);
+  document.getElementById('reportModalDownload').href = _reportUrl;
+  document.getElementById('reportModalTitle').textContent = 'Your Report';
+  document.getElementById('reportModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReportModal() {
+  document.getElementById('reportModal').classList.remove('open');
+  document.getElementById('reportModalFrame').src = '';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReportModal(); });
 
 window.addEventListener('DOMContentLoaded', async () => {
   // Auth gate — only player and parent roles allowed
@@ -225,10 +273,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   pill.className = 'pill ' + (isActive ? 'pill-active' : 'pill-pending');
   document.getElementById('statusText').textContent = isActive ? 'Active' : 'Pending Review';
   const btnViewCard = document.getElementById('btnViewCard');
-  if (!isActive || !product.reportUrl) {
-    btnViewCard.style.display = 'none';
-  } else {
-    btnViewCard.href = product.reportUrl;
+  if (isActive && product.reportUrl) {
+    _reportUrl = product.reportUrl;
+    btnViewCard.style.display = '';
   }
 });
 </script>
