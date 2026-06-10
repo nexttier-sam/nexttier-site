@@ -161,11 +161,19 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 async function loadProducts() {
   const encoded = encodeURIComponent(JSON.stringify({ type: 'listProducts', token: _token }));
-  const res = await fetch(NT_API_URL + '?payload=' + encoded).then(r => r.json()).catch(() => ({ status: 'error' }));
+  let res;
+  try {
+    const r = await fetch(NT_API_URL + '?payload=' + encoded);
+    res = await r.json();
+  } catch (err) {
+    document.getElementById('tableWrap').innerHTML =
+      '<div class="empty-state">Network error — could not reach the API.<br><small style="color:#555;">' + err.message + '</small></div>';
+    return;
+  }
 
   if (res.status !== 'ok') {
     document.getElementById('tableWrap').innerHTML =
-      '<div class="empty-state">Failed to load products: ' + (res.message || 'unknown error') + '</div>';
+      '<div class="empty-state">API error: ' + (res.message || JSON.stringify(res)) + '</div>';
     return;
   }
 
