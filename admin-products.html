@@ -228,18 +228,22 @@ function renderTable() {
         <td colspan="8" style="padding:0;">
           <div class="deliver-panel open" id="panelBody-${p.id}">
             <div class="deliver-panel-title">Deliver report — ${escHtml(name)}</div>
-            <p style="font-size:12px;color:var(--nt-muted);margin-bottom:16px;line-height:1.6;">
-              Upload the report to Google Drive, set sharing to <strong style="color:var(--nt-slate);">"Anyone with the link"</strong>, then paste the link below.
-            </p>
             <div class="deliver-field" style="margin-bottom:16px;">
-              <label>Report link <span style="color:var(--nt-green)">*</span></label>
-              <input type="url" id="url-${p.id}" placeholder="https://drive.google.com/file/d/..." value="${escHtml(p.reportUrl || '')}"
-                style="background:#111;border:1px solid var(--nt-border-strong);border-radius:8px;padding:10px 14px;width:100%;color:var(--nt-white);font-family:var(--font-body);font-size:13px;outline:none;"
-                onfocus="this.style.borderColor='var(--nt-green)'" onblur="this.style.borderColor='var(--nt-border-strong)'">
+              <label>Report file <span style="color:var(--nt-green)">*</span></label>
+              <input type="file" id="file-${p.id}" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.html,.htm"
+                style="display:block;width:100%;background:#111;border:1px solid var(--nt-border-strong);border-radius:8px;padding:10px 14px;color:var(--nt-slate);font-family:var(--font-body);font-size:13px;cursor:pointer;"
+                onchange="onFileSelected('${p.id}', this)">
+              <div id="fileInfo-${p.id}" style="margin-top:8px;font-size:11px;color:var(--nt-muted);display:none;"></div>
+            </div>
+            <div id="progressWrap-${p.id}" style="display:none;margin-bottom:14px;">
+              <div id="progressText-${p.id}" style="font-family:var(--font-mono);font-size:11px;letter-spacing:.07em;color:var(--nt-green);text-transform:uppercase;"></div>
+              <div style="margin-top:8px;height:2px;background:var(--nt-border);border-radius:2px;overflow:hidden;">
+                <div id="progressBar-${p.id}" style="height:100%;background:var(--nt-green);width:0%;transition:width .4s;"></div>
+              </div>
             </div>
             <div class="deliver-actions">
-              <button class="btn-deliver" id="btnDeliver-${p.id}" onclick="deliverProduct('${p.id}')">Mark as Delivered</button>
-              <button class="btn-cancel-deliver" onclick="toggleDeliver('${p.id}')">Cancel</button>
+              <button class="btn-deliver" id="btnDeliver-${p.id}" onclick="deliverProduct('${p.id}')">Upload &amp; Deliver</button>
+              <button class="btn-cancel-deliver" id="btnCancel-${p.id}" onclick="toggleDeliver('${p.id}')">Cancel</button>
             </div>
             <div id="panelMsg-${p.id}" style="margin-top:12px;font-size:13px;padding:10px 14px;border-radius:8px;display:none;"></div>
           </div>
@@ -269,39 +273,108 @@ function toggleDeliver(id) {
   _openProductId = isOpen ? null : id;
 }
 
+function onFileSelected(id, input) {
+  const info = document.getElementById('fileInfo-' + id);
+  if (!input.files || !input.files[0]) { info.style.display = 'none'; return; }
+  const f    = input.files[0];
+  const size = f.size > 1024 * 1024
+    ? (f.size / 1024 / 1024).toFixed(1) + ' MB'
+    : (f.size / 1024).toFixed(0) + ' KB';
+  info.textContent  = f.name + ' · ' + size;
+  info.style.display = '';
+}
+
+function setProgress(id, text, pct) {
+  const wrap = document.getElementById('progressWrap-' + id);
+  const txt  = document.getElementById('progressText-' + id);
+  const bar  = document.getElementById('progressBar-' + id);
+  if (!text) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  txt.textContent    = text;
+  bar.style.width    = pct + '%';
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = e => resolve(e.target.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function pollForDelivery(id, timeoutMs) {
+  const start = Date.now();
+  await new Promise(r => setTimeout(r, 5000));
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const encoded = encodeURIComponent(JSON.stringify({ type: 'listProducts', token: _token }));
+      const res = await fetch(NT_API_URL + '?payload=' + encoded).then(r => r.json());
+      if (res?.products) {
+        const updated = res.products.find(x => x.id === id);
+        if (updated?.status === 'active' && updated.reportUrl) {
+          _allProducts = res.products;
+          return updated.reportUrl;
+        }
+      }
+    } catch (_) {}
+    await new Promise(r => setTimeout(r, 4000));
+  }
+  return null;
+}
+
 async function deliverProduct(id) {
-  const urlEl = document.getElementById('url-' + id);
-  const url   = urlEl ? urlEl.value.trim() : '';
-  const btn   = document.getElementById('btnDeliver-' + id);
-  const msg   = document.getElementById('panelMsg-' + id);
+  const fileInput = document.getElementById('file-' + id);
+  const btn       = document.getElementById('btnDeliver-' + id);
+  const cancelBtn = document.getElementById('btnCancel-' + id);
+  const msg       = document.getElementById('panelMsg-' + id);
 
-  if (!url)                    { showMsg(msg, 'Please paste the report link.', 'error'); return; }
-  if (!url.startsWith('http')) { showMsg(msg, 'Please enter a valid URL starting with https://', 'error'); return; }
+  if (!fileInput?.files?.[0]) {
+    showMsg(msg, 'Please select a file to upload.', 'error');
+    return;
+  }
 
-  btn.disabled    = true;
-  btn.textContent = 'Delivering…';
-  msg.style.display = 'none';
+  const file = fileInput.files[0];
+  if (file.size > 10 * 1024 * 1024) {
+    showMsg(msg, 'File must be under 10 MB. Compress or split the file and try again.', 'error');
+    return;
+  }
+
+  btn.disabled       = true;
+  cancelBtn.disabled = true;
+  msg.style.display  = 'none';
 
   try {
-    const encoded = encodeURIComponent(JSON.stringify({
-      type:      'deliverProduct',
-      token:     _token,
-      productId: id,
-      reportUrl: url
-    }));
-    const res = await fetch(NT_API_URL + '?payload=' + encoded).then(r => r.json());
+    setProgress(id, 'Reading file…', 20);
+    const base64 = await readFileAsBase64(file);
 
-    if (res.status === 'ok') {
-      const p = _allProducts.find(x => x.id === id);
-      if (p) { p.status = 'active'; p.reportUrl = url; }
+    setProgress(id, 'Uploading to Drive…', 50);
+    fetch(NT_API_URL, {
+      method:  'POST',
+      mode:    'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify({
+        type:      'uploadReport',
+        token:     _token,
+        productId: id,
+        fileName:  file.name,
+        mimeType:  file.type || 'application/octet-stream',
+        fileData:  base64
+      })
+    }).catch(() => {});
 
-      document.getElementById('panel-' + id).style.display = 'none';
-      document.getElementById('statusCell-' + id).innerHTML =
-        '<span class="status-pill active">active</span>';
-      document.getElementById('fileCell-' + id).innerHTML =
-        `<a href="${escHtml(url)}" target="_blank" style="color:var(--nt-green);font-size:12px;">View ↗</a>`;
+    setProgress(id, 'Confirming delivery…', 75);
+    const reportUrl = await pollForDelivery(id, 45000);
+
+    if (reportUrl) {
+      setProgress(id, 'Delivered ✓', 100);
+
+      document.getElementById('panel-' + id).style.display  = 'none';
+      document.getElementById('statusCell-' + id).innerHTML = '<span class="status-pill active">active</span>';
+      document.getElementById('fileCell-' + id).innerHTML   =
+        `<a href="${escHtml(reportUrl)}" target="_blank" style="color:var(--nt-green);font-size:12px;">View ↗</a>`;
       document.getElementById('actionCell-' + id).innerHTML =
-        `<button class="action-btn" onclick="toggleDeliver('${id}')">Update link</button>`;
+        `<button class="action-btn" onclick="toggleDeliver('${id}')">Replace file</button>`;
 
       const row = document.getElementById('row-' + id);
       row.style.background = 'rgba(170,221,0,0.06)';
@@ -311,23 +384,37 @@ async function deliverProduct(id) {
         _allProducts.length + ' total · ' +
         _allProducts.filter(x => x.status !== 'active').length + ' pending';
     } else {
-      showMsg(msg, 'Error: ' + (res.message || 'unknown'), 'error');
-      btn.disabled    = false;
-      btn.textContent = 'Mark as Delivered';
+      setProgress(id, '', 0);
+      showMsg(msg, 'Upload sent but not yet confirmed — refresh in a moment to check the status.', 'warn');
+      btn.disabled       = false;
+      cancelBtn.disabled = false;
+      btn.textContent    = 'Upload & Deliver';
     }
   } catch (err) {
-    showMsg(msg, 'Network error — ' + err.message, 'error');
-    btn.disabled    = false;
-    btn.textContent = 'Mark as Delivered';
+    setProgress(id, '', 0);
+    showMsg(msg, 'Error: ' + err.message, 'error');
+    btn.disabled       = false;
+    cancelBtn.disabled = false;
+    btn.textContent    = 'Upload & Deliver';
   }
 }
 
 function showMsg(el, text, type) {
-  el.textContent       = text;
-  el.style.background  = type === 'error' ? 'rgba(232,52,74,0.1)'          : 'rgba(170,221,0,0.08)';
-  el.style.border      = type === 'error' ? '1px solid rgba(232,52,74,0.2)' : '1px solid rgba(170,221,0,0.15)';
-  el.style.color       = type === 'error' ? 'var(--nt-red)'                 : 'var(--nt-green)';
-  el.style.display     = '';
+  el.textContent = text;
+  if (type === 'error') {
+    el.style.background = 'rgba(232,52,74,0.1)';
+    el.style.border     = '1px solid rgba(232,52,74,0.2)';
+    el.style.color      = 'var(--nt-red)';
+  } else if (type === 'warn') {
+    el.style.background = 'rgba(255,180,0,0.1)';
+    el.style.border     = '1px solid rgba(255,180,0,0.2)';
+    el.style.color      = '#FFB400';
+  } else {
+    el.style.background = 'rgba(170,221,0,0.08)';
+    el.style.border     = '1px solid rgba(170,221,0,0.15)';
+    el.style.color      = 'var(--nt-green)';
+  }
+  el.style.display = '';
 }
 
 function escHtml(str) {
