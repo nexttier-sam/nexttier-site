@@ -117,6 +117,7 @@ function doPost(e) {
       case 'listProducts':    return handleListProducts(payload);
       case 'deliverProduct':  return handleDeliverProduct(payload);
       case 'uploadReport':    return handleUploadReport(payload);
+      case 'viewReport':      return handleViewReport(payload);
       default:
         return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
     }
@@ -538,6 +539,51 @@ function hashPassword(pw) {
 
 function verifyPassword(pw, hash) {
   return hashPassword(pw) === hash;
+}
+
+// ── View Report ───────────────────────────────────────────────────
+function handleViewReport(payload) {
+  const auth = requireRole(payload.token, ['admin', 'player', 'parent', 'scout']);
+  if (auth.status === 'error') return jsonCors(auth);
+
+  const { productId } = payload;
+  if (!productId) return jsonCors({ status: 'error', message: 'productId required' });
+
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(TABS.products);
+  if (!sheet) return jsonCors({ status: 'error', message: 'Products sheet not found' });
+
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    if (r[0] !== productId) continue;
+
+    // Non-admins can only view their own product
+    if (auth.role !== 'admin' && r[1] !== auth.userId) {
+      return jsonCors({ status: 'error', message: 'Access denied' });
+    }
+
+    const reportUrl = r[12];
+    if (!reportUrl) return jsonCors({ status: 'error', message: 'No report available' });
+
+    const match = reportUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (!match) return jsonCors({ status: 'error', message: 'Invalid report URL format' });
+
+    try {
+      const file     = DriveApp.getFileById(match[1]);
+      const mimeType = file.getMimeType();
+      const blob     = file.getBlob();
+
+      if (mimeType === 'text/html') {
+        return jsonCors({ status: 'ok', content: blob.getDataAsString(), mimeType: 'text/html', isBase64: false });
+      } else {
+        return jsonCors({ status: 'ok', content: Utilities.base64Encode(blob.getBytes()), mimeType: mimeType, isBase64: true });
+      }
+    } catch (err) {
+      return jsonCors({ status: 'error', message: 'Could not read file: ' + err.message });
+    }
+  }
+  return jsonCors({ status: 'error', message: 'Product not found' });
 }
 
 // Run this once manually to authorize Google Drive access.

@@ -425,20 +425,36 @@ function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function drivePreviewUrl(url) {
-  const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : url;
-}
-
-function openReportById(id) {
+async function openReportById(id) {
   const p = _allProducts.find(x => x.id === id);
   if (!p || !p.reportUrl) return;
+
   const name = [p.firstName, p.lastName].filter(Boolean).join(' ') || '';
-  document.getElementById('reportModalFrame').src     = drivePreviewUrl(p.reportUrl);
+  document.getElementById('reportModalFrame').src = '';
   document.getElementById('reportModalDownload').href = p.reportUrl;
-  document.getElementById('reportModalTitle').textContent = name ? 'Report — ' + name : 'Report preview';
+  document.getElementById('reportModalTitle').textContent = name ? 'Report — ' + name : 'Loading…';
   document.getElementById('reportModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  try {
+    const encoded = encodeURIComponent(JSON.stringify({ type: 'viewReport', token: _token, productId: id }));
+    const res = await fetch(NT_API_URL + '?payload=' + encoded).then(r => r.json());
+    if (res.status !== 'ok') throw new Error(res.message || 'Could not load report');
+    document.getElementById('reportModalFrame').src = buildBlobUrl(res);
+    document.getElementById('reportModalTitle').textContent = name ? 'Report — ' + name : 'Report';
+  } catch (err) {
+    document.getElementById('reportModalTitle').textContent = 'Error: ' + err.message;
+  }
+}
+
+function buildBlobUrl(res) {
+  if (res.isBase64) {
+    const binary = atob(res.content);
+    const bytes  = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: res.mimeType }));
+  }
+  return URL.createObjectURL(new Blob([res.content], { type: res.mimeType || 'text/html' }));
 }
 
 function closeReportModal() {

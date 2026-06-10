@@ -200,7 +200,8 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 </div>
 
 <script>
-let _reportUrl = '';
+let _reportUrl   = '';
+let _productId   = '';
 
 function formatDate(iso) {
   if (!iso) return '—';
@@ -208,19 +209,31 @@ function formatDate(iso) {
   return d.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function drivePreviewUrl(url) {
-  if (!url) return '';
-  const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : url;
+function buildBlobUrl(res) {
+  if (res.isBase64) {
+    const binary = atob(res.content);
+    const bytes  = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: res.mimeType }));
+  }
+  return URL.createObjectURL(new Blob([res.content], { type: res.mimeType || 'text/html' }));
 }
 
-function openReportModal() {
-  if (!_reportUrl) return;
-  document.getElementById('reportModalFrame').src    = drivePreviewUrl(_reportUrl);
+async function openReportModal() {
+  if (!_productId) return;
+  document.getElementById('reportModalFrame').src = '';
   document.getElementById('reportModalDownload').href = _reportUrl;
-  document.getElementById('reportModalTitle').textContent = 'Your Report';
+  document.getElementById('reportModalTitle').textContent = 'Loading…';
   document.getElementById('reportModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  try {
+    const res = await NT.api({ type: 'viewReport', token: NT.getToken(), productId: _productId });
+    if (res.status !== 'ok') throw new Error(res.message || 'Could not load report');
+    document.getElementById('reportModalFrame').src = buildBlobUrl(res);
+    document.getElementById('reportModalTitle').textContent = 'Your Report';
+  } catch (err) {
+    document.getElementById('reportModalTitle').textContent = 'Error: ' + err.message;
+  }
 }
 
 function closeReportModal() {
@@ -274,7 +287,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('statusText').textContent = isActive ? 'Active' : 'Pending Review';
   const btnViewCard = document.getElementById('btnViewCard');
   if (isActive && product.reportUrl) {
-    _reportUrl = product.reportUrl;
+    _reportUrl  = product.reportUrl;
+    _productId  = product.id;
     btnViewCard.style.display = '';
   }
 });

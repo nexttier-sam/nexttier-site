@@ -359,23 +359,36 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 
 <script>
 let _reportUrl = '';
+let _productId = '';
 
 function fmtDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-CA', { year:'numeric', month:'short', day:'numeric' });
 }
 
-function drivePreviewUrl(url) {
-  const m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  return m ? 'https://drive.google.com/file/d/' + m[1] + '/preview' : url;
+function buildBlobUrl(res) {
+  if (res.isBase64) {
+    const binary = atob(res.content);
+    const bytes  = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: res.mimeType }));
+  }
+  return URL.createObjectURL(new Blob([res.content], { type: res.mimeType || 'text/html' }));
 }
 
-function openReportModal() {
-  if (!_reportUrl) return;
-  document.getElementById('reportModalFrame').src = drivePreviewUrl(_reportUrl);
+async function openReportModal() {
+  if (!_productId) return;
+  document.getElementById('reportModalFrame').src = '';
   document.getElementById('reportModalDl').href   = _reportUrl;
   document.getElementById('reportModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  try {
+    const res = await NT.api({ type: 'viewReport', token: NT.getToken(), productId: _productId });
+    if (res.status !== 'ok') throw new Error(res.message || 'Could not load report');
+    document.getElementById('reportModalFrame').src = buildBlobUrl(res);
+  } catch (err) {
+    document.getElementById('reportModalFrame').srcdoc = '<p style="padding:24px;font-family:sans-serif;color:#c00;">Error: ' + err.message + '</p>';
+  }
 }
 
 function closeReportModal() {
@@ -446,6 +459,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const reportUrl = product.reportUrl || '';
     if (reportUrl) {
       _reportUrl = reportUrl;
+      _productId = product.id;
       document.getElementById('reportModalDl').href = reportUrl;
     }
     document.getElementById('scBtnReport').style.display = reportUrl ? '' : 'none';
