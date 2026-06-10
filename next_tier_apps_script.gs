@@ -539,3 +539,11 @@ function hashPassword(pw) {
 function verifyPassword(pw, hash) {
   return hashPassword(pw) === hash;
 }
+
+// Run this once manually to authorize Google Drive access.
+// Select authorizeDrive → Run → Review permissions → Allow → then redeploy.
+function authorizeDrive() {
+  const folders = DriveApp.getFoldersByName('NT Reports');
+  const folder  = folders.hasNext() ? folders.next() : DriveApp.createFolder('NT Reports');
+  Logger.log('Drive authorized. NT Reports folder ID: ' + folder.getId());
+}
