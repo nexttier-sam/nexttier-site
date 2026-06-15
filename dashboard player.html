@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Next Tier — Player Home</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="/config.js"></script>
-<script src="/nt-auth.js"></script>
+<script src="/config.js?v=2"></script>
+<script src="/nt-auth.js?v=2"></script>
 <style>
 :root {
   --nt-black:#000000;--nt-white:#FFFFFF;
@@ -331,6 +334,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 
 <script>
 const _reports = {};
+let _fallbackTimer = null;
 
 function fmtDate(iso) {
   if (!iso) return '—';
@@ -348,6 +352,8 @@ function openReportModal(productId) {
   const frame  = document.getElementById('reportModalFrame');
   const loader = document.getElementById('reportModalLoader');
 
+  if (_fallbackTimer) { clearTimeout(_fallbackTimer); _fallbackTimer = null; }
+  frame.onload         = null;
   frame.src            = '';
   frame.style.display  = 'none';
   loader.style.display = '';
@@ -357,15 +363,25 @@ function openReportModal(productId) {
   document.getElementById('reportModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 
+  _fallbackTimer = setTimeout(() => {
+    loader.innerHTML =
+      '<p style="font-family:sans-serif;font-size:13px;color:#888;margin-bottom:16px;">Preview unavailable.</p>' +
+      '<a href="' + reportUrl + '" target="_blank" style="font-family:sans-serif;font-size:13px;color:#AADD00;' +
+      'border:1px solid rgba(170,221,0,.25);padding:8px 18px;border-radius:5px;text-decoration:none;">Open in Google Drive ↗</a>';
+  }, 12000);
+
   frame.onload = () => {
+    clearTimeout(_fallbackTimer);
+    _fallbackTimer       = null;
     loader.style.display = 'none';
     frame.style.display  = '';
-    frame.onload = null;
+    frame.onload         = null;
   };
   frame.src = previewUrl;
 }
 
 function closeReportModal() {
+  if (_fallbackTimer) { clearTimeout(_fallbackTimer); _fallbackTimer = null; }
   const frame  = document.getElementById('reportModalFrame');
   const loader = document.getElementById('reportModalLoader');
   document.getElementById('reportModal').classList.remove('open');
