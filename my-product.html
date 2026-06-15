@@ -257,13 +257,14 @@ async function openReportModal() {
   }, 12000);
 
   let apiRes = null;
+  let apiErr = null;
   try {
     apiRes = await fetch(NT_API_URL, {
       method:  'POST',
       headers: { 'Content-Type': 'text/plain' },
       body:    JSON.stringify({ type: 'viewReport', token: NT.getToken(), productId: _productId })
     }).then(r => r.json());
-  } catch (_) {}
+  } catch (e) { apiErr = e.message; }
 
   if (apiRes && apiRes.status === 'ok' && !apiRes.isBase64) {
     const doc = frame.contentDocument || frame.contentWindow.document;
@@ -271,15 +272,21 @@ async function openReportModal() {
     clearTimeout(_fallbackTimer); _fallbackTimer = null;
     loader.style.display = 'none';
     frame.style.display  = '';
-  } else {
-    const src = (apiRes && apiRes.status === 'ok') ? buildBlobUrl(apiRes) : previewUrl;
+  } else if (apiRes && apiRes.status === 'ok') {
     frame.onload = () => {
       clearTimeout(_fallbackTimer); _fallbackTimer = null;
       loader.style.display = 'none';
       frame.style.display  = '';
       frame.onload         = null;
     };
-    frame.src = src;
+    frame.src = buildBlobUrl(apiRes);
+  } else {
+    clearTimeout(_fallbackTimer); _fallbackTimer = null;
+    const msg = apiRes ? apiRes.message : (apiErr || 'Network error');
+    loader.innerHTML =
+      '<p style="font-family:sans-serif;font-size:12px;color:#f66;margin-bottom:12px;">Error: ' + msg + '</p>' +
+      '<a href="' + _reportUrl + '" target="_blank" style="font-family:sans-serif;font-size:13px;color:#AADD00;' +
+      'border:1px solid rgba(170,221,0,.25);padding:8px 18px;border-radius:5px;text-decoration:none;">Open in Google Drive ↗</a>';
   }
 }
 
