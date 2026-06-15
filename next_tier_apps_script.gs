@@ -607,9 +607,10 @@ function handleViewReport(payload) {
     try {
       const file     = DriveApp.getFileById(match[1]);
       const mimeType = file.getMimeType();
+      const fileName = file.getName().toLowerCase();
       const blob     = file.getBlob();
 
-      if (mimeType === 'text/html') {
+      if (mimeType === 'text/html' || fileName.endsWith('.html')) {
         return jsonCors({ status: 'ok', content: blob.getDataAsString(), mimeType: 'text/html', isBase64: false });
       } else {
         return jsonCors({ status: 'ok', content: Utilities.base64Encode(blob.getBytes()), mimeType: mimeType, isBase64: true });

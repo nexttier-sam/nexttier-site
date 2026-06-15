@@ -239,6 +239,7 @@ async function openReportModal() {
 
   if (_fallbackTimer) { clearTimeout(_fallbackTimer); _fallbackTimer = null; }
   frame.onload         = null;
+  frame.srcdoc         = '';
   frame.src            = '';
   frame.style.display  = 'none';
   loader.style.display = '';
@@ -256,14 +257,13 @@ async function openReportModal() {
       'border:1px solid rgba(170,221,0,.25);padding:8px 18px;border-radius:5px;text-decoration:none;">Open in Google Drive ↗</a>';
   }, 12000);
 
-  let src = previewUrl;
+  let apiRes = null;
   try {
-    const res = await fetch(NT_API_URL, {
+    apiRes = await fetch(NT_API_URL, {
       method:  'POST',
       headers: { 'Content-Type': 'text/plain' },
       body:    JSON.stringify({ type: 'viewReport', token: NT.getToken(), productId: _productId })
     }).then(r => r.json());
-    if (res.status === 'ok') src = buildBlobUrl(res);
   } catch (_) {}
 
   frame.onload = () => {
@@ -273,7 +273,16 @@ async function openReportModal() {
     frame.style.display  = '';
     frame.onload         = null;
   };
-  frame.src = src;
+
+  if (apiRes && apiRes.status === 'ok' && !apiRes.isBase64) {
+    frame.srcdoc = apiRes.content;
+  } else if (apiRes && apiRes.status === 'ok') {
+    frame.srcdoc = '';
+    frame.src    = buildBlobUrl(apiRes);
+  } else {
+    frame.srcdoc = '';
+    frame.src    = previewUrl;
+  }
 }
 
 function closeReportModal() {
@@ -282,6 +291,7 @@ function closeReportModal() {
   const loader = document.getElementById('reportModalLoader');
   document.getElementById('reportModal').classList.remove('open');
   frame.onload         = null;
+  frame.srcdoc         = '';
   frame.src            = '';
   frame.style.display  = 'none';
   loader.style.display = '';
