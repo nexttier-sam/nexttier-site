@@ -221,7 +221,17 @@ function formatDate(iso) {
   return d.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function openReportModal() {
+function buildBlobUrl(res) {
+  if (res.isBase64) {
+    const binary = atob(res.content);
+    const bytes  = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: res.mimeType }));
+  }
+  return URL.createObjectURL(new Blob([res.content], { type: res.mimeType || 'text/html' }));
+}
+
+async function openReportModal() {
   if (!_productId || !_reportUrl) return;
   const previewUrl = _reportUrl.replace('/view', '/preview');
   const frame  = document.getElementById('reportModalFrame');
@@ -246,6 +256,16 @@ function openReportModal() {
       'border:1px solid rgba(170,221,0,.25);padding:8px 18px;border-radius:5px;text-decoration:none;">Open in Google Drive ↗</a>';
   }, 12000);
 
+  let src = previewUrl;
+  try {
+    const res = await fetch(NT_API_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify({ type: 'viewReport', token: NT.getToken(), productId: _productId })
+    }).then(r => r.json());
+    if (res.status === 'ok') src = buildBlobUrl(res);
+  } catch (_) {}
+
   frame.onload = () => {
     clearTimeout(_fallbackTimer);
     _fallbackTimer       = null;
@@ -253,7 +273,7 @@ function openReportModal() {
     frame.style.display  = '';
     frame.onload         = null;
   };
-  frame.src = previewUrl;
+  frame.src = src;
 }
 
 function closeReportModal() {

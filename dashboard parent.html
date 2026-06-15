@@ -184,7 +184,17 @@ function escHtml(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function openReportModal(productId) {
+function buildBlobUrl(res) {
+  if (res.isBase64) {
+    const binary = atob(res.content);
+    const bytes  = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return URL.createObjectURL(new Blob([bytes], { type: res.mimeType }));
+  }
+  return URL.createObjectURL(new Blob([res.content], { type: res.mimeType || 'text/html' }));
+}
+
+async function openReportModal(productId) {
   if (!productId || !_reports[productId]) return;
   const reportUrl  = _reports[productId];
   const previewUrl = reportUrl.replace('/view', '/preview');
@@ -209,6 +219,18 @@ function openReportModal(productId) {
       'border:1px solid rgba(170,221,0,.25);padding:8px 18px;border-radius:5px;text-decoration:none;">Open in Google Drive ↗</a>';
   }, 12000);
 
+  // Try API first — renders HTML correctly as a blob URL.
+  // Falls back to Drive preview (works for PDFs) if the API is unavailable.
+  let src = previewUrl;
+  try {
+    const res = await fetch(NT_API_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify({ type: 'viewReport', token: NT.getToken(), productId })
+    }).then(r => r.json());
+    if (res.status === 'ok') src = buildBlobUrl(res);
+  } catch (_) {}
+
   frame.onload = () => {
     clearTimeout(_fallbackTimer);
     _fallbackTimer       = null;
@@ -216,7 +238,7 @@ function openReportModal(productId) {
     frame.style.display  = '';
     frame.onload         = null;
   };
-  frame.src = previewUrl;
+  frame.src = src;
 }
 
 function closeReportModal() {
