@@ -96,6 +96,10 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .btn-close-modal{background:none;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;font-family:var(--font-body);}
 .btn-close-modal:hover{color:var(--nt-white);}
 .report-modal iframe{flex:1;border:none;background:#fff;}
+.report-modal-loader{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#111;}
+.report-modal-loader-text{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#888;}
+@keyframes nt-spin{to{transform:rotate(360deg);}}
+.report-modal-spinner{width:32px;height:32px;border:2px solid rgba(170,221,0,0.15);border-top-color:#AADD00;border-radius:50%;animation:nt-spin .8s linear infinite;}
 
 @media(max-width:720px){
   .deliver-grid{grid-template-columns:1fr;}
@@ -119,7 +123,11 @@ tr:hover td{background:rgba(255,255,255,.02);}
       <button class="btn-close-modal" onclick="closeReportModal()">Close ✕</button>
     </div>
   </div>
-  <iframe id="reportModalFrame" src="" allowfullscreen></iframe>
+  <div class="report-modal-loader" id="reportModalLoader">
+    <div class="report-modal-spinner"></div>
+    <div class="report-modal-loader-text">Loading report…</div>
+  </div>
+  <iframe id="reportModalFrame" src="" allowfullscreen style="display:none;"></iframe>
 </div>
 
 <nav>
@@ -425,41 +433,41 @@ function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-async function openReportById(id) {
+function openReportById(id) {
   const p = _allProducts.find(x => x.id === id);
   if (!p || !p.reportUrl) return;
 
-  const name = [p.firstName, p.lastName].filter(Boolean).join(' ') || '';
-  document.getElementById('reportModalFrame').src = '';
+  const previewUrl = p.reportUrl.replace('/view', '/preview');
+  const frame  = document.getElementById('reportModalFrame');
+  const loader = document.getElementById('reportModalLoader');
+  const name   = [p.firstName, p.lastName].filter(Boolean).join(' ') || '';
+
+  frame.src            = '';
+  frame.style.display  = 'none';
+  loader.style.display = '';
+  loader.innerHTML     = '<div class="report-modal-spinner"></div><div class="report-modal-loader-text">Loading report…</div>';
+
   document.getElementById('reportModalDownload').href = p.reportUrl;
-  document.getElementById('reportModalTitle').textContent = name ? 'Report — ' + name : 'Loading…';
+  document.getElementById('reportModalTitle').textContent = name ? 'Report — ' + name : 'Report';
   document.getElementById('reportModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 
-  try {
-    const encoded = encodeURIComponent(JSON.stringify({ type: 'viewReport', token: _token, productId: id }));
-    const res = await fetch(NT_API_URL + '?payload=' + encoded).then(r => r.json());
-    if (res.status !== 'ok') throw new Error(res.message || 'Could not load report');
-    document.getElementById('reportModalFrame').src = buildBlobUrl(res);
-    document.getElementById('reportModalTitle').textContent = name ? 'Report — ' + name : 'Report';
-  } catch (err) {
-    document.getElementById('reportModalTitle').textContent = 'Error: ' + err.message;
-  }
-}
-
-function buildBlobUrl(res) {
-  if (res.isBase64) {
-    const binary = atob(res.content);
-    const bytes  = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return URL.createObjectURL(new Blob([bytes], { type: res.mimeType }));
-  }
-  return URL.createObjectURL(new Blob([res.content], { type: res.mimeType || 'text/html' }));
+  frame.onload = () => {
+    loader.style.display = 'none';
+    frame.style.display  = '';
+    frame.onload = null;
+  };
+  frame.src = previewUrl;
 }
 
 function closeReportModal() {
+  const frame  = document.getElementById('reportModalFrame');
+  const loader = document.getElementById('reportModalLoader');
   document.getElementById('reportModal').classList.remove('open');
-  document.getElementById('reportModalFrame').src = '';
+  frame.onload         = null;
+  frame.src            = '';
+  frame.style.display  = 'none';
+  loader.style.display = '';
   document.body.style.overflow = '';
 }
 

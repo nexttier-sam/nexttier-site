@@ -83,6 +83,10 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .btn-close-modal{background:none;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;font-family:var(--font-body);}
 .btn-close-modal:hover{color:#fff;}
 .report-modal iframe{flex:1;border:none;background:#fff;}
+.report-modal-loader{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#111;}
+.report-modal-loader-text{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#888;}
+@keyframes nt-spin{to{transform:rotate(360deg);}}
+.report-modal-spinner{width:32px;height:32px;border:2px solid rgba(170,221,0,0.15);border-top-color:#AADD00;border-radius:50%;animation:nt-spin .8s linear infinite;}
 </style>
 </head>
 <body>
@@ -99,7 +103,11 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
       <button class="btn-close-modal" onclick="closeReportModal()">Close ✕</button>
     </div>
   </div>
-  <iframe id="reportModalFrame" src="" allowfullscreen></iframe>
+  <div class="report-modal-loader" id="reportModalLoader">
+    <div class="report-modal-spinner"></div>
+    <div class="report-modal-loader-text">Loading report…</div>
+  </div>
+  <iframe id="reportModalFrame" src="" allowfullscreen style="display:none;"></iframe>
 </div>
 
 <nav>
@@ -122,31 +130,8 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
   <div class="page-title">YOUR PLAYER'S <em>PROGRESS.</em></div>
   <div class="page-sub">Track reports, status updates, and all activity for your linked player.</div>
 
-  <!-- LINKED PLAYER — shown only when intake submitted -->
-  <div class="section" id="sectionPlayer" style="display:none;">
-    <div class="section-head">
-      <div class="section-title">LINKED PLAYER</div>
-      <span class="pill" id="statusPill"><span class="pill-dot"></span><span id="statusText">Pending</span></span>
-    </div>
-    <div class="section-body">
-      <div class="player-card">
-        <div class="player-avatar" id="playerAvatar">—</div>
-        <div>
-          <div class="player-name" id="playerName">—</div>
-          <div class="player-meta" id="playerMeta">—</div>
-        </div>
-      </div>
-      <div class="info-grid">
-        <div class="info-item"><div class="info-label">Package</div><div class="info-val" id="infoPackage">—</div></div>
-        <div class="info-item"><div class="info-label">Submitted</div><div class="info-val" id="infoSubmitted">—</div></div>
-        <div class="info-item"><div class="info-label">Status</div><div class="info-val" id="infoStatus">—</div></div>
-      </div>
-    </div>
-    <div class="card-foot">
-      <button class="btn-sm" id="btnViewReport" style="display:none;" onclick="openReportModal()">View Full Report →</button>
-      <a href="contact" class="btn-sm outline">Contact support</a>
-    </div>
-  </div>
+  <!-- LINKED PLAYERS — one card per product, rendered by JS -->
+  <div id="sectionProducts"></div>
 
   <!-- NO INTAKE — shown when no product exists -->
   <div class="section" id="sectionEmpty" style="display:none;">
@@ -184,46 +169,102 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 </div>
 
 <script>
-let _reportUrl = '';
-let _productId = '';
+const _reports = {};
 
 function fmtDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-CA', { year:'numeric', month:'short', day:'numeric' });
 }
 
-function buildBlobUrl(res) {
-  if (res.isBase64) {
-    const binary = atob(res.content);
-    const bytes  = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return URL.createObjectURL(new Blob([bytes], { type: res.mimeType }));
-  }
-  return URL.createObjectURL(new Blob([res.content], { type: res.mimeType || 'text/html' }));
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-async function openReportModal() {
-  if (!_productId) return;
-  document.getElementById('reportModalFrame').src = '';
-  document.getElementById('reportModalDl').href   = _reportUrl;
+function openReportModal(productId) {
+  if (!productId || !_reports[productId]) return;
+  const reportUrl  = _reports[productId];
+  const previewUrl = reportUrl.replace('/view', '/preview');
+  const frame  = document.getElementById('reportModalFrame');
+  const loader = document.getElementById('reportModalLoader');
+
+  frame.src            = '';
+  frame.style.display  = 'none';
+  loader.style.display = '';
+  loader.innerHTML     = '<div class="report-modal-spinner"></div><div class="report-modal-loader-text">Loading report…</div>';
+
+  document.getElementById('reportModalDl').href = reportUrl;
   document.getElementById('reportModal').classList.add('open');
   document.body.style.overflow = 'hidden';
-  try {
-    const res = await NT.api({ type: 'viewReport', token: NT.getToken(), productId: _productId });
-    if (res.status !== 'ok') throw new Error(res.message || 'Could not load report');
-    document.getElementById('reportModalFrame').src = buildBlobUrl(res);
-  } catch (err) {
-    document.getElementById('reportModalFrame').srcdoc = '<p style="padding:24px;font-family:sans-serif;color:#c00;">Error: ' + err.message + '</p>';
-  }
+
+  frame.onload = () => {
+    loader.style.display = 'none';
+    frame.style.display  = '';
+    frame.onload = null;
+  };
+  frame.src = previewUrl;
 }
 
 function closeReportModal() {
+  const frame  = document.getElementById('reportModalFrame');
+  const loader = document.getElementById('reportModalLoader');
   document.getElementById('reportModal').classList.remove('open');
-  document.getElementById('reportModalFrame').src = '';
+  frame.onload         = null;
+  frame.src            = '';
+  frame.style.display  = 'none';
+  loader.style.display = '';
   document.body.style.overflow = '';
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReportModal(); });
+
+function renderProductCards(products) {
+  const container = document.getElementById('sectionProducts');
+  container.innerHTML = '';
+
+  products.forEach(product => {
+    const name     = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
+    const initials = [(product.firstName||'')[0],(product.lastName||'')[0]].filter(Boolean).join('').toUpperCase() || '?';
+    const meta     = [product.position, product.team, product.league].filter(Boolean).join(' · ') || '—';
+    const isActive = product.status === 'active';
+    const hasReport = isActive && product.reportUrl;
+
+    if (hasReport) _reports[product.id] = product.reportUrl;
+
+    const section = document.createElement('div');
+    section.className = 'section';
+    section.style.marginBottom = '16px';
+    section.innerHTML = `
+      <div class="section-head">
+        <div>
+          <div class="section-title">LINKED PLAYER</div>
+          <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-muted);margin-top:3px;">${escHtml(product.package || '—')}</div>
+        </div>
+        <span class="pill ${isActive ? 'pill-active' : 'pill-pending'}">
+          <span class="pill-dot"></span>
+          <span>${isActive ? 'Active' : 'In review'}</span>
+        </span>
+      </div>
+      <div class="section-body">
+        <div class="player-card">
+          <div class="player-avatar">${escHtml(initials)}</div>
+          <div>
+            <div class="player-name">${escHtml(name.toUpperCase())}</div>
+            <div class="player-meta">${escHtml(meta)}</div>
+          </div>
+        </div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-label">Package</div><div class="info-val">${escHtml(product.package || '—')}</div></div>
+          <div class="info-item"><div class="info-label">Submitted</div><div class="info-val">${fmtDate(product.createdAt)}</div></div>
+          <div class="info-item"><div class="info-label">Status</div><div class="info-val">${isActive ? 'Report ready' : 'In review'}</div></div>
+        </div>
+      </div>
+      <div class="card-foot">
+        ${hasReport ? `<button class="btn-sm" onclick="openReportModal('${escHtml(product.id)}')">View Full Report →</button>` : ''}
+        <a href="contact" class="btn-sm outline">Contact support</a>
+      </div>`;
+    container.appendChild(section);
+  });
+}
 
 window.addEventListener('DOMContentLoaded', async () => {
   const user = await NT.guard(['parent', 'admin']);
@@ -231,48 +272,26 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   NT.renderUser();
 
-  let product = null;
+  let products = [];
   try {
-    const res = await NT.api({ type: 'getProduct', token: NT.getToken() });
-    if (res.status === 'ok') product = res.product;
+    const res = await NT.api({ type: 'getProducts', token: NT.getToken() });
+    if (res.status === 'ok') products = res.products || [];
   } catch (_) {}
 
   document.getElementById('loadingOverlay').style.display = 'none';
 
-  if (!product) {
+  if (!products.length) {
     document.getElementById('sectionEmpty').style.display = '';
     return;
   }
 
-  // Populate linked player section
-  const name = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
-  const initials = [(product.firstName || '')[0], (product.lastName || '')[0]].filter(Boolean).join('').toUpperCase() || '?';
-  const metaParts = [product.position, product.team, product.league].filter(Boolean);
-  const isActive = product.status === 'active';
+  renderProductCards(products);
 
-  document.getElementById('playerAvatar').textContent   = initials;
-  document.getElementById('playerName').textContent     = name.toUpperCase();
-  document.getElementById('playerMeta').textContent     = metaParts.join(' · ') || '—';
-  document.getElementById('infoPackage').textContent    = product.package  || '—';
-  document.getElementById('infoSubmitted').textContent  = fmtDate(product.createdAt);
-  document.getElementById('infoStatus').textContent     = isActive ? 'Report ready' : 'In review';
-
-  const pill = document.getElementById('statusPill');
-  pill.className = 'pill ' + (isActive ? 'pill-active' : 'pill-pending');
-  document.getElementById('statusText').textContent = isActive ? 'Active' : 'In review';
-
-  if (isActive && product.reportUrl) {
-    _reportUrl = product.reportUrl;
-    _productId = product.id;
-    document.getElementById('reportModalDl').href = product.reportUrl;
-    document.getElementById('btnViewReport').style.display = '';
-  }
-
-  document.getElementById('sectionPlayer').style.display = '';
-
-  // Show upgrade CTA only for Player Card package
-  const pkg = (product.package || '').toLowerCase();
-  if (pkg.includes('player') && !pkg.includes('video')) {
+  // Show upgrade CTA if any product is a Player Card without a Video Review
+  const pkgs = products.map(p => (p.package || '').toLowerCase());
+  const hasPlayerCard = pkgs.some(p => p.includes('player') && !p.includes('video'));
+  const hasVideoReview = pkgs.some(p => p.includes('video'));
+  if (hasPlayerCard && !hasVideoReview) {
     document.getElementById('sectionUpgrade').style.display = '';
   }
 });

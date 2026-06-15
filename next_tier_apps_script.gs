@@ -114,6 +114,7 @@ function doPost(e) {
       case 'getUsers':    return handleGetUsers(payload);
       case 'updateUser':  return handleUpdateUser(payload);
       case 'getProduct':      return handleGetProduct(payload);
+      case 'getProducts':     return handleGetProducts(payload);
       case 'listProducts':    return handleListProducts(payload);
       case 'deliverProduct':  return handleDeliverProduct(payload);
       case 'uploadReport':    return handleUploadReport(payload);
@@ -142,9 +143,11 @@ function doGet(e) {
         case 'getUsers':    return handleGetUsers(payload);
         case 'updateUser':  return handleUpdateUser(payload);
         case 'getProduct':      return handleGetProduct(payload);
+        case 'getProducts':     return handleGetProducts(payload);
         case 'listProducts':    return handleListProducts(payload);
         case 'deliverProduct':  return handleDeliverProduct(payload);
         case 'uploadReport':    return handleUploadReport(payload);
+        case 'viewReport':      return handleViewReport(payload);
         default:                return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
       }
     } catch (err) {
@@ -407,6 +410,38 @@ function handleGetProduct(payload) {
     }
   }
   return jsonCors({ status: 'ok', product: null });
+}
+
+function handleGetProducts(payload) {
+  const auth = requireRole(payload.token, ['player','parent','scout','admin']);
+  if (auth.status === 'error') return jsonCors(auth);
+
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(TABS.products);
+  if (!sheet) return jsonCors({ status: 'ok', products: [] });
+
+  const data = sheet.getDataRange().getValues();
+  const products = [];
+  for (let i = 1; i < data.length; i++) {
+    const r = data[i];
+    if (!r[0] || r[1] !== auth.userId) continue;
+    products.push({
+      id:           r[0],
+      userId:       r[1],
+      createdAt:    r[2] ? r[2].toString() : '',
+      package:      r[3],
+      status:       r[4],
+      firstName:    r[5],
+      lastName:     r[6],
+      position:     r[7],
+      team:         r[8],
+      league:       r[9],
+      jerseyNumber: r[10],
+      pdsScore:     r[11],
+      reportUrl:    r[12] || ''
+    });
+  }
+  return jsonCors({ status: 'ok', products });
 }
 
 function handleListProducts(payload) {

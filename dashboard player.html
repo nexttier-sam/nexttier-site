@@ -158,6 +158,10 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .btn-close-modal{background:none;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;font-family:var(--font-body);}
 .btn-close-modal:hover{color:#fff;}
 .report-modal iframe{flex:1;border:none;background:#fff;}
+.report-modal-loader{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#111;}
+.report-modal-loader-text{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#888;}
+@keyframes nt-spin{to{transform:rotate(360deg);}}
+.report-modal-spinner{width:32px;height:32px;border:2px solid rgba(170,221,0,0.15);border-top-color:#AADD00;border-radius:50%;animation:nt-spin .8s linear infinite;}
 </style>
 </head>
 <body>
@@ -174,7 +178,11 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
       <button class="btn-close-modal" onclick="closeReportModal()">Close ✕</button>
     </div>
   </div>
-  <iframe id="reportModalFrame" src="" allowfullscreen></iframe>
+  <div class="report-modal-loader" id="reportModalLoader">
+    <div class="report-modal-spinner"></div>
+    <div class="report-modal-loader-text">Loading report…</div>
+  </div>
+  <iframe id="reportModalFrame" src="" allowfullscreen style="display:none;"></iframe>
 </div>
 
 <nav>
@@ -228,44 +236,8 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 
 <div class="page-body">
 
-  <!-- PRODUCT SHOWCASE (shown when product exists) -->
-  <div id="showcase" style="display:none;">
-    <div class="showcase">
-      <div class="showcase-head">
-        <div class="showcase-left">
-          <div class="showcase-package" id="scPackage">Player Card</div>
-          <div class="showcase-title" id="scName">—</div>
-          <div class="showcase-date" id="scDate">Submitted —</div>
-          <div style="margin-top:12px;">
-            <span class="pill" id="scPill"><span class="pill-dot"></span><span id="scStatus">Pending</span></span>
-          </div>
-        </div>
-        <div class="showcase-right">
-          <div class="pds-display" id="scPDS">—</div>
-          <div class="pds-label">PDS Score</div>
-        </div>
-      </div>
-      <div class="showcase-body">
-        <div class="showcase-stat">
-          <div class="stat-lbl">Position</div>
-          <div class="stat-val" id="scPosition">—</div>
-        </div>
-        <div class="showcase-stat">
-          <div class="stat-lbl">Team</div>
-          <div class="stat-val" id="scTeam">—</div>
-        </div>
-        <div class="showcase-stat">
-          <div class="stat-lbl">League</div>
-          <div class="stat-val" id="scLeague">—</div>
-        </div>
-      </div>
-      <div class="showcase-foot">
-        <button class="btn btn-primary" id="scBtnReport" style="display:none;" onclick="openReportModal()">View Report →</button>
-        <a href="/my-product" class="btn btn-outline">View profile status</a>
-        <a href="/contact" class="btn btn-outline">Contact support</a>
-      </div>
-    </div>
-  </div>
+  <!-- PRODUCT SHOWCASES (one per product, rendered by JS) -->
+  <div id="showcaseList"></div>
 
   <!-- GET STARTED (shown when no product) -->
   <div id="getStarted" style="display:none;">
@@ -358,114 +330,144 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 </div><!-- /page-body -->
 
 <script>
-let _reportUrl = '';
-let _productId = '';
+const _reports = {};
 
 function fmtDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-CA', { year:'numeric', month:'short', day:'numeric' });
 }
 
-function buildBlobUrl(res) {
-  if (res.isBase64) {
-    const binary = atob(res.content);
-    const bytes  = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return URL.createObjectURL(new Blob([bytes], { type: res.mimeType }));
-  }
-  return URL.createObjectURL(new Blob([res.content], { type: res.mimeType || 'text/html' }));
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-async function openReportModal() {
-  if (!_productId) return;
-  document.getElementById('reportModalFrame').src = '';
-  document.getElementById('reportModalDl').href   = _reportUrl;
+function openReportModal(productId) {
+  if (!productId || !_reports[productId]) return;
+  const reportUrl  = _reports[productId];
+  const previewUrl = reportUrl.replace('/view', '/preview');
+  const frame  = document.getElementById('reportModalFrame');
+  const loader = document.getElementById('reportModalLoader');
+
+  frame.src            = '';
+  frame.style.display  = 'none';
+  loader.style.display = '';
+  loader.innerHTML     = '<div class="report-modal-spinner"></div><div class="report-modal-loader-text">Loading report…</div>';
+
+  document.getElementById('reportModalDl').href = reportUrl;
   document.getElementById('reportModal').classList.add('open');
   document.body.style.overflow = 'hidden';
-  try {
-    const res = await NT.api({ type: 'viewReport', token: NT.getToken(), productId: _productId });
-    if (res.status !== 'ok') throw new Error(res.message || 'Could not load report');
-    document.getElementById('reportModalFrame').src = buildBlobUrl(res);
-  } catch (err) {
-    document.getElementById('reportModalFrame').srcdoc = '<p style="padding:24px;font-family:sans-serif;color:#c00;">Error: ' + err.message + '</p>';
-  }
+
+  frame.onload = () => {
+    loader.style.display = 'none';
+    frame.style.display  = '';
+    frame.onload = null;
+  };
+  frame.src = previewUrl;
 }
 
 function closeReportModal() {
+  const frame  = document.getElementById('reportModalFrame');
+  const loader = document.getElementById('reportModalLoader');
   document.getElementById('reportModal').classList.remove('open');
-  document.getElementById('reportModalFrame').src = '';
+  frame.onload         = null;
+  frame.src            = '';
+  frame.style.display  = 'none';
+  loader.style.display = '';
   document.body.style.overflow = '';
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReportModal(); });
 
+function renderShowcases(products) {
+  const container = document.getElementById('showcaseList');
+  container.innerHTML = '';
+  products.forEach(product => {
+    const isActive  = product.status === 'active';
+    const hasReport = isActive && product.reportUrl;
+    const name      = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
+    const pds       = product.pdsScore || '—';
+
+    if (hasReport) _reports[product.id] = product.reportUrl;
+
+    const wrap = document.createElement('div');
+    wrap.style.marginBottom = '36px';
+    wrap.innerHTML = `
+      <div class="showcase">
+        <div class="showcase-head">
+          <div class="showcase-left">
+            <div class="showcase-package">${escHtml(product.package || 'Player Card')}</div>
+            <div class="showcase-title">${escHtml(name.toUpperCase())}</div>
+            <div class="showcase-date">Submitted ${fmtDate(product.createdAt)}</div>
+            <div style="margin-top:12px;">
+              <span class="pill ${isActive ? 'pill-active' : 'pill-pending'}">
+                <span class="pill-dot"></span>
+                <span>${isActive ? 'Report ready' : 'In review'}</span>
+              </span>
+            </div>
+          </div>
+          <div class="showcase-right">
+            <div class="pds-display ${pds === '—' ? 'dim' : ''}">${escHtml(pds)}</div>
+            <div class="pds-label">PDS Score</div>
+          </div>
+        </div>
+        <div class="showcase-body">
+          <div class="showcase-stat"><div class="stat-lbl">Position</div><div class="stat-val">${escHtml(product.position || '—')}</div></div>
+          <div class="showcase-stat"><div class="stat-lbl">Team</div><div class="stat-val">${escHtml(product.team || '—')}</div></div>
+          <div class="showcase-stat"><div class="stat-lbl">League</div><div class="stat-val">${escHtml(product.league || '—')}</div></div>
+        </div>
+        <div class="showcase-foot">
+          ${hasReport ? `<button class="btn btn-primary" onclick="openReportModal('${escHtml(product.id)}')">View Report →</button>` : ''}
+          <a href="/my-product" class="btn btn-outline">View profile status</a>
+          <a href="/contact" class="btn btn-outline">Contact support</a>
+        </div>
+      </div>`;
+    container.appendChild(wrap);
+  });
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   const user = await NT.guard(['player', 'admin']);
   if (!user) return;
 
-  // Nav
   document.getElementById('navAvatar').textContent = (user.firstName || '?')[0].toUpperCase();
   document.getElementById('navName').textContent   = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
 
-  // Hero greeting
   if (user.firstName) {
     document.getElementById('heroName').innerHTML =
-      'WELCOME BACK,<br><em>' + user.firstName.toUpperCase() + '.</em>';
+      'WELCOME BACK,<br><em>' + escHtml(user.firstName.toUpperCase()) + '.</em>';
   }
 
-  // Fetch product
-  let product = null;
+  let products = [];
   try {
-    const res = await NT.api({ type: 'getProduct', token: NT.getToken() });
-    if (res.status === 'ok') product = res.product;
+    const res = await NT.api({ type: 'getProducts', token: NT.getToken() });
+    if (res.status === 'ok') products = res.products || [];
   } catch (_) {}
 
   document.getElementById('loadingOverlay').style.display = 'none';
 
-  if (!product) {
-    // No product — show get-started block, update journey
+  if (!products.length) {
     document.getElementById('getStarted').style.display = '';
     document.getElementById('heroSub').textContent = 'Submit your player profile to receive your Player Development Score and personalised 12-month development roadmap.';
     document.getElementById('heroActions').innerHTML =
       '<a href="/intake-player-card" class="btn-hero btn-hero-primary">Get Player Card — $75 →</a>' +
       '<a href="/checkout" class="btn-hero btn-hero-outline">View all packages</a>';
-    // Journey: step 2 is active
     document.getElementById('stepProfileNum').className = 'step-num active';
     return;
   }
 
-  // Has product — populate showcase
-  document.getElementById('showcase').style.display = '';
-  const isActive = product.status === 'active';
-  const name = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
+  renderShowcases(products);
 
-  document.getElementById('scPackage').textContent  = product.package  || 'Player Card';
-  document.getElementById('scName').textContent     = name.toUpperCase();
-  document.getElementById('scDate').textContent     = 'Submitted ' + fmtDate(product.createdAt);
-  document.getElementById('scPosition').textContent = product.position      || '—';
-  document.getElementById('scTeam').textContent     = product.team          || '—';
-  document.getElementById('scLeague').textContent   = product.league        || '—';
+  // Hero messaging based on most recent product
+  const latest   = products[products.length - 1];
+  const anyActive = products.some(p => p.status === 'active');
+  const anyReport = products.some(p => p.status === 'active' && p.reportUrl);
 
-  const pds = product.pdsScore || '—';
-  const pdsEl = document.getElementById('scPDS');
-  pdsEl.textContent = pds;
-  if (pds === '—') pdsEl.classList.add('dim');
-
-  const pill = document.getElementById('scPill');
-  pill.className = 'pill ' + (isActive ? 'pill-active' : 'pill-pending');
-  document.getElementById('scStatus').textContent = isActive ? 'Report ready' : 'In review';
-
-  if (isActive) {
-    const reportUrl = product.reportUrl || '';
-    if (reportUrl) {
-      _reportUrl = reportUrl;
-      _productId = product.id;
-      document.getElementById('reportModalDl').href = reportUrl;
-    }
-    document.getElementById('scBtnReport').style.display = reportUrl ? '' : 'none';
-    document.getElementById('heroSub').textContent = 'Your Player Card report is ready. View your full evaluation below.';
+  if (anyActive) {
+    document.getElementById('heroSub').textContent = products.length > 1
+      ? 'Your reports are ready. View your full evaluations below.'
+      : 'Your Player Card report is ready. View your full evaluation below.';
     document.getElementById('heroActions').innerHTML =
-      (reportUrl ? '<button class="btn-hero btn-hero-primary" onclick="openReportModal()">View Report →</button>' : '') +
+      (anyReport ? '<button class="btn-hero btn-hero-primary" onclick="document.getElementById(\'showcaseList\').scrollIntoView({behavior:\'smooth\'})">View Reports ↓</button>' : '') +
       '<a href="/my-product" class="btn-hero btn-hero-outline">Profile status</a>';
   } else {
     document.getElementById('heroSub').textContent = 'Your profile is in review. Our evaluators are working on your Player Development Score — expect delivery within 48 hours.';
@@ -474,19 +476,19 @@ window.addEventListener('DOMContentLoaded', async () => {
       '<a href="/contact" class="btn-hero btn-hero-outline">Contact support</a>';
   }
 
-  // Journey steps
-  document.getElementById('stepProfileNum').className = 'step-num done';
+  // Journey strip — reflects overall completion state
+  document.getElementById('stepProfileNum').className  = 'step-num done';
   document.getElementById('stepProfileNum').textContent = '✓';
   document.getElementById('stepProfileSub').textContent = 'Profile submitted';
-  document.getElementById('stepPaymentNum').className = 'step-num done';
+  document.getElementById('stepPaymentNum').className  = 'step-num done';
   document.getElementById('stepPaymentNum').textContent = '✓';
   document.getElementById('stepPaymentSub').textContent = 'Payment received';
-  if (isActive) {
-    document.getElementById('stepReportNum').className = 'step-num done';
+  if (anyActive) {
+    document.getElementById('stepReportNum').className  = 'step-num done';
     document.getElementById('stepReportNum').textContent = '✓';
     document.getElementById('stepReportSub').textContent = 'Report delivered';
   } else {
-    document.getElementById('stepReportNum').className = 'step-num active';
+    document.getElementById('stepReportNum').className  = 'step-num active';
     document.getElementById('stepReportSub').textContent = 'In production';
   }
 });
