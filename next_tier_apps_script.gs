@@ -155,7 +155,7 @@ function doGet(e) {
     }
   }
   // Health check
-  return jsonCors({ status: 'ok', message: 'Next Tier API is live', time: new Date().toISOString() });
+  return jsonCors({ status: 'ok', message: 'Next Tier API is live', version: 'v3', time: new Date().toISOString() });
 }
 
 // ── Intake ────────────────────────────────────────────────────────
@@ -629,3 +629,4 @@ function authorizeDrive() {
   const folder  = folders.hasNext() ? folders.next() : DriveApp.createFolder('NT Reports');
   Logger.log('Drive authorized. NT Reports folder ID: ' + folder.getId());
 }
+ 

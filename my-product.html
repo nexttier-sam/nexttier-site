@@ -259,11 +259,7 @@ async function openReportModal() {
   let apiRes = null;
   let apiErr = null;
   try {
-    apiRes = await fetch(NT_API_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body:    JSON.stringify({ type: 'viewReport', token: NT.getToken(), productId: _productId })
-    }).then(r => r.json());
+    apiRes = await NT.api({ type: 'viewReport', token: NT.getToken(), productId: _productId });
   } catch (e) { apiErr = e.message; }
 
   if (apiRes && apiRes.status === 'ok' && !apiRes.isBase64) {
