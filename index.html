@@ -1,4 +1,15 @@
 ﻿<!DOCTYPE html>
+<script>
+// Supabase auth emails redirect to site_url (homepage). Bounce recovery/error hashes to the correct page.
+(function(){
+  var h = window.location.hash;
+  if (!h) return;
+  var p = new URLSearchParams(h.replace(/^#/,''));
+  if (p.get('type') === 'recovery' || p.get('error')) {
+    window.location.replace('/reset-password' + h);
+  }
+})();
+</script>
 
 <html lang="en">
 
