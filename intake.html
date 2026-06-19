@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Next Tier — Player Profile Intake</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="/config.js"></script>
 <script src="/nt-auth.js"></script>
 <style>
@@ -585,7 +586,7 @@ nav {
             <input type="radio" name="plan" id="planCard" value="player_card" class="plan-opt">
             <label for="planCard">
               <span class="plan-name">PLAYER CARD</span>
-              <span class="plan-price">$75</span>
+              <span class="plan-price">$125</span>
               <span class="plan-desc">A professional digital recruiting card built from your player profile.</span>
               <ul class="plan-includes">
                 <li>Player stats snapshot</li>
@@ -708,7 +709,7 @@ function isChecked(id) {
 function collectFormData() {
   const planEl  = document.querySelector('input[name="plan"]:checked');
   const planVal = planEl ? planEl.value : '';
-  const planLabels = { player_card: 'Player Card — $75', video_review: 'Video Review — $300' };
+  const planLabels = { player_card: 'Player Card — $125', video_review: 'Video Review — $300' };
   return [
     new Date().toLocaleString('en-CA', { timeZone: 'America/Edmonton' }),
     v('firstName'), v('lastName'), v('dob'), v('position'),

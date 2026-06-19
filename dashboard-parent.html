@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,6 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>Next Tier — Parent Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="/config.js?v=3"></script>
 <script src="/nt-auth.js?v=2"></script>
 <style>
@@ -221,20 +222,14 @@ async function openReportModal(productId) {
     apiRes = await NT.api({ type: 'viewReport', token: NT.getToken(), productId });
   } catch (e) { apiErr = e.message; }
 
-  if (apiRes && apiRes.status === 'ok' && !apiRes.isBase64) {
-    const doc = frame.contentDocument || frame.contentWindow.document;
-    doc.open(); doc.write(apiRes.content); doc.close();
-    clearTimeout(_fallbackTimer); _fallbackTimer = null;
-    loader.style.display = 'none';
-    frame.style.display  = '';
-  } else if (apiRes && apiRes.status === 'ok') {
+  if (apiRes && apiRes.status === 'ok') {
     frame.onload = () => {
       clearTimeout(_fallbackTimer); _fallbackTimer = null;
       loader.style.display = 'none';
       frame.style.display  = '';
       frame.onload         = null;
     };
-    frame.src = buildBlobUrl(apiRes);
+    frame.src = apiRes.signedUrl;
   } else {
     clearTimeout(_fallbackTimer); _fallbackTimer = null;
     const msg = apiRes ? apiRes.message : (apiErr || 'Network error');

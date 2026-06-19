@@ -13,7 +13,8 @@ const TABS = {
   contact:  'Contact',
   users:    'Users',
   sessions: 'Sessions',
-  products: 'Products'
+  products: 'Products',
+  resets:   'PasswordResets'
 };
 
 const SESSION_TTL_HOURS = 24;
@@ -64,6 +65,10 @@ function initSheets() {
   ensureTab(ss, TABS.products, [
     'ID','User ID','Created At','Package','Status',
     'First Name','Last Name','Position','Team','League','Jersey Number','PDS Score','Report URL'
+  ]);
+
+  ensureTab(ss, TABS.resets, [
+    'Token','User ID','Email','Expires At','Used'
   ]);
 }
 
@@ -119,6 +124,8 @@ function doPost(e) {
       case 'deliverProduct':  return handleDeliverProduct(payload);
       case 'uploadReport':    return handleUploadReport(payload);
       case 'viewReport':      return handleViewReport(payload);
+      case 'requestReset':    return handleRequestReset(payload);
+      case 'resetPassword':   return handleResetPassword(payload);
       default:
         return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
     }
@@ -148,6 +155,8 @@ function doGet(e) {
         case 'deliverProduct':  return handleDeliverProduct(payload);
         case 'uploadReport':    return handleUploadReport(payload);
         case 'viewReport':      return handleViewReport(payload);
+        case 'requestReset':    return handleRequestReset(payload);
+        case 'resetPassword':   return handleResetPassword(payload);
         default:                return jsonCors({ status: 'error', message: 'Unknown type: ' + type });
       }
     } catch (err) {
@@ -622,6 +631,89 @@ function handleViewReport(payload) {
   return jsonCors({ status: 'error', message: 'Product not found' });
 }
 
+// ── Request Password Reset ────────────────────────────────────────
+function handleRequestReset(payload) {
+  const { email, resetUrlBase } = payload;
+  if (!email) return jsonCors({ status: 'error', message: 'Email required.' });
+
+  const ss         = SpreadsheetApp.getActiveSpreadsheet();
+  const usersSheet = ss.getSheetByName(TABS.users);
+  if (!usersSheet) return jsonCors({ status: 'error', message: 'Users sheet not found.' });
+
+  // Find the user — always return ok to prevent email enumeration
+  const usersData = usersSheet.getDataRange().getValues();
+  let userId = null;
+  for (let i = 1; i < usersData.length; i++) {
+    if (usersData[i][2] && usersData[i][2].toString().toLowerCase() === email.toLowerCase()) {
+      userId = usersData[i][0];
+      break;
+    }
+  }
+
+  if (!userId) return jsonCors({ status: 'ok' }); // silent — don't reveal whether email exists
+
+  const resetsSheet = ensureTab(ss, TABS.resets, ['Token','User ID','Email','Expires At','Used']);
+  const token   = Utilities.getUuid();
+  const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+  resetsSheet.appendRow([token, userId, email.toLowerCase(), expires.toISOString(), 'false']);
+
+  const resetLink = (resetUrlBase || 'https://nexttierstats.com/reset-password?token=') + token;
+
+  try {
+    MailApp.sendEmail({
+      to:      email,
+      subject: 'Reset your Next Tier password',
+      body:
+        'Hi,\n\n' +
+        'We received a request to reset the password for your Next Tier account.\n\n' +
+        'Click the link below to set a new password. This link expires in 1 hour.\n\n' +
+        resetLink + '\n\n' +
+        'If you didn\'t request this, you can ignore this email — your password has not changed.\n\n' +
+        '— Next Tier'
+    });
+  } catch (mailErr) {
+    Logger.log('Reset email failed: ' + mailErr.message);
+  }
+
+  return jsonCors({ status: 'ok' });
+}
+
+// ── Reset Password ────────────────────────────────────────────────
+function handleResetPassword(payload) {
+  const { token, newPassword } = payload;
+  if (!token || !newPassword) return jsonCors({ status: 'error', message: 'Token and new password required.' });
+  if (newPassword.length < 8) return jsonCors({ status: 'error', message: 'Password must be at least 8 characters.' });
+
+  const ss          = SpreadsheetApp.getActiveSpreadsheet();
+  const resetsSheet = ss.getSheetByName(TABS.resets);
+  if (!resetsSheet) return jsonCors({ status: 'error', message: 'Reset tokens not found.' });
+
+  const resetsData = resetsSheet.getDataRange().getValues();
+  for (let i = 1; i < resetsData.length; i++) {
+    const row = resetsData[i];
+    if (row[0] !== token) continue;
+
+    if (row[4] === 'true') return jsonCors({ status: 'error', message: 'This reset link has already been used.' });
+    if (new Date() > new Date(row[3])) return jsonCors({ status: 'error', message: 'This reset link has expired.' });
+
+    const userId = row[1];
+
+    const usersSheet = ss.getSheetByName(TABS.users);
+    if (!usersSheet) return jsonCors({ status: 'error', message: 'Users sheet not found.' });
+
+    const usersData = usersSheet.getDataRange().getValues();
+    for (let j = 1; j < usersData.length; j++) {
+      if (usersData[j][0] === userId) {
+        usersSheet.getRange(j + 1, 4).setValue(hashPassword(newPassword));
+        resetsSheet.getRange(i + 1, 5).setValue('true'); // mark used
+        return jsonCors({ status: 'ok', message: 'Password updated successfully.' });
+      }
+    }
+    return jsonCors({ status: 'error', message: 'User not found.' });
+  }
+  return jsonCors({ status: 'error', message: 'Invalid or expired reset link.' });
+}
+
 // Run this once manually to authorize Google Drive access.
 // Select authorizeDrive → Run → Review permissions → Allow → then redeploy.
 function authorizeDrive() {
@@ -629,4 +721,3 @@ function authorizeDrive() {
   const folder  = folders.hasNext() ? folders.next() : DriveApp.createFolder('NT Reports');
   Logger.log('Drive authorized. NT Reports folder ID: ' + folder.getId());
 }
- 

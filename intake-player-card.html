@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Next Tier — Player Card Profile</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="/config.js"></script>
 <script src="/nt-auth.js"></script>
 <style>
@@ -335,7 +336,7 @@ nav {
         <div class="package-desc">PDS score · 14-metric breakdown · 12-month roadmap · 1 film evaluation</div>
       </div>
     </div>
-    <div class="package-price"><span>$</span>75</div>
+    <div class="package-price"><span>$</span>125</div>
   </div>
 
   <!-- 1. PLAYER INFORMATION -->
@@ -578,7 +579,7 @@ nav {
         <span>I agree to receive the PDS report and occasional development insights from Next Tier at the email address provided. Unsubscribe anytime.</span>
       </div>
       <div class="submit-wrap" style="margin-top:20px">
-        <button class="btn-submit" id="btnSubmit" onclick="submitForm()">Continue to payment — $75 →</button>
+        <button class="btn-submit" id="btnSubmit" onclick="submitForm()">Continue to payment — $125 →</button>
         <div class="submit-note">Your profile is saved first, then you'll be taken to secure checkout via Stripe.</div>
         <div class="submit-error" id="submitError"></div>
       </div>
@@ -643,7 +644,7 @@ function collectRow() {
     v('height'), v('weight'), v('contactName'), v('relationship'),
     v('email'), v('phone'), v('hearAbout'), v('teamName'),
     v('currentLeague'), v('season'), v('jerseyNum'),
-    'Player Card — $75',
+    'Player Card — $125',
     _selectedRegion,
     isChecked('consentData'), isChecked('consentContact')
   ];

@@ -1,3 +1,4 @@
 // Next Tier — site configuration
-// Update NT_API_URL here whenever the Apps Script deployment changes.
-const NT_API_URL = 'https://script.google.com/macros/s/AKfycbwILwzHDpcKRGynnIwapc8cf0vCKavfYjjFP2Ht9sS9TVjy32QihmVH_61CiAKUk2xF0Q/exec';
+const NT_SUPABASE_URL      = 'https://latyfeujgcgvwdonqerd.supabase.co';
+const NT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhdHlmZXVqZ2Nndndkb25xZXJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzAwMzEsImV4cCI6MjA5NzMwNjAzMX0.m7XFql5ujlbli9tLyr6aHNfACMfwDmMd6zBGswCjSe4';
+const NT_EDGE_BASE         = NT_SUPABASE_URL + '/functions/v1';

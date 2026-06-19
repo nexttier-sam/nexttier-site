@@ -8,6 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>Next Tier — My Product</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="/config.js?v=3"></script>
 <script src="/nt-auth.js?v=2"></script>
 <style>
@@ -204,7 +205,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
     </div>
     <div class="product-card-foot">
       <button class="btn-sm" id="btnViewCard" onclick="openReportModal()" style="display:none;">View Report →</button>
-      <a href="dashboard player" class="btn-sm outline">← Dashboard</a>
+      <a href="/dashboard-player" class="btn-sm outline">← Dashboard</a>
       <a href="contact" class="btn-sm outline">Contact support</a>
     </div>
   </div>
@@ -262,27 +263,20 @@ async function openReportModal() {
     apiRes = await NT.api({ type: 'viewReport', token: NT.getToken(), productId: _productId });
   } catch (e) { apiErr = e.message; }
 
-  if (apiRes && apiRes.status === 'ok' && !apiRes.isBase64) {
-    const doc = frame.contentDocument || frame.contentWindow.document;
-    doc.open(); doc.write(apiRes.content); doc.close();
-    clearTimeout(_fallbackTimer); _fallbackTimer = null;
-    loader.style.display = 'none';
-    frame.style.display  = '';
-  } else if (apiRes && apiRes.status === 'ok') {
+  if (apiRes && apiRes.status === 'ok') {
+    document.getElementById('reportModalDownload').href = apiRes.signedUrl;
     frame.onload = () => {
       clearTimeout(_fallbackTimer); _fallbackTimer = null;
       loader.style.display = 'none';
       frame.style.display  = '';
       frame.onload         = null;
     };
-    frame.src = buildBlobUrl(apiRes);
+    frame.src = apiRes.signedUrl;
   } else {
     clearTimeout(_fallbackTimer); _fallbackTimer = null;
     const msg = apiRes ? apiRes.message : (apiErr || 'Network error');
     loader.innerHTML =
-      '<p style="font-family:sans-serif;font-size:12px;color:#f66;margin-bottom:12px;">Error: ' + msg + '</p>' +
-      '<a href="' + _reportUrl + '" target="_blank" style="font-family:sans-serif;font-size:13px;color:#AADD00;' +
-      'border:1px solid rgba(170,221,0,.25);padding:8px 18px;border-radius:5px;text-decoration:none;">Open in Google Drive ↗</a>';
+      '<p style="font-family:sans-serif;font-size:12px;color:#f66;margin-bottom:12px;">Error: ' + msg + '</p>';
   }
 }
 

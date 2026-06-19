@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Next Tier — Sign In</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="/config.js"></script>
 <script src="/nt-auth.js"></script>
 <style>
@@ -137,6 +138,9 @@ body {
       <div class="form-group">
         <label>Password</label>
         <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div style="text-align:right; margin-top:8px;">
+        <a href="/forgot-password" style="font-size:12px; color:var(--nt-muted); text-decoration:none;">Forgot password?</a>
       </div>
       <button class="btn-auth" id="btnLogin" onclick="doLogin()">Sign in →</button>
       <div class="auth-error"  id="loginError"></div>
@@ -276,8 +280,8 @@ async function doRegister() {
 }
 
 function dashboardFor(role) {
-  const map = { player: 'dashboard%20player', parent: 'dashboard%20parent', scout: 'dashboard%20scout', admin: 'dashboard%20admin' };
-  return map[role] || 'index';
+  const map = { player: '/dashboard-player', parent: '/dashboard-parent', scout: '/dashboard-scout', admin: '/dashboard-admin' };
+  return map[role] || '/';
 }
 
 function showErr(el, msg) {

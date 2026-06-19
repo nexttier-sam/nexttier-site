@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,6 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>Next Tier — Player Home</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="/config.js?v=3"></script>
 <script src="/nt-auth.js?v=2"></script>
 <style>
@@ -248,7 +249,7 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
       <div class="gs-title">GET YOUR<br><em>PLAYER CARD.</em></div>
       <div class="gs-sub">Submit your player profile and receive your Player Development Score — a comprehensive 14-metric breakdown that shows exactly where you stand and where you're headed.</div>
       <div class="gs-actions">
-        <a href="/intake-player-card" class="btn-hero btn-hero-primary">Get Player Card — $75 →</a>
+        <a href="/intake-player-card" class="btn-hero btn-hero-primary">Get Player Card — $125 →</a>
         <a href="/checkout" class="btn-hero btn-hero-outline">View all packages</a>
       </div>
     </div>
@@ -382,20 +383,14 @@ async function openReportModal(productId) {
     apiRes = await NT.api({ type: 'viewReport', token: NT.getToken(), productId });
   } catch (e) { apiErr = e.message; }
 
-  if (apiRes && apiRes.status === 'ok' && !apiRes.isBase64) {
-    const doc = frame.contentDocument || frame.contentWindow.document;
-    doc.open(); doc.write(apiRes.content); doc.close();
-    clearTimeout(_fallbackTimer); _fallbackTimer = null;
-    loader.style.display = 'none';
-    frame.style.display  = '';
-  } else if (apiRes && apiRes.status === 'ok') {
+  if (apiRes && apiRes.status === 'ok') {
     frame.onload = () => {
       clearTimeout(_fallbackTimer); _fallbackTimer = null;
       loader.style.display = 'none';
       frame.style.display  = '';
       frame.onload         = null;
     };
-    frame.src = buildBlobUrl(apiRes);
+    frame.src = apiRes.signedUrl;
   } else {
     clearTimeout(_fallbackTimer); _fallbackTimer = null;
     const msg = apiRes ? apiRes.message : (apiErr || 'Network error');
@@ -489,7 +484,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('getStarted').style.display = '';
     document.getElementById('heroSub').textContent = 'Submit your player profile to receive your Player Development Score and personalised 12-month development roadmap.';
     document.getElementById('heroActions').innerHTML =
-      '<a href="/intake-player-card" class="btn-hero btn-hero-primary">Get Player Card — $75 →</a>' +
+      '<a href="/intake-player-card" class="btn-hero btn-hero-primary">Get Player Card — $125 →</a>' +
       '<a href="/checkout" class="btn-hero btn-hero-outline">View all packages</a>';
     document.getElementById('stepProfileNum').className = 'step-num active';
     return;
