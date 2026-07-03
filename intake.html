@@ -687,8 +687,10 @@ function selectRegion(code) {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  const user = NT.getUser();
-  if (!user) { window.location.href = '/login?redirect=/intake'; return; }
+  // NT.getUser() only reads an in-memory cache that's always empty on a
+  // fresh page load — checking it before NT.validate() (which actually
+  // checks the persisted session) caused every real, logged-in visitor to
+  // bounce straight back to /login. Go straight to validate().
   const valid = await NT.validate();
   if (!valid) { window.location.href = '/login?redirect=/intake'; return; }
   _stripeParams = new URLSearchParams({ client_reference_id: valid.id, prefilled_email: valid.email || '' }).toString();

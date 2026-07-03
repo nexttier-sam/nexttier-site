@@ -180,9 +180,10 @@ let _fallbackTimer = null;
 window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('loadingOverlay').classList.add('active');
 
-  const user = NT.getUser();
-  if (!user) { window.location.href = '/login?redirect=/admin-products'; return; }
-
+  // NT.getUser() only reads an in-memory cache that's always empty on a
+  // fresh page load — checking it before NT.validate() (which actually
+  // checks the persisted session) caused every real, logged-in visitor to
+  // bounce straight back to /login. Go straight to validate().
   const valid = await NT.validate();
   if (!valid || valid.role !== 'admin') {
     window.location.href = '/dashboard%20' + (valid?.role || 'player');
