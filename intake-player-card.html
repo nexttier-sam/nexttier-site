@@ -638,14 +638,14 @@ function isChecked(id) {
 
 function collectRow() {
   return [
-    new Date().toLocaleString('en-CA', { timeZone: 'America/Edmonton' }),
-    v('firstName'), v('lastName'), v('dob'), v('position'),
-    v('height'), v('weight'), v('contactName'), v('relationship'),
-    v('email'), v('phone'), v('hearAbout'), v('teamName'),
-    v('currentLeague'), v('season'), v('jerseyNum'),
-    'Player Card — $125',
-    _selectedRegion,
-    isChecked('consentData'), isChecked('consentContact')
+    '',                                                           // row[0] unused
+    v('firstName'), v('lastName'), v('dob'), v('position'),      // 1-4
+    v('height'), v('weight'), v('contactName'), v('relationship'),// 5-8
+    v('email'), v('phone'), v('hearAbout'), v('teamName'),        // 9-12
+    v('currentLeague'), v('season'), v('jerseyNum'),              // 13-15
+    'Player Card',                                                // row[16] package
+    document.getElementById('consentData').checked,              // row[17]
+    document.getElementById('consentContact').checked            // row[18]
   ];
 }
 
@@ -667,28 +667,18 @@ async function submitForm() {
   document.getElementById('loadingOverlay').classList.add('active');
 
   try {
-    const user    = NT.getUser();
-    const payload = { type: 'intake', row: collectRow() };
-    if (user && user.id) payload.userId = user.id;
+    const user = NT.getUser();
+    const res  = await NT.api({ type: 'intake', row: collectRow(), userId: user?.id || null });
 
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    const url     = NT_API_URL + '?payload=' + encoded;
+    if (res.status !== 'ok') throw new Error(res.message || 'Submission failed.');
 
-    await new Promise(resolve => {
-      const img = new Image();
-      img.onload = img.onerror = resolve;
-      img.src = url;
-      setTimeout(resolve, 6000);
-    });
-
-    // Profile saved — send to correct Stripe link for region
     window.location.href = STRIPE_URLS[_selectedRegion] + '?' + _stripeParams;
 
   } catch (err) {
     document.getElementById('loadingOverlay').classList.remove('active');
     document.getElementById('btnSubmit').disabled = false;
     const errEl = document.getElementById('submitError');
-    errEl.textContent = 'Something went wrong. Please try again.';
+    errEl.textContent = err.message || 'Something went wrong. Please try again.';
     errEl.style.display = 'block';
   }
 }

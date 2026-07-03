@@ -669,8 +669,6 @@ nav {
 </div><!-- /intake-body -->
 
 <script>
-const APPS_SCRIPT_URL = NT_API_URL;
-
 const STRIPE_URLS = {
   playerCard:  { CA: 'https://buy.stripe.com/dRmbJ31NE4F00pNcSb7ss03', US: 'https://buy.stripe.com/5kQ5kF1NE8Vg2xV9FZ7ss02' },
   videoReview: { CA: 'https://buy.stripe.com/dRmbJ31NE4F00pNcSb7ss03', US: 'https://buy.stripe.com/5kQ5kF1NE8Vg2xV9FZ7ss02' }
@@ -711,15 +709,16 @@ function isChecked(id) {
 function collectFormData() {
   const planEl  = document.querySelector('input[name="plan"]:checked');
   const planVal = planEl ? planEl.value : '';
-  const planLabels = { player_card: 'Player Card — $125', video_review: 'Video Review — $300' };
+  const planLabels = { player_card: 'Player Card', video_review: 'Video Review' };
   return [
-    new Date().toLocaleString('en-CA', { timeZone: 'America/Edmonton' }),
-    v('firstName'), v('lastName'), v('dob'), v('position'),
-    v('height'), v('weight'), v('contactName'), v('relationship'),
-    v('email'), v('phone'), v('hearAbout'), v('teamName'),
-    v('currentLeague'), v('season'), v('jerseyNum'),
-    planLabels[planVal] || planVal,
-    isChecked('consentData'), isChecked('consentContact')
+    '',                                                           // row[0] unused
+    v('firstName'), v('lastName'), v('dob'), v('position'),      // 1-4
+    v('height'), v('weight'), v('contactName'), v('relationship'),// 5-8
+    v('email'), v('phone'), v('hearAbout'), v('teamName'),        // 9-12
+    v('currentLeague'), v('season'), v('jerseyNum'),              // 13-15
+    planLabels[planVal] || planVal,                               // row[16] package
+    document.getElementById('consentData').checked,              // row[17]
+    document.getElementById('consentContact').checked            // row[18]
   ];
 }
 
@@ -761,25 +760,10 @@ async function submitForm() {
   setSubmitLoading(true);
 
   try {
-    // Encode the row as a single JSON parameter on a GET request.
-    // GET requests to Apps Script never trigger CORS preflight — this is
-    // the only method that works reliably from a static HTML page.
-    const row    = collectFormData();
-    const user   = NT.getUser();
-    const payload = { type: 'intake', row };
-    if (user && user.id) payload.userId = user.id;
-    const encoded = encodeURIComponent(JSON.stringify(payload));
-    const url     = APPS_SCRIPT_URL + '?payload=' + encoded;
+    const user = NT.getUser();
+    const res  = await NT.api({ type: 'intake', row: collectFormData(), userId: user?.id || null });
 
-    // Use an Image() ping — fires the GET with zero CORS issues.
-    // If Apps Script receives it, the row gets written.
-    await new Promise((resolve) => {
-      const img  = new Image();
-      img.onload = img.onerror = resolve; // resolve either way
-      img.src    = url;
-      // Fallback: also resolve after 6 seconds in case the ping stalls
-      setTimeout(resolve, 6000);
-    });
+    if (res.status !== 'ok') throw new Error(res.message || 'Submission failed.');
 
     const planEl  = document.querySelector('input[name="plan"]:checked');
     const isVideo = planEl && planEl.value === 'video_review';
@@ -787,7 +771,7 @@ async function submitForm() {
     window.location.href = stripeBase + '?' + _stripeParams;
 
   } catch (err) {
-    showSubmitError('Submission failed: ' + err.message);
+    showSubmitError(err.message || 'Submission failed. Please try again.');
     setSubmitLoading(false);
   }
 }

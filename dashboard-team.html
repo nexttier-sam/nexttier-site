@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Team Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="/config.js"></script>
+<script src="/nt-auth.js"></script>
+<style>
+:root{--nt-black:#000000;--nt-ice:#1A1A1A;--nt-white:#FFFFFF;--nt-green:#AADD00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;--nt-red:#E8344A;--nt-red-l:#FDEAEC;--nt-amber:#F59E0B;--nt-blue:#5599FF;--nt-blue-l:#0D1A33;--nt-slate:#CCCCCC;--nt-muted:#888888;--nt-border:rgba(85,153,255,0.08);--nt-border-strong:rgba(85,153,255,0.18);--font-display:'Bebas Neue',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:#0D0D0D;color:var(--nt-white);-webkit-font-smoothing:antialiased;}
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--nt-border);}
+.nav-logo{display:flex;align-items:center;text-decoration:none;}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--nt-blue);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:#fff;}
+.nav-name{font-size:13px;color:rgba(255,255,255,.6);}
+.nav-role{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-blue);}
+.btn-logout{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 14px;font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;font-family:var(--font-body);transition:all .15s;}
+.btn-logout:hover{background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);}
+.page-body{max-width:1100px;margin:0 auto;padding:36px 24px 80px;}
+.page-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--nt-blue);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.page-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-blue);}
+.page-title{font-family:var(--font-display);font-size:clamp(32px,4vw,48px);letter-spacing:.02em;color:var(--nt-white);margin-bottom:6px;}
+.page-title em{color:var(--nt-blue);font-style:normal;}
+.page-sub{font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:32px;}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-tile{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:12px;padding:18px 20px;}
+.stat-tile-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:8px;}
+.stat-tile-val{font-family:var(--font-display);font-size:36px;letter-spacing:.02em;color:var(--nt-white);line-height:1;}
+.stat-tile-val em{color:var(--nt-blue);font-style:normal;}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--nt-border);margin-bottom:20px;}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;padding:10px 20px;font-size:13px;font-weight:500;color:var(--nt-muted);cursor:pointer;font-family:var(--font-body);margin-bottom:-1px;transition:color .15s,border-color .15s;}
+.tab-btn.active{color:var(--nt-white);border-bottom-color:var(--nt-blue);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.section{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.section-head{padding:20px 24px 16px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.section-title{font-family:var(--font-display);font-size:18px;letter-spacing:.02em;}
+.search-input{background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:8px 12px;font-size:13px;color:var(--nt-white);font-family:var(--font-body);outline:none;min-width:200px;}
+.search-input:focus{border-color:var(--nt-blue);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:#0D0D0D;}
+th{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);padding:10px 16px;text-align:left;font-weight:500;border-bottom:1px solid var(--nt-border);}
+td{padding:13px 16px;font-size:13px;color:#CCCCCC;border-bottom:1px solid var(--nt-border);}
+tr:last-child td{border-bottom:none;}
+.role-badge{display:inline-block;border-radius:4px;padding:3px 8px;font-size:10px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
+.role-player{background:#1C2200;color:#AADD00;}
+.role-parent{background:#1E2200;color:#1A5FAA;}
+.role-scout{background:#222;color:#AAAAAA;}
+.role-team{background:#0D1A33;color:#5599FF;}
+.role-coach{background:#2A1A33;color:#B377FF;}
+.status-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--font-mono);letter-spacing:.05em;}
+.status-active{color:var(--nt-green-d);}
+.status-suspended{color:var(--nt-red);}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
+.pill-pending{background:#2A2000;color:#CCAA00;}
+.pill-active{background:#1C2200;color:#AADD00;}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+.action-btn{background:none;border:1px solid var(--nt-border-strong);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--font-body);color:#CCCCCC;transition:all .15s;margin-right:4px;}
+.action-btn:hover{background:#0D0D0D;}
+.action-btn.danger{border-color:rgba(232,52,74,.3);color:var(--nt-red);}
+.action-btn.danger:hover{background:var(--nt-red-l);}
+.btn-add{background:var(--nt-blue);color:#fff;border:none;border-radius:7px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .15s;}
+.btn-add:hover{background:#3377EE;}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(8,9,12,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-overlay.open{display:flex;}
+.modal{background:#1E1E1E;border-radius:14px;padding:28px;width:100%;max-width:440px;border:1px solid var(--nt-border-strong);}
+.modal-title{font-family:var(--font-display);font-size:22px;letter-spacing:.02em;margin-bottom:4px;}
+.modal-sub{font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:22px;}
+.modal-group{margin-bottom:14px;}
+.modal-group label{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:6px;}
+.modal-group input,.modal-group select{width:100%;background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);color:#fff;outline:none;-webkit-appearance:none;transition:border-color .15s;}
+.modal-group input:focus,.modal-group select:focus{border-color:var(--nt-blue);}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.btn-save{flex:1;background:var(--nt-blue);color:#fff;border:none;border-radius:7px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .15s;}
+.btn-save:hover{background:#3377EE;}
+.btn-save:disabled{opacity:.6;cursor:not-allowed;}
+.btn-cancel{flex:1;background:#0D0D0D;color:#CCCCCC;border:1px solid var(--nt-border-strong);border-radius:7px;padding:11px;font-size:13px;cursor:pointer;font-family:var(--font-body);}
+.modal-error{margin-top:12px;padding:9px 12px;background:#2A0A0C;border:1px solid rgba(232,52,74,.2);border-radius:6px;font-size:12px;color:var(--nt-red);display:none;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--nt-black);color:#fff;border-radius:8px;padding:11px 20px;font-size:13px;z-index:300;transition:transform .25s;opacity:0;border:1px solid rgba(85,153,255,.2);}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.loading-overlay{position:fixed;inset:0;background:var(--nt-black);display:flex;align-items:center;justify-content:center;z-index:999;}
+.empty-row td{text-align:center;color:var(--nt-muted);padding:36px!important;}
+.modal-divider{margin:18px 0 14px;border-top:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px;}
+.modal-divider span{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);white-space:nowrap;}
+.eval-toggle{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#111;border-radius:8px;cursor:pointer;user-select:none;border:1px solid var(--nt-border-strong);}
+.eval-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--nt-green);cursor:pointer;flex-shrink:0;}
+.eval-toggle-label{font-size:13px;color:#CCCCCC;font-weight:400;}
+.eval-fields{display:none;margin-top:14px;}
+.eval-fields.open{display:block;}
+.btn-add-player{background:var(--nt-green);color:#000;border:none;border-radius:7px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:background .15s;}
+.btn-add-player:hover{background:#99CC00;}
+.action-btn.green{border-color:rgba(170,221,0,.3);color:var(--nt-green);}
+.action-btn.green:hover{background:var(--nt-green-l);}
+@media(max-width:768px){.stat-row{grid-template-columns:1fr 1fr;}.page-body{padding:24px 16px 60px;}nav{padding:0 16px;}th,td{padding:10px 10px;}table{font-size:12px;}.modal-row{grid-template-columns:1fr;gap:0;}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;">
+</div>
+
+<!-- ADD PLAYER MODAL -->
+<div class="modal-overlay" id="addPlayerModal">
+  <div class="modal" style="max-width:500px;max-height:90vh;overflow-y:auto;">
+    <div class="modal-title">ADD PLAYER</div>
+    <div class="modal-sub">Create a player account linked to your team.</div>
+
+    <div class="modal-row">
+      <div class="modal-group">
+        <label>First name *</label>
+        <input type="text" id="pFirst" placeholder="Tyler">
+      </div>
+      <div class="modal-group">
+        <label>Last name *</label>
+        <input type="text" id="pLast" placeholder="Keating">
+      </div>
+    </div>
+    <div class="modal-group">
+      <label>Email address *</label>
+      <input type="email" id="pEmail" placeholder="player@email.com">
+    </div>
+    <div class="modal-group">
+      <label>Temporary password *</label>
+      <input type="password" id="pPassword" placeholder="Min 8 characters">
+    </div>
+
+    <div class="modal-divider"><span>Player info</span></div>
+
+    <div class="modal-row">
+      <div class="modal-group">
+        <label>Position</label>
+        <select id="pPosition">
+          <option value="">Select position</option>
+          <option value="C">Centre (C)</option>
+          <option value="LW">Left Wing (LW)</option>
+          <option value="RW">Right Wing (RW)</option>
+          <option value="LD">Left Defence (LD)</option>
+          <option value="RD">Right Defence (RD)</option>
+          <option value="G">Goalie (G)</option>
+        </select>
+      </div>
+      <div class="modal-group">
+        <label>Jersey #</label>
+        <input type="text" id="pJersey" placeholder="e.g. 19">
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-group">
+        <label>Team name</label>
+        <input type="text" id="pTeam" placeholder="e.g. Winnipeg Hawks">
+      </div>
+      <div class="modal-group">
+        <label>League</label>
+        <input type="text" id="pLeague" placeholder="e.g. MJHL">
+      </div>
+    </div>
+
+    <div class="modal-divider"><span>Evaluation (optional)</span></div>
+
+    <label class="eval-toggle" onclick="toggleEval()">
+      <input type="checkbox" id="pRequestEval">
+      <span class="eval-toggle-label">Also submit an evaluation request for this player</span>
+    </label>
+
+    <div class="eval-fields" id="evalFields">
+      <div class="modal-group" style="margin-top:14px;">
+        <label>Package</label>
+        <select id="pPackage">
+          <option value="Player Card">Player Card — $125</option>
+          <option value="Player Card + Video Review">Player Card + Video Review — $225</option>
+        </select>
+      </div>
+      <div style="padding:10px 12px;background:#111;border-radius:7px;font-size:12px;color:var(--nt-muted);line-height:1.6;margin-top:4px;">
+        Submitting creates a pending evaluation for this player. Next Tier will reach out to confirm payment details.
+      </div>
+    </div>
+
+    <div class="modal-error" id="addPlayerError"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddPlayerModal()">Cancel</button>
+      <button class="btn-save" id="btnAddPlayer" onclick="doAddPlayer()" style="background:var(--nt-green);color:#000;">Add player →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MEMBER MODAL -->
+<div class="modal-overlay" id="addMemberModal">
+  <div class="modal">
+    <div class="modal-title">ADD MEMBER</div>
+    <div class="modal-sub">Create a new account under your team.</div>
+    <div class="modal-row">
+      <div class="modal-group">
+        <label>First name</label>
+        <input type="text" id="mFirst" placeholder="Tyler">
+      </div>
+      <div class="modal-group">
+        <label>Last name</label>
+        <input type="text" id="mLast" placeholder="Keating">
+      </div>
+    </div>
+    <div class="modal-group">
+      <label>Email address</label>
+      <input type="email" id="mEmail" placeholder="player@email.com">
+    </div>
+    <div class="modal-group">
+      <label>Temporary password</label>
+      <input type="password" id="mPassword" placeholder="Min 8 characters">
+    </div>
+    <div class="modal-group">
+      <label>Role</label>
+      <select id="mRole" onchange="toggleParentPlayerField()">
+        <option value="player">Player</option>
+        <option value="parent">Parent / Guardian</option>
+        <option value="scout">Scout / Recruiter</option>
+      </select>
+    </div>
+    <div class="modal-group" id="mParentPlayerGroup" style="display:none;">
+      <label>Player</label>
+      <select id="mParentPlayerId">
+        <option value="">Select the player this account belongs to</option>
+      </select>
+    </div>
+    <div class="modal-error" id="addMemberError"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+      <button class="btn-save" id="btnAddMember" onclick="doAddMember()">Create account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER EVAL MODAL (existing player) -->
+<div class="modal-overlay" id="orderEvalModal">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-title">ORDER EVALUATION</div>
+    <div class="modal-sub">Submit an evaluation request for <strong id="oePlayerName"></strong>.</div>
+    <div class="modal-group">
+      <label>Package</label>
+      <select id="oePackage">
+        <option value="Player Card">Player Card — $125</option>
+        <option value="Player Card + Video Review">Player Card + Video Review — $225</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <div class="modal-group">
+        <label>Position</label>
+        <select id="oePosition">
+          <option value="">Select position</option>
+          <option value="C">Centre (C)</option>
+          <option value="LW">Left Wing (LW)</option>
+          <option value="RW">Right Wing (RW)</option>
+          <option value="LD">Left Defence (LD)</option>
+          <option value="RD">Right Defence (RD)</option>
+          <option value="G">Goalie (G)</option>
+        </select>
+      </div>
+      <div class="modal-group">
+        <label>Jersey #</label>
+        <input type="text" id="oeJersey" placeholder="e.g. 19">
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-group">
+        <label>Team name</label>
+        <input type="text" id="oeTeam" placeholder="e.g. Winnipeg Hawks">
+      </div>
+      <div class="modal-group">
+        <label>League</label>
+        <input type="text" id="oeLeague" placeholder="e.g. MJHL">
+      </div>
+    </div>
+    <div style="padding:10px 12px;background:#111;border-radius:7px;font-size:12px;color:var(--nt-muted);line-height:1.6;">
+      Submitting creates a pending evaluation. Next Tier will contact you to confirm payment.
+    </div>
+    <div class="modal-error" id="orderEvalError"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeOrderEvalModal()">Cancel</button>
+      <button class="btn-save" id="btnOrderEval" onclick="doOrderEval()" style="background:var(--nt-green);color:#000;">Submit evaluation →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav>
+  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:40px;width:auto;"></a>
+  <div class="nav-right">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="nav-avatar" id="navAvatar">T</div>
+      <div>
+        <div class="nav-name" id="navName">Team</div>
+        <div class="nav-role">Team</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="NT.logout()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page-body">
+  <div class="page-eyebrow">Team Panel</div>
+  <div class="page-title">TEAM <em>DASHBOARD.</em></div>
+  <div class="page-sub" id="pageSub">Manage your organization's accounts and products.</div>
+
+  <div class="stat-row">
+    <div class="stat-tile"><div class="stat-tile-label">Members</div><div class="stat-tile-val" id="countMembers">—</div></div>
+    <div class="stat-tile"><div class="stat-tile-label">Total products</div><div class="stat-tile-val" id="countProducts">—</div></div>
+    <div class="stat-tile"><div class="stat-tile-label">Reports ready</div><div class="stat-tile-val" id="countActive">—</div></div>
+    <div class="stat-tile"><div class="stat-tile-label">In review</div><div class="stat-tile-val" id="countPending">—</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('members')">Members</button>
+    <button class="tab-btn" onclick="switchTab('products')">Products</button>
+  </div>
+
+  <!-- MEMBERS TAB -->
+  <div class="tab-panel active" id="tabMembers">
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">MEMBER ACCOUNTS</div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <input class="search-input" type="text" placeholder="Search members…" oninput="filterMembers(this.value)">
+          <button class="btn-add" onclick="openAddModal()" style="background:#1E1E1E;border:1px solid var(--nt-border-strong);color:#CCCCCC;">+ Add member</button>
+          <button class="btn-add-player" onclick="openAddPlayerModal()">+ Add player</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Products</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="memberTableBody">
+            <tr class="empty-row"><td colspan="6">Loading members…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS TAB -->
+  <div class="tab-panel" id="tabProducts">
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">TEAM PRODUCTS</div>
+        <input class="search-input" type="text" placeholder="Search products…" oninput="filterProducts(this.value)">
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Player name</th>
+              <th>Package</th>
+              <th>Status</th>
+              <th>PDS Score</th>
+              <th>Position</th>
+              <th>Submitted</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="productTableBody">
+            <tr class="empty-row"><td colspan="7">Loading products…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let allMembers  = [];
+let allProducts = [];
+let productsByMember = {};
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = await NT.guard(['team']);
+  if (!user) return;
+
+  document.getElementById('navAvatar').textContent = (user.firstName || 'T')[0].toUpperCase();
+  document.getElementById('navName').textContent   = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+  document.getElementById('pageSub').textContent   = 'Managing accounts and products for ' + ([user.firstName, user.lastName].filter(Boolean).join(' ') || 'your team') + '.';
+
+  document.getElementById('loadingOverlay').style.display = 'none';
+
+  await Promise.all([loadMembers(), loadProducts()]);
+});
+
+async function loadMembers() {
+  const res = await NT.api({ type: 'getTeamMembers' });
+  if (res.status === 'ok') {
+    allMembers = res.members || [];
+    renderMemberTable(allMembers);
+    updateStats();
+  } else {
+    document.getElementById('memberTableBody').innerHTML =
+      `<tr class="empty-row"><td colspan="6" style="color:var(--nt-red);">${escHtml(res.message)}</td></tr>`;
+  }
+}
+
+async function loadProducts() {
+  const res = await NT.api({ type: 'getTeamProducts' });
+  if (res.status === 'ok') {
+    allProducts = res.products || [];
+    productsByMember = {};
+    allProducts.forEach(p => {
+      productsByMember[p.userId] = (productsByMember[p.userId] || 0) + 1;
+    });
+    renderProductTable(allProducts);
+    updateStats();
+  } else {
+    document.getElementById('productTableBody').innerHTML =
+      `<tr class="empty-row"><td colspan="7" style="color:var(--nt-red);">${escHtml(res.message)}</td></tr>`;
+  }
+}
+
+function updateStats() {
+  document.getElementById('countMembers').textContent  = allMembers.length;
+  document.getElementById('countProducts').textContent = allProducts.length;
+  document.getElementById('countActive').textContent   = allProducts.filter(p => p.status === 'active').length;
+  document.getElementById('countPending').textContent  = allProducts.filter(p => p.status === 'pending').length;
+}
+
+function renderMemberTable(members) {
+  const tbody = document.getElementById('memberTableBody');
+  if (!members.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No members yet. Click "+ Add member" to get started.</td></tr>';
+    return;
+  }
+  const membersById = {};
+  members.forEach(m => { membersById[m.id] = m; });
+  tbody.innerHTML = members.map(m => {
+    const pCount = productsByMember[m.id] || 0;
+    const linkedPlayer = m.role === 'parent' && m.parentPlayerId ? membersById[m.parentPlayerId] : null;
+    return `<tr>
+      <td><strong style="font-weight:500;color:var(--nt-white);">${escHtml(m.firstName)} ${escHtml(m.lastName)}</strong></td>
+      <td>${escHtml(m.email)}</td>
+      <td><span class="role-badge role-${escHtml(m.role)}">${escHtml(m.role)}</span>${linkedPlayer ? `<div style="font-size:11px;color:var(--nt-muted);margin-top:3px;">Parent of ${escHtml(linkedPlayer.firstName)} ${escHtml(linkedPlayer.lastName)}</div>` : ''}</td>
+      <td><span class="status-badge status-${escHtml(m.status)}"><span class="status-dot"></span>${escHtml(m.status)}</span></td>
+      <td style="color:var(--nt-muted);">${pCount}</td>
+      <td>
+        ${m.role === 'player' && m.status === 'active' ? `<button class="action-btn green" onclick="openOrderEvalModal('${escHtml(m.id)}','${escHtml(m.firstName)}','${escHtml(m.lastName)}')">Order eval</button>` : ''}
+        ${m.status === 'active'
+          ? `<button class="action-btn danger" onclick="quickSuspend('${escHtml(m.id)}')">Suspend</button>`
+          : `<button class="action-btn" onclick="quickActivate('${escHtml(m.id)}')">Activate</button>`}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderProductTable(products) {
+  const tbody = document.getElementById('productTableBody');
+  if (!products.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No products yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = products.map(p => `
+    <tr>
+      <td><strong style="font-weight:500;color:var(--nt-white);">${escHtml([p.firstName,p.lastName].filter(Boolean).join(' ') || '—')}</strong></td>
+      <td style="color:var(--nt-muted);font-size:12px;">${escHtml(p.package || '—')}</td>
+      <td><span class="pill ${p.status === 'active' ? 'pill-active' : 'pill-pending'}"><span class="pill-dot"></span>${p.status === 'active' ? 'Report ready' : 'In review'}</span></td>
+      <td style="font-family:var(--font-mono);color:var(--nt-blue);">${escHtml(p.pdsScore || '—')}</td>
+      <td>${escHtml(p.position || '—')}</td>
+      <td style="color:var(--nt-muted);font-size:12px;">${fmtDate(p.createdAt)}</td>
+      <td>${p.status === 'active' ? `<a class="action-btn" href="/player-card?pid=${encodeURIComponent(p.userId)}">Coach Notes →</a>` : ''}</td>
+    </tr>
+  `).join('');
+}
+
+function filterMembers(q) {
+  const lq = q.toLowerCase();
+  renderMemberTable(allMembers.filter(m =>
+    (m.firstName + ' ' + m.lastName + ' ' + m.email).toLowerCase().includes(lq)
+  ));
+}
+
+function filterProducts(q) {
+  const lq = q.toLowerCase();
+  renderProductTable(allProducts.filter(p =>
+    ([p.firstName, p.lastName, p.package, p.position].join(' ')).toLowerCase().includes(lq)
+  ));
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0) === (tab === 'members'));
+  });
+  document.getElementById('tabMembers').classList.toggle('active', tab === 'members');
+  document.getElementById('tabProducts').classList.toggle('active', tab === 'products');
+}
+
+function toggleParentPlayerField() {
+  const isParent = document.getElementById('mRole').value === 'parent';
+  document.getElementById('mParentPlayerGroup').style.display = isParent ? '' : 'none';
+  if (isParent) {
+    const sel = document.getElementById('mParentPlayerId');
+    const players = allMembers.filter(m => m.role === 'player');
+    sel.innerHTML = '<option value="">Select the player this account belongs to</option>' +
+      players.map(p => `<option value="${escHtml(p.id)}">${escHtml(p.firstName)} ${escHtml(p.lastName)}</option>`).join('');
+  }
+}
+
+function openAddModal() {
+  ['mFirst','mLast','mEmail','mPassword'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('mRole').value = 'player';
+  document.getElementById('mParentPlayerGroup').style.display = 'none';
+  document.getElementById('addMemberError').style.display = 'none';
+  document.getElementById('btnAddMember').disabled = false;
+  document.getElementById('btnAddMember').textContent = 'Create account →';
+  document.getElementById('addMemberModal').classList.add('open');
+}
+
+function closeAddModal() {
+  document.getElementById('addMemberModal').classList.remove('open');
+}
+
+async function doAddMember() {
+  const firstName = document.getElementById('mFirst').value.trim();
+  const lastName  = document.getElementById('mLast').value.trim();
+  const email     = document.getElementById('mEmail').value.trim();
+  const password  = document.getElementById('mPassword').value;
+  const role      = document.getElementById('mRole').value;
+  const errEl     = document.getElementById('addMemberError');
+  const btn       = document.getElementById('btnAddMember');
+
+  const playerId = role === 'parent' ? document.getElementById('mParentPlayerId').value : null;
+
+  errEl.style.display = 'none';
+  if (!firstName)          { showModalErr(errEl, 'First name is required.'); return; }
+  if (!email)              { showModalErr(errEl, 'Email address is required.'); return; }
+  if (password.length < 8) { showModalErr(errEl, 'Password must be at least 8 characters.'); return; }
+  if (role === 'parent' && !playerId) { showModalErr(errEl, 'Select the player this parent account belongs to.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Creating…';
+
+  const res = await NT.api({ type: 'createTeamMember', firstName, lastName, email, password, role, playerId });
+
+  if (res.status === 'ok') {
+    closeAddModal();
+    showToast('Member added successfully.');
+    await Promise.all([loadMembers(), loadProducts()]);
+  } else {
+    showModalErr(errEl, res.message || 'Failed to create member.');
+    btn.disabled = false; btn.textContent = 'Create account →';
+  }
+}
+
+async function quickSuspend(id) {
+  if (!confirm('Suspend this member? They will not be able to log in.')) return;
+  const res = await NT.api({ type: 'updateUser', userId: id, status: 'suspended' });
+  if (res.status === 'ok') { showToast('Member suspended.'); await loadMembers(); }
+  else showToast('Error: ' + res.message);
+}
+
+async function quickActivate(id) {
+  const res = await NT.api({ type: 'updateUser', userId: id, status: 'active' });
+  if (res.status === 'ok') { showToast('Member reactivated.'); await loadMembers(); }
+  else showToast('Error: ' + res.message);
+}
+
+// ── Add Player ────────────────────────────────────────────────────────────────
+function openAddPlayerModal() {
+  ['pFirst','pLast','pEmail','pPassword','pJersey','pTeam','pLeague'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pPosition').value = '';
+  document.getElementById('pPackage').value  = 'Player Card';
+  document.getElementById('pRequestEval').checked = false;
+  document.getElementById('evalFields').classList.remove('open');
+  document.getElementById('addPlayerError').style.display = 'none';
+  document.getElementById('btnAddPlayer').disabled = false;
+  document.getElementById('btnAddPlayer').textContent = 'Add player →';
+  document.getElementById('addPlayerModal').classList.add('open');
+}
+
+function closeAddPlayerModal() {
+  document.getElementById('addPlayerModal').classList.remove('open');
+}
+
+function toggleEval() {
+  const checked = document.getElementById('pRequestEval').checked;
+  document.getElementById('evalFields').classList.toggle('open', checked);
+}
+
+async function doAddPlayer() {
+  const firstName   = document.getElementById('pFirst').value.trim();
+  const lastName    = document.getElementById('pLast').value.trim();
+  const email       = document.getElementById('pEmail').value.trim();
+  const password    = document.getElementById('pPassword').value;
+  const position    = document.getElementById('pPosition').value;
+  const jersey      = document.getElementById('pJersey').value.trim();
+  const teamName    = document.getElementById('pTeam').value.trim();
+  const league      = document.getElementById('pLeague').value.trim();
+  const requestEval = document.getElementById('pRequestEval').checked;
+  const pkg         = document.getElementById('pPackage').value;
+  const errEl       = document.getElementById('addPlayerError');
+  const btn         = document.getElementById('btnAddPlayer');
+
+  errEl.style.display = 'none';
+  if (!firstName)          { showModalErr(errEl, 'First name is required.'); return; }
+  if (!lastName)           { showModalErr(errEl, 'Last name is required.'); return; }
+  if (!email)              { showModalErr(errEl, 'Email address is required.'); return; }
+  if (password.length < 8) { showModalErr(errEl, 'Password must be at least 8 characters.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Creating player…';
+
+  const createRes = await NT.api({ type: 'createTeamMember', firstName, lastName, email, password, role: 'player' });
+  if (createRes.status !== 'ok') {
+    showModalErr(errEl, createRes.message || 'Failed to create player account.');
+    btn.disabled = false; btn.textContent = 'Add player →';
+    return;
+  }
+
+  const playerId   = createRes.memberId;
+  const teamUser   = NT.getUser();
+  const adminName  = [teamUser?.firstName, teamUser?.lastName].filter(Boolean).join(' ') || 'Team Admin';
+
+  if (requestEval && playerId) {
+    btn.textContent = 'Submitting evaluation…';
+    const row = new Array(19).fill('');
+    row[1]  = firstName;
+    row[2]  = lastName;
+    row[4]  = position;
+    row[7]  = adminName;
+    row[8]  = 'Team Admin';
+    row[9]  = email;
+    row[11] = 'Team Account';
+    row[12] = teamName;
+    row[13] = league;
+    row[15] = jersey;
+    row[16] = pkg;
+    row[17] = true;
+    row[18] = true;
+    const evalRes = await NT.api({ type: 'intake', row, userId: playerId });
+    if (evalRes.status !== 'ok') {
+      // Account was created; surface the eval failure non-fatally
+      closeAddPlayerModal();
+      showToast('Player added. Evaluation request failed: ' + (evalRes.message || 'unknown error'));
+      await Promise.all([loadMembers(), loadProducts()]);
+      return;
+    }
+  }
+
+  closeAddPlayerModal();
+  showToast(requestEval ? 'Player added and evaluation submitted.' : 'Player account created.');
+  await Promise.all([loadMembers(), loadProducts()]);
+}
+
+// ── Order Eval for existing player ───────────────────────────────────────────
+let _orderEvalPlayerId = null;
+
+function openOrderEvalModal(playerId, firstName, lastName) {
+  _orderEvalPlayerId = playerId;
+  document.getElementById('oePlayerName').textContent = firstName + ' ' + lastName;
+  document.getElementById('oePackage').value = 'Player Card';
+  ['oePosition','oeJersey','oeTeam','oeLeague'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('orderEvalError').style.display = 'none';
+  document.getElementById('btnOrderEval').disabled = false;
+  document.getElementById('btnOrderEval').textContent = 'Submit evaluation →';
+  document.getElementById('orderEvalModal').classList.add('open');
+}
+
+function closeOrderEvalModal() {
+  document.getElementById('orderEvalModal').classList.remove('open');
+  _orderEvalPlayerId = null;
+}
+
+async function doOrderEval() {
+  const playerId = _orderEvalPlayerId;
+  const position = document.getElementById('oePosition').value;
+  const jersey   = document.getElementById('oeJersey').value.trim();
+  const teamName = document.getElementById('oeTeam').value.trim();
+  const league   = document.getElementById('oeLeague').value.trim();
+  const pkg      = document.getElementById('oePackage').value;
+  const errEl    = document.getElementById('orderEvalError');
+  const btn      = document.getElementById('btnOrderEval');
+
+  errEl.style.display = 'none';
+  if (!playerId) { showModalErr(errEl, 'No player selected.'); return; }
+
+  const player = allMembers.find(m => m.id === playerId);
+  if (!player) { showModalErr(errEl, 'Player not found.'); return; }
+
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  const teamUser  = NT.getUser();
+  const adminName = [teamUser?.firstName, teamUser?.lastName].filter(Boolean).join(' ') || 'Team Admin';
+
+  const row = new Array(19).fill('');
+  row[1]  = player.firstName;
+  row[2]  = player.lastName;
+  row[4]  = position;
+  row[7]  = adminName;
+  row[8]  = 'Team Admin';
+  row[9]  = player.email;
+  row[11] = 'Team Account';
+  row[12] = teamName;
+  row[13] = league;
+  row[15] = jersey;
+  row[16] = pkg;
+  row[17] = true;
+  row[18] = true;
+
+  const res = await NT.api({ type: 'intake', row, userId: playerId });
+  if (res.status === 'ok') {
+    closeOrderEvalModal();
+    showToast('Evaluation request submitted for ' + player.firstName + '.');
+    await Promise.all([loadMembers(), loadProducts()]);
+  } else {
+    showModalErr(errEl, res.message || 'Failed to submit evaluation.');
+    btn.disabled = false; btn.textContent = 'Submit evaluation →';
+  }
+}
+
+function showModalErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' }); }
+  catch(_) { return iso; }
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

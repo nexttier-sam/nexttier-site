@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Coach Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="/config.js"></script>
+<script src="/nt-auth.js"></script>
+<style>
+:root{--nt-black:#000000;--nt-ice:#1A1A1A;--nt-white:#FFFFFF;--nt-green:#AADD00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;--nt-red:#E8344A;--nt-purple:#B377FF;--nt-purple-l:#2A1A33;--nt-slate:#CCCCCC;--nt-muted:#888888;--nt-border:rgba(179,119,255,0.08);--nt-border-strong:rgba(179,119,255,0.18);--font-display:'Bebas Neue',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:#0D0D0D;color:var(--nt-white);-webkit-font-smoothing:antialiased;}
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--nt-border);}
+.nav-logo{display:flex;align-items:center;text-decoration:none;}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--nt-purple);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:#000;}
+.nav-name{font-size:13px;color:rgba(255,255,255,.6);}
+.nav-role{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-purple);}
+.btn-logout{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:7px 14px;font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;font-family:var(--font-body);transition:all .15s;}
+.btn-logout:hover{background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);}
+.page-body{max-width:1100px;margin:0 auto;padding:36px 24px 80px;}
+.page-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;color:var(--nt-purple);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.page-eyebrow::before{content:'';width:16px;height:1px;background:var(--nt-purple);}
+.page-title{font-family:var(--font-display);font-size:clamp(32px,4vw,48px);letter-spacing:.02em;color:var(--nt-white);margin-bottom:6px;}
+.page-title em{color:var(--nt-purple);font-style:normal;}
+.page-sub{font-size:13px;font-weight:300;color:var(--nt-muted);margin-bottom:32px;}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.stat-tile{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:12px;padding:18px 20px;}
+.stat-tile-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:8px;}
+.stat-tile-val{font-family:var(--font-display);font-size:36px;letter-spacing:.02em;color:var(--nt-white);line-height:1;}
+.section{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.section-head{padding:20px 24px 16px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.section-title{font-family:var(--font-display);font-size:18px;letter-spacing:.02em;}
+.search-input{background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:8px 12px;font-size:13px;color:var(--nt-white);font-family:var(--font-body);outline:none;min-width:200px;}
+.search-input:focus{border-color:var(--nt-purple);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:#0D0D0D;}
+th{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);padding:10px 16px;text-align:left;font-weight:500;border-bottom:1px solid var(--nt-border);}
+td{padding:13px 16px;font-size:13px;color:#CCCCCC;border-bottom:1px solid var(--nt-border);}
+tr:last-child td{border-bottom:none;}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
+.pill-pending{background:#2A2000;color:#CCAA00;}
+.pill-active{background:#1C2200;color:#AADD00;}
+.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+.action-btn{background:none;border:1px solid var(--nt-border-strong);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--font-body);color:#CCCCCC;transition:all .15s;text-decoration:none;display:inline-block;}
+.action-btn:hover{background:#0D0D0D;}
+.empty-row td{text-align:center;color:var(--nt-muted);padding:36px!important;}
+.loading-overlay{position:fixed;inset:0;background:var(--nt-black);display:flex;align-items:center;justify-content:center;z-index:999;}
+@media(max-width:768px){.stat-row{grid-template-columns:1fr 1fr;}.page-body{padding:24px 16px 60px;}nav{padding:0 16px;}th,td{padding:10px 10px;}table{font-size:12px;}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;">
+</div>
+
+<nav>
+  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:40px;width:auto;"></a>
+  <div class="nav-right">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="nav-avatar" id="navAvatar">C</div>
+      <div>
+        <div class="nav-name" id="navName">Coach</div>
+        <div class="nav-role">Coach</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="NT.logout()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page-body">
+  <div class="page-eyebrow">Coach Panel</div>
+  <div class="page-title">COACH <em>DASHBOARD.</em></div>
+  <div class="page-sub" id="pageSub">Evaluate players on your team's roster.</div>
+
+  <div class="stat-row">
+    <div class="stat-tile"><div class="stat-tile-label">Roster players</div><div class="stat-tile-val" id="countPlayers">—</div></div>
+    <div class="stat-tile"><div class="stat-tile-label">Reports ready</div><div class="stat-tile-val" id="countActive">—</div></div>
+    <div class="stat-tile"><div class="stat-tile-label">In review</div><div class="stat-tile-val" id="countPending">—</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">TEAM ROSTER</div>
+      <input class="search-input" type="text" placeholder="Search players…" oninput="filterProducts(this.value)">
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Player name</th>
+            <th>Status</th>
+            <th>Position</th>
+            <th>Submitted</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="productTableBody">
+          <tr class="empty-row"><td colspan="5">Loading roster…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+let allProducts = [];
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = await NT.guard(['coach']);
+  if (!user) return;
+
+  document.getElementById('navAvatar').textContent = (user.firstName || 'C')[0].toUpperCase();
+  document.getElementById('navName').textContent   = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+  document.getElementById('pageSub').textContent   = 'Evaluate players on your team\'s roster' + (user.firstName ? ' — ' + user.firstName + ' ' + (user.lastName || '') : '') + '.';
+
+  document.getElementById('loadingOverlay').style.display = 'none';
+
+  await loadProducts();
+});
+
+async function loadProducts() {
+  const res = await NT.api({ type: 'getProducts', token: NT.getToken() });
+  if (res.status === 'ok') {
+    allProducts = res.products || [];
+    renderProductTable(allProducts);
+    updateStats();
+  } else {
+    document.getElementById('productTableBody').innerHTML =
+      `<tr class="empty-row"><td colspan="5" style="color:var(--nt-red);">${escHtml(res.message)}</td></tr>`;
+  }
+}
+
+function updateStats() {
+  document.getElementById('countPlayers').textContent = allProducts.length;
+  document.getElementById('countActive').textContent  = allProducts.filter(p => p.status === 'active').length;
+  document.getElementById('countPending').textContent = allProducts.filter(p => p.status === 'pending').length;
+}
+
+function renderProductTable(products) {
+  const tbody = document.getElementById('productTableBody');
+  if (!products.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No players on your roster yet. Ask your team admin to add players.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = products.map(p => `
+    <tr>
+      <td><strong style="font-weight:500;color:var(--nt-white);">${escHtml([p.firstName,p.lastName].filter(Boolean).join(' ') || '—')}</strong></td>
+      <td><span class="pill ${p.status === 'active' ? 'pill-active' : 'pill-pending'}"><span class="pill-dot"></span>${p.status === 'active' ? 'Report ready' : 'In review'}</span></td>
+      <td>${escHtml(p.position || '—')}</td>
+      <td style="color:var(--nt-muted);font-size:12px;">${fmtDate(p.createdAt)}</td>
+      <td>${p.status === 'active' ? `<a class="action-btn" href="/player-card?pid=${encodeURIComponent(p.userId)}">Coach Notes →</a>` : ''}</td>
+    </tr>
+  `).join('');
+}
+
+function filterProducts(q) {
+  const lq = q.toLowerCase();
+  renderProductTable(allProducts.filter(p =>
+    ([p.firstName, p.lastName, p.position].join(' ')).toLowerCase().includes(lq)
+  ));
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('en-CA', { month:'short', day:'numeric', year:'numeric' }); }
+  catch(_) { return iso; }
+}
+
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

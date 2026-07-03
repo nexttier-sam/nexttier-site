@@ -110,6 +110,13 @@ body {
   font-size: 12px; color: rgba(255,255,255,0.25);
 }
 .auth-footer a { color: rgba(255,255,255,0.4); }
+
+@media (max-width: 480px) {
+  .auth-logo { margin-bottom: 24px; }
+  .auth-logo img { height: 44px; }
+  .auth-body { padding: 20px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+}
 </style>
 </head>
 <body>
@@ -175,6 +182,7 @@ body {
           <option value="player">Player</option>
           <option value="parent">Parent / Guardian</option>
           <option value="scout">Scout / Recruiter</option>
+          <option value="team">Team / Organization</option>
         </select>
       </div>
       <div class="role-info" id="roleInfo" style="display:none"></div>
@@ -194,7 +202,8 @@ body {
 const ROLE_DESCRIPTIONS = {
   player: '<strong>Player access</strong> — view your player card, reports, and development notes.',
   parent: '<strong>Parent / Guardian access</strong> — view your linked player\'s profile and all reports.',
-  scout:  '<strong>Scout / Recruiter access</strong> — browse player cards and public profiles. No personal contact info.'
+  scout:  '<strong>Scout / Recruiter access</strong> — browse player cards and public profiles. No personal contact info.',
+  team:   '<strong>Team / Organization access</strong> — manage subsidiary player accounts and products under your organization.'
 };
 
 function switchTab(tab) {
@@ -280,7 +289,7 @@ async function doRegister() {
 }
 
 function dashboardFor(role) {
-  const map = { player: '/dashboard-player', parent: '/dashboard-parent', scout: '/dashboard-scout', admin: '/dashboard-admin' };
+  const map = { player: '/dashboard-player', parent: '/dashboard-parent', scout: '/dashboard-scout', admin: '/dashboard-admin', team: '/dashboard-team', coach: '/dashboard-coach' };
   return map[role] || '/';
 }
 

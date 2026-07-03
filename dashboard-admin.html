@@ -49,6 +49,8 @@ tr:hover td{background:rgba(248,250,252,0.8);}
 .role-parent{background:#1E2200;color:#1A5FAA;}
 .role-scout{background:#222;color:#AAAAAA;}
 .role-admin{background:var(--nt-red-l);color:var(--nt-red);}
+.role-team{background:#0D1A33;color:#5599FF;}
+.role-coach{background:#2A1A33;color:#B377FF;}
 .status-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:var(--font-mono);letter-spacing:.05em;}
 .status-active{color:var(--nt-green-d);}
 .status-suspended{color:var(--nt-red);}
@@ -96,6 +98,8 @@ tr:hover td{background:rgba(248,250,252,0.8);}
         <option value="player">Player</option>
         <option value="parent">Parent</option>
         <option value="scout">Scout</option>
+        <option value="team">Team</option>
+        <option value="coach">Coach</option>
         <option value="admin">Admin</option>
       </select>
     </div>
@@ -109,6 +113,72 @@ tr:hover td{background:rgba(248,250,252,0.8);}
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
       <button class="btn-save" onclick="saveUser()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE COACH MODAL -->
+<div class="modal-overlay" id="createCoachModal">
+  <div class="modal">
+    <div class="modal-title">CREATE COACH ACCOUNT</div>
+    <div class="modal-sub">Create a coach linked to an existing team account</div>
+    <div class="modal-group">
+      <label>Team account *</label>
+      <select id="ccaTeam" style="width:100%;background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);color:#fff;outline:none;-webkit-appearance:none;">
+        <option value="">— select team —</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="modal-group">
+        <label>First name *</label>
+        <input type="text" id="ccaFirst" placeholder="e.g. Mike" style="width:100%;background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);color:#fff;outline:none;">
+      </div>
+      <div class="modal-group">
+        <label>Last name</label>
+        <input type="text" id="ccaLast" placeholder="e.g. Turner" style="width:100%;background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);color:#fff;outline:none;">
+      </div>
+    </div>
+    <div class="modal-group">
+      <label>Email *</label>
+      <input type="email" id="ccaEmail" placeholder="coach@team.com" style="width:100%;background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);color:#fff;outline:none;">
+    </div>
+    <div class="modal-group">
+      <label>Temporary password *</label>
+      <input type="text" id="ccaPassword" placeholder="Min 8 characters" style="width:100%;background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);color:#fff;outline:none;">
+    </div>
+    <div style="color:var(--nt-red);font-size:12px;min-height:14px;margin-bottom:6px;" id="ccaError"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCreateCoachModal()">Cancel</button>
+      <button class="btn-save" id="ccaSubmitBtn" onclick="createCoachAccount()">Create coach</button>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE TEAM ACCOUNT MODAL -->
+<div class="modal-overlay" id="createTeamModal">
+  <div class="modal">
+    <div class="modal-title">CREATE TEAM ACCOUNT</div>
+    <div class="modal-sub">Bootstrap a new coach / organization account</div>
+    <div class="modal-group">
+      <label>Organization / Coach name</label>
+      <input type="text" id="ctaFirst" placeholder="e.g. Olds Grizzlys" style="width:100%;background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);color:#fff;outline:none;">
+    </div>
+    <div class="modal-group">
+      <label>Contact last name (optional)</label>
+      <input type="text" id="ctaLast" placeholder="" style="width:100%;background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);color:#fff;outline:none;">
+    </div>
+    <div class="modal-group">
+      <label>Email</label>
+      <input type="email" id="ctaEmail" placeholder="coach@team.com" style="width:100%;background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);color:#fff;outline:none;">
+    </div>
+    <div class="modal-group">
+      <label>Temporary password</label>
+      <input type="text" id="ctaPassword" placeholder="Min 8 characters" style="width:100%;background:#0D0D0D;border:1px solid var(--nt-border-strong);border-radius:7px;padding:9px 12px;font-size:13px;font-family:var(--font-body);color:#fff;outline:none;">
+    </div>
+    <div style="color:var(--nt-red);font-size:12px;min-height:14px;margin-bottom:6px;" id="ctaError"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCreateTeamModal()">Cancel</button>
+      <button class="btn-save" id="ctaSubmitBtn" onclick="createTeamAccount()">Create account</button>
     </div>
   </div>
 </div>
@@ -155,7 +225,11 @@ tr:hover td{background:rgba(248,250,252,0.8);}
   <div class="section">
     <div class="section-head">
       <div class="section-title">USER ACCOUNTS</div>
-      <input class="search-input" type="text" placeholder="Search by name or email…" oninput="filterUsers(this.value)">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input class="search-input" type="text" placeholder="Search by name or email…" oninput="filterUsers(this.value)">
+        <button onclick="openCreateCoachModal()" style="background:#2A1A33;color:#B377FF;border:1px solid rgba(179,119,255,0.3);border-radius:7px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">+ Create coach</button>
+        <button onclick="openCreateTeamModal()" style="background:var(--nt-green);color:#000;border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);white-space:nowrap;">+ Create team account</button>
+      </div>
     </div>
     <div style="overflow-x:auto;">
       <table>
@@ -277,6 +351,91 @@ async function quickSuspend(id) {
 async function quickActivate(id) {
   const res = await NT.api({ type: 'updateUser', token: NT.getToken(), userId: id, status: 'active' });
   if (res.status === 'ok') { showToast('User reactivated.'); await loadUsers(); }
+}
+
+function openCreateTeamModal() {
+  ['ctaFirst','ctaLast','ctaEmail','ctaPassword'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ctaError').textContent = '';
+  document.getElementById('ctaSubmitBtn').disabled = false;
+  document.getElementById('ctaSubmitBtn').textContent = 'Create account';
+  document.getElementById('createTeamModal').classList.add('open');
+}
+
+function closeCreateTeamModal() {
+  document.getElementById('createTeamModal').classList.remove('open');
+}
+
+function openCreateCoachModal() {
+  ['ccaFirst','ccaLast','ccaEmail','ccaPassword'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ccaError').textContent = '';
+  document.getElementById('ccaSubmitBtn').disabled = false;
+  document.getElementById('ccaSubmitBtn').textContent = 'Create coach';
+  // Populate team dropdown from loaded users
+  const select = document.getElementById('ccaTeam');
+  const teams = allUsers.filter(u => u.role === 'team');
+  select.innerHTML = '<option value="">— select team —</option>' +
+    teams.map(t => `<option value="${escHtml(t.id)}">${escHtml([t.firstName, t.lastName].filter(Boolean).join(' ') || t.email)}</option>`).join('');
+  document.getElementById('createCoachModal').classList.add('open');
+}
+
+function closeCreateCoachModal() {
+  document.getElementById('createCoachModal').classList.remove('open');
+}
+
+async function createCoachAccount() {
+  const teamId    = document.getElementById('ccaTeam').value;
+  const firstName = document.getElementById('ccaFirst').value.trim();
+  const lastName  = document.getElementById('ccaLast').value.trim();
+  const email     = document.getElementById('ccaEmail').value.trim();
+  const password  = document.getElementById('ccaPassword').value;
+  const errEl     = document.getElementById('ccaError');
+  const btn       = document.getElementById('ccaSubmitBtn');
+  errEl.textContent = '';
+
+  if (!teamId)              { errEl.textContent = 'Select a team account.'; return; }
+  if (!firstName)           { errEl.textContent = 'First name is required.'; return; }
+  if (!email)               { errEl.textContent = 'Email is required.'; return; }
+  if (password.length < 8)  { errEl.textContent = 'Password must be at least 8 characters.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Creating…';
+
+  const res = await NT.api({ type: 'createTeamMember', firstName, lastName, email, password, role: 'coach', teamId });
+
+  if (res.status === 'ok') {
+    closeCreateCoachModal();
+    showToast('Coach account created.');
+    await loadUsers();
+  } else {
+    errEl.textContent = res.message || 'Failed to create coach account.';
+    btn.disabled = false; btn.textContent = 'Create coach';
+  }
+}
+
+async function createTeamAccount() {
+  const orgName  = document.getElementById('ctaFirst').value.trim();
+  const lastName = document.getElementById('ctaLast').value.trim();
+  const email    = document.getElementById('ctaEmail').value.trim();
+  const password = document.getElementById('ctaPassword').value;
+  const errEl    = document.getElementById('ctaError');
+  const btn      = document.getElementById('ctaSubmitBtn');
+  errEl.textContent = '';
+
+  if (!orgName)   { errEl.textContent = 'Organization / coach name is required.'; return; }
+  if (!email)     { errEl.textContent = 'Email is required.'; return; }
+  if (password.length < 8) { errEl.textContent = 'Password must be at least 8 characters.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Creating…';
+
+  const res = await NT.api({ type: 'createTeamAccount', firstName: orgName, lastName, email, password });
+
+  if (res.status === 'ok') {
+    closeCreateTeamModal();
+    showToast('Team account created.');
+    await loadUsers();
+  } else {
+    errEl.textContent = res.message || 'Failed to create team account.';
+    btn.disabled = false; btn.textContent = 'Create account';
+  }
 }
 
 function showTableError(msg) {

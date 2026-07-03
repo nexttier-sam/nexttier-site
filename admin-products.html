@@ -61,6 +61,8 @@ tr:hover td{background:rgba(255,255,255,.02);}
 .status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;}
 .status-pill.pending{background:rgba(255,180,0,.1);color:#FFB400;}
 .status-pill.active{background:rgba(170,221,0,.1);color:var(--nt-green);}
+.status-pill.review{background:rgba(80,160,255,.12);color:#5AA0FF;}
+.status-pill.failed{background:rgba(232,52,74,.12);color:var(--nt-red);}
 .status-pill::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;}
 
 .action-btn{background:none;border:1px solid var(--nt-border-strong);border-radius:5px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:var(--font-body);color:#CCCCCC;transition:all .15s;}
@@ -185,6 +187,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // checks the persisted session) caused every real, logged-in visitor to
   // bounce straight back to /login. Go straight to validate().
   const valid = await NT.validate();
+  if (!valid) { window.location.href = '/login?redirect=/admin-products'; return; }
   if (!valid || valid.role !== 'admin') {
     window.location.href = '/dashboard%20' + (valid?.role || 'player');
     return;
@@ -196,12 +199,15 @@ window.addEventListener('DOMContentLoaded', async () => {
   await loadProducts();
 });
 
+let _cardJobsByProduct = {};
+
 async function loadProducts() {
-  const encoded = encodeURIComponent(JSON.stringify({ type: 'listProducts', token: _token }));
-  let res;
+  let res, jobsRes;
   try {
-    const r = await fetch(NT_API_URL + '?payload=' + encoded);
-    res = await r.json();
+    [res, jobsRes] = await Promise.all([
+      NT.api({ type: 'listProducts' }),
+      NT.api({ type: 'getCardJobs' }),
+    ]);
   } catch (err) {
     document.getElementById('tableWrap').innerHTML =
       '<div class="empty-state">Network error — could not reach the API.<br><small style="color:#555;">' + err.message + '</small></div>';
@@ -215,6 +221,8 @@ async function loadProducts() {
   }
 
   _allProducts = res.products || [];
+  _cardJobsByProduct = {};
+  (jobsRes?.jobs || []).forEach(j => { if (j.product_id) _cardJobsByProduct[j.product_id] = j; });
   renderTable();
 }
 
@@ -243,12 +251,34 @@ function renderTable() {
     const name    = [p.firstName, p.lastName].filter(Boolean).join(' ') || '—';
     const date    = p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-CA') : '—';
     const isPend  = p.status !== 'active';
+    const job     = _cardJobsByProduct[p.id] || null;
     const fileDisp = p.reportUrl
       ? `<a href="#" class="view-report-link" data-id="${escHtml(p.id)}" style="color:var(--nt-green);font-size:12px;">View ↗</a>`
       : '<span style="color:var(--nt-muted);">—</span>';
-    const deliverBtn = isPend
+
+    // Automated pipeline status takes priority over the manual-upload button
+    // when a card_jobs row exists for this product.
+    let statusPill = `<span class="status-pill ${p.status === 'active' ? 'active' : 'pending'}">${p.status || 'pending'}</span>`;
+    let actionCell = isPend
       ? `<button class="action-btn deliver" onclick="toggleDeliver('${p.id}')">Deliver →</button>`
       : `<button class="action-btn" onclick="toggleDeliver('${p.id}')">Update link</button>`;
+
+    if (job && job.status === 'ready_for_review') {
+      statusPill = `<span class="status-pill review">ready for review</span>`;
+      actionCell = `
+        <button class="action-btn" onclick="reviewCard('${job.id}', '${job.report_storage_path}')">Review card ↗</button>
+        <button class="action-btn deliver" onclick="approveCard('${job.id}', '${p.id}')">Approve &amp; Deliver</button>`;
+    } else if (job && job.status === 'qa_failed') {
+      const qaSnippet = (job.qa_report || '').split('\n').filter(l => l.includes('[ERROR]')).slice(0, 3).join(' · ');
+      statusPill = `<span class="status-pill failed" title="${escHtml(qaSnippet)}">qa failed</span>`;
+      actionCell = `<button class="action-btn" onclick="retryCardJob('${escHtml(p.intakeId || '')}')">Retry</button>`;
+    } else if (job && ['queued', 'scouting', 'generating_card'].includes(job.status)) {
+      statusPill = `<span class="status-pill pending">generating…</span>`;
+      actionCell = `<span style="color:var(--nt-muted);font-size:11px;">${escHtml(job.status)}</span>`;
+    } else if (job && job.status === 'failed') {
+      statusPill = `<span class="status-pill failed" title="${escHtml(job.error_message || '')}">pipeline failed</span>`;
+      actionCell = `<button class="action-btn" onclick="retryCardJob('${escHtml(p.intakeId || '')}')">Retry</button>`;
+    }
 
     return `
       <tr id="row-${p.id}">
@@ -258,13 +288,14 @@ function renderTable() {
         <td>${escHtml(p.team || '—')}</td>
         <td>${date}</td>
         <td id="fileCell-${p.id}">${fileDisp}</td>
-        <td id="statusCell-${p.id}"><span class="status-pill ${p.status === 'active' ? 'active' : 'pending'}">${p.status || 'pending'}</span></td>
-        <td id="actionCell-${p.id}">${deliverBtn}</td>
+        <td id="statusCell-${p.id}">${statusPill}</td>
+        <td id="actionCell-${p.id}">${actionCell}</td>
       </tr>
       <tr id="panel-${p.id}" style="display:none;">
         <td colspan="8" style="padding:0;">
           <div class="deliver-panel open" id="panelBody-${p.id}">
-            <div class="deliver-panel-title">Deliver report — ${escHtml(name)}</div>
+            <div class="deliver-panel-title">Manually deliver report — ${escHtml(name)}</div>
+            ${job ? '<p style="font-size:12px;color:var(--nt-muted);margin-bottom:14px;">This product already has an automated card job (' + escHtml(job.status) + '). Manual upload will overwrite it once delivered.</p>' : ''}
             <div class="deliver-field" style="margin-bottom:16px;">
               <label>Report file <span style="color:var(--nt-green)">*</span></label>
               <input type="file" id="file-${p.id}" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.html,.htm"
@@ -365,24 +396,19 @@ async function deliverProduct(id) {
     setProgress(id, 'Reading file…', 30);
     const base64 = await readFileAsBase64(file);
 
-    setProgress(id, 'Uploading to Drive…', 65);
-    const res = await fetch(NT_API_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body:    JSON.stringify({
-        type:      'uploadReport',
-        token:     _token,
-        productId: id,
-        fileName:  file.name,
-        mimeType:  file.type || 'application/octet-stream',
-        fileData:  base64
-      })
-    }).then(r => r.json());
+    setProgress(id, 'Uploading…', 65);
+    const res = await NT.api({
+      type:      'uploadReport',
+      productId: id,
+      fileName:  file.name,
+      mimeType:  file.type || 'application/octet-stream',
+      fileData:  base64
+    });
 
     setProgress(id, 'Finishing…', 90);
 
     if (res.status === 'ok') {
-      const reportUrl = res.reportUrl;
+      const reportUrl = res.reportPath;
       setProgress(id, 'Delivered ✓', 100);
 
       document.getElementById('panel-' + id).style.display  = 'none';
@@ -413,6 +439,61 @@ async function deliverProduct(id) {
     showMsg(msg, 'Network error: ' + err.message, 'error');
     btn.disabled       = false;
     cancelBtn.disabled = false;
+  }
+}
+
+async function reviewCard(jobId, reportStoragePath) {
+  const frame  = document.getElementById('reportModalFrame');
+  const loader = document.getElementById('reportModalLoader');
+
+  if (_fallbackTimer) { clearTimeout(_fallbackTimer); _fallbackTimer = null; }
+  frame.onload         = null;
+  frame.src            = '';
+  frame.style.display  = 'none';
+  loader.style.display = '';
+  loader.innerHTML     = '<div class="report-modal-spinner"></div><div class="report-modal-loader-text">Loading card…</div>';
+
+  document.getElementById('reportModalTitle').textContent = 'Card review (pending approval)';
+  document.getElementById('reportModalDownload').style.display = 'none';
+  document.getElementById('reportModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  let apiRes = null, apiErr = null;
+  try {
+    apiRes = await NT.api({ type: 'viewReport', jobId });
+  } catch (e) { apiErr = e.message; }
+
+  if (apiRes && apiRes.status === 'ok') {
+    frame.onload = () => {
+      loader.style.display = 'none';
+      frame.style.display  = '';
+      frame.onload         = null;
+    };
+    frame.src = apiRes.signedUrl;
+  } else {
+    loader.innerHTML =
+      '<p style="font-family:sans-serif;font-size:12px;color:#f66;margin-bottom:12px;">Error: ' +
+      (apiRes ? apiRes.message : (apiErr || 'Network error')) + '</p>';
+  }
+}
+
+async function approveCard(jobId, productId) {
+  if (!confirm('This makes the card visible to the customer. Continue?')) return;
+  const res = await NT.api({ type: 'approveCard', jobId });
+  if (res.status === 'ok') {
+    await loadProducts();
+  } else {
+    alert('Approve failed: ' + (res.message || 'Unknown error'));
+  }
+}
+
+async function retryCardJob(intakeId) {
+  if (!intakeId) { alert('No intake row linked to this product — cannot retry automatically.'); return; }
+  const res = await NT.api({ type: 'retryCardJob', intakeId });
+  if (res.status === 'ok') {
+    await loadProducts();
+  } else {
+    alert('Retry failed: ' + (res.message || 'Unknown error'));
   }
 }
 
@@ -466,6 +547,7 @@ async function openReportById(id) {
   loader.innerHTML     = '<div class="report-modal-spinner"></div><div class="report-modal-loader-text">Loading report…</div>';
 
   document.getElementById('reportModalDownload').href = p.reportUrl;
+  document.getElementById('reportModalDownload').style.display = '';
   document.getElementById('reportModalTitle').textContent = name ? 'Report — ' + name : 'Report';
   document.getElementById('reportModal').classList.add('open');
   document.body.style.overflow = 'hidden';

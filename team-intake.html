@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Team Intake</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="/config.js"></script>
+<script src="/nt-auth.js"></script>
+<style>
+:root {
+  --nt-black: #000000;
+  --nt-charcoal: #2A2A2A;
+  --nt-ice: #161616;
+  --nt-white: #FFFFFF;
+  --nt-green: #AADD00;
+  --nt-green-d: #99BF00;
+  --nt-green-l: #1C2200;
+  --nt-red: #E8344A;
+  --nt-blue: #AADD00;
+  --nt-blue-l: #1C2200;
+  --nt-slate: #CCCCCC;
+  --nt-muted: #777777;
+  --nt-border: rgba(170,221,0,0.1);
+  --nt-border-strong: rgba(170,221,0,0.2);
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: #111111;
+  color: var(--nt-white);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--nt-black);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 56px;
+}
+.nav-logo { display:flex; align-items:center; text-decoration:none; }
+
+.nav-back {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: rgba(255,255,255,0.4);
+  text-decoration: none; transition: color .15s;
+}
+.nav-back:hover { color: rgba(255,255,255,0.7); }
+.nav-back svg { width: 14px; height: 14px; }
+
+/* ── HEADER ── */
+.intake-header {
+  background: var(--nt-black);
+  padding: 48px 32px 44px;
+  position: relative; overflow: hidden;
+}
+.intake-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(170,221,0,0.03) 39px, rgba(170,221,0,0.03) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(170,221,0,0.03) 39px, rgba(170,221,0,0.03) 40px);
+  pointer-events: none;
+}
+.intake-header-inner {
+  max-width: 680px; margin: 0 auto; position: relative;
+}
+.intake-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: .1em;
+  color: var(--nt-green); text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.intake-eyebrow::before { content: ''; width: 16px; height: 1px; background: var(--nt-green); }
+.intake-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 5vw, 58px);
+  line-height: .95; letter-spacing: .02em;
+  color: var(--nt-white);
+}
+.intake-header h1 em { color: var(--nt-green); font-style: normal; }
+.intake-header-sub {
+  margin-top: 14px;
+  font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.4);
+}
+
+/* ── BODY ── */
+.intake-body {
+  max-width: 680px; margin: 0 auto;
+  padding: 36px 24px 80px;
+}
+
+/* ── FORM BLOCKS ── */
+.form-block {
+  background: #1E1E1E;
+  border: 1px solid var(--nt-border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.form-block-header {
+  padding: 20px 26px 16px;
+  border-bottom: 1px solid var(--nt-border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.form-block-title {
+  font-family: var(--font-display);
+  font-size: 20px; letter-spacing: .02em; color: var(--nt-white);
+}
+.form-block-sub {
+  font-size: 12px; font-weight: 300; color: var(--nt-muted); margin-top: 2px;
+}
+.form-block-tag {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 4px;
+  background: var(--nt-green-l); color: var(--nt-green-d);
+  flex-shrink: 0; margin-top: 4px;
+}
+.form-block-tag.optional { background: var(--nt-blue-l); color: var(--nt-blue); }
+.form-block-body { padding: 22px 26px; }
+
+/* ── FIELDS ── */
+.form-group { margin-bottom: 16px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-group label {
+  display: block;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--nt-muted); margin-bottom: 7px;
+  font-family: var(--font-mono);
+}
+.form-group label .req { color: var(--nt-green); margin-left: 2px; }
+.form-group label .opt { color: var(--nt-muted); font-weight: 300; text-transform: none; letter-spacing: 0; font-family: var(--font-body); font-size: 11px; margin-left: 4px; }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  background: #111111;
+  border: 1px solid var(--nt-border-strong);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px; font-weight: 300;
+  color: var(--nt-white);
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color .15s, background .15s;
+  -webkit-appearance: none;
+}
+.form-group textarea { resize: vertical; min-height: 76px; }
+.form-group input::placeholder,
+.form-group textarea::placeholder { color: var(--nt-muted); }
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--nt-green);
+  background: #1E1E1E;
+}
+.form-group select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238896A8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* ── PACKAGE INTEREST ── */
+.plan-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.plan-opt { display: none; }
+.plan-opt + label {
+  display: block;
+  border: 1px solid var(--nt-border-strong);
+  border-radius: 12px;
+  padding: 20px 18px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.plan-opt + label:hover { border-color: var(--nt-green); background: var(--nt-green-l); }
+.plan-opt:checked + label { border-color: var(--nt-green); background: var(--nt-green-l); }
+.plan-name {
+  font-family: var(--font-display);
+  font-size: 19px; letter-spacing: .02em;
+  color: var(--nt-white); display: block; margin-bottom: 6px;
+}
+.plan-desc {
+  font-size: 12px; color: var(--nt-muted);
+  font-weight: 300; line-height: 1.5;
+}
+
+/* ── ROSTER TABLE ── */
+.roster-table { display: flex; flex-direction: column; gap: 10px; }
+.roster-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 90px 32px;
+  gap: 10px; align-items: center;
+}
+.roster-row input, .roster-row select {
+  width: 100%;
+  background: #111111;
+  border: 1px solid var(--nt-border-strong);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px; font-weight: 300;
+  color: var(--nt-white);
+  font-family: var(--font-body);
+  outline: none;
+}
+.roster-row input:focus, .roster-row select:focus { border-color: var(--nt-green); }
+.roster-row select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238896A8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+.roster-row-remove {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 1px solid var(--nt-border-strong); background: #111111;
+  color: var(--nt-muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; line-height: 1; transition: border-color .15s, color .15s;
+}
+.roster-row-remove:hover { border-color: var(--nt-red); color: var(--nt-red); }
+.roster-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 90px 32px;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--nt-muted); margin-bottom: 2px;
+}
+.btn-add-row {
+  margin-top: 4px;
+  background: transparent; border: 1px dashed var(--nt-border-strong);
+  border-radius: 8px; color: var(--nt-green);
+  font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  padding: 10px; cursor: pointer; width: 100%;
+  transition: border-color .15s, background .15s;
+}
+.btn-add-row:hover { border-color: var(--nt-green); background: var(--nt-green-l); }
+
+/* ── CONSENT ── */
+.check-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--nt-border);
+}
+.check-row:last-child { border-bottom: none; padding-bottom: 0; }
+.check-row input[type="checkbox"] {
+  width: 16px; height: 16px; flex-shrink: 0;
+  margin-top: 3px; accent-color: var(--nt-green); cursor: pointer;
+}
+.check-row span {
+  font-size: 13px; color: #CCCCCC; font-weight: 300; line-height: 1.6;
+}
+
+/* ── SUBMIT BUTTON ── */
+.submit-wrap { margin-top: 8px; }
+.btn-submit {
+  width: 100%;
+  background: var(--nt-green); color: #000000;
+  border: none; border-radius: 9px;
+  padding: 16px; font-size: 15px; font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer; transition: background .15s;
+  letter-spacing: .01em;
+}
+.btn-submit:hover { background: #23D98C; }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.submit-note {
+  text-align: center; margin-top: 10px;
+  font-size: 11px; color: var(--nt-muted); font-weight: 300;
+}
+.submit-error {
+  margin-top: 12px; padding: 12px 16px;
+  background: #2A0A0C; border: 1px solid rgba(232,52,74,0.2);
+  border-radius: 8px; font-size: 13px; color: var(--nt-red);
+  display: none;
+}
+
+/* ── SUCCESS ── */
+.success-panel {
+  display: none; text-align: center;
+  padding: 80px 32px;
+}
+.success-panel.visible { display: block; }
+.success-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--nt-green-l);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+}
+.success-icon svg { width: 32px; height: 32px; }
+.success-title {
+  font-family: var(--font-display);
+  font-size: 52px; letter-spacing: .02em;
+  color: var(--nt-white); line-height: .95; margin-bottom: 16px;
+}
+.success-title em { color: var(--nt-green); font-style: normal; }
+.success-sub {
+  font-size: 15px; font-weight: 300; color: var(--nt-muted);
+  max-width: 440px; margin: 0 auto 36px; line-height: 1.65;
+}
+.success-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-primary-lg {
+  background: var(--nt-green); color: #000000;
+  font-weight: 500; font-size: 14px;
+  padding: 13px 28px; border-radius: 7px;
+  border: none; cursor: pointer; font-family: var(--font-body);
+  text-decoration: none; transition: background .15s;
+}
+.btn-primary-lg:hover { background: #23D98C; }
+.btn-outline-lg {
+  background: transparent; color: #CCCCCC;
+  font-size: 14px; padding: 13px 28px; border-radius: 7px;
+  border: 1px solid var(--nt-border-strong);
+  cursor: pointer; font-family: var(--font-body);
+  text-decoration: none; transition: all .15s;
+}
+.btn-outline-lg:hover { background: #1E1E1E; }
+
+@media (max-width: 640px) {
+  .form-row, .form-row-3 { grid-template-columns: 1fr; }
+  .plan-grid { grid-template-columns: 1fr; }
+  nav { padding: 0 16px; }
+  .intake-header { padding: 36px 20px 32px; }
+  .intake-body { padding: 24px 16px 60px; }
+  .roster-head { display: none; }
+  .roster-row { grid-template-columns: 1fr; gap: 6px; padding: 10px; border: 1px solid var(--nt-border); border-radius: 8px; }
+  .roster-row-remove { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></a>
+  <a href="/" class="nav-back">
+    <svg viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to home
+  </a>
+</nav>
+
+<!-- HEADER -->
+<div class="intake-header">
+  <div class="intake-header-inner">
+    <div class="intake-eyebrow">Team intake</div>
+    <h1>BRING YOUR<br>WHOLE TEAM <em>ONBOARD.</em></h1>
+    <p class="intake-header-sub">Tell us about your team and roster. We'll follow up with team pricing and next steps within 1 business day.</p>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="intake-body">
+
+  <!-- SUCCESS STATE -->
+  <div class="success-panel" id="successPanel">
+    <div class="success-icon">
+      <svg viewBox="0 0 32 32" fill="none"><path d="M6 16l7 7L26 9" stroke="#AADD00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="success-title">TEAM INTAKE<br><em>SUBMITTED.</em></div>
+    <p class="success-sub">We've received your team's information. Someone from Next Tier will reach out within 1 business day with team pricing and onboarding steps.</p>
+    <div class="success-actions">
+      <a href="/" class="btn-primary-lg">Back to home</a>
+      <a href="#" class="btn-outline-lg" onclick="location.reload()">Submit another team</a>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div id="formArea">
+
+    <!-- 1. TEAM INFORMATION -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">TEAM INFORMATION</div>
+          <div class="form-block-sub">Basic details about the team or organization</div>
+        </div>
+        <div class="form-block-tag">Required</div>
+      </div>
+      <div class="form-block-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Team name <span class="req">*</span></label>
+            <input type="text" id="teamName" placeholder="e.g. Sherwood Park Crusaders">
+          </div>
+          <div class="form-group">
+            <label>Current league <span class="req">*</span></label>
+            <select id="currentLeague">
+              <option value="">Select league</option>
+              <optgroup label="Alberta">
+                <option>AEHL U18</option>
+                <option>AEHL U15</option>
+                <option>AJHL</option>
+                <option>AMHL U18 AAA</option>
+                <option>AMHL U15 AAA</option>
+              </optgroup>
+              <optgroup label="BC / West">
+                <option>BCHL</option>
+                <option>PJHL</option>
+                <option>BCEHL U18</option>
+              </optgroup>
+              <optgroup label="National / US">
+                <option>USHL</option>
+                <option>NAHL</option>
+                <option>OJHL</option>
+                <option>NCAA D1</option>
+                <option>NCAA D2/D3</option>
+                <option>ACHA</option>
+              </optgroup>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Season</label>
+            <select id="season">
+              <option>2025–26</option>
+              <option>2024–25</option>
+              <option>2026–27 (upcoming)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Number of players <span class="opt">(approximate)</span></label>
+            <input type="number" id="numPlayers" placeholder="e.g. 18" min="1" max="99">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. CONTACT INFORMATION -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">CONTACT INFORMATION</div>
+          <div class="form-block-sub">Who should we follow up with?</div>
+        </div>
+        <div class="form-block-tag">Required</div>
+      </div>
+      <div class="form-block-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Your name <span class="req">*</span></label>
+            <input type="text" id="contactName" placeholder="e.g. Jamie Carter">
+          </div>
+          <div class="form-group">
+            <label>Your role <span class="req">*</span></label>
+            <select id="role">
+              <option value="">Select</option>
+              <option>Head Coach</option>
+              <option>Assistant Coach</option>
+              <option>Team Manager</option>
+              <option>General Manager</option>
+              <option>Organization / Club Admin</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email address <span class="req">*</span></label>
+            <input type="email" id="email" placeholder="you@email.com">
+          </div>
+          <div class="form-group">
+            <label>Phone <span class="opt">(optional)</span></label>
+            <input type="tel" id="phone" placeholder="+1 780 555 0123">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label>How did you hear about Next Tier? <span class="opt">(optional)</span></label>
+          <select id="hearAbout">
+            <option value="">Select</option>
+            <option>Coach / Trainer recommendation</option>
+            <option>Social media</option>
+            <option>Word of mouth</option>
+            <option>Search engine</option>
+            <option>Team / league partnership</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. ROSTER -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">ROSTER</div>
+          <div class="form-block-sub">Add the players you'd like included — you can add more later</div>
+        </div>
+        <div class="form-block-tag optional">Optional</div>
+      </div>
+      <div class="form-block-body">
+        <div class="roster-head">
+          <div>First name</div><div>Last name</div><div>Position</div><div>Birth year</div><div></div>
+        </div>
+        <div class="roster-table" id="rosterTable"></div>
+        <button type="button" class="btn-add-row" onclick="addRosterRow()">+ Add player</button>
+      </div>
+    </div>
+
+    <!-- 4. PACKAGE INTEREST -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">PACKAGE INTEREST</div>
+          <div class="form-block-sub">Team pricing is quoted based on roster size — select what you're interested in</div>
+        </div>
+        <div class="form-block-tag">Required</div>
+      </div>
+      <div class="form-block-body">
+        <div class="plan-grid">
+          <div>
+            <input type="radio" name="pkg" id="pkgCards" value="Team Player Cards" class="plan-opt">
+            <label for="pkgCards">
+              <span class="plan-name">TEAM PLAYER CARDS</span>
+              <span class="plan-desc">A digital recruiting card for every player on the roster.</span>
+            </label>
+          </div>
+          <div>
+            <input type="radio" name="pkg" id="pkgVideo" value="Team Video Reviews" class="plan-opt">
+            <label for="pkgVideo">
+              <span class="plan-name">TEAM VIDEO REVIEWS</span>
+              <span class="plan-desc">Full scout-level video breakdowns for the whole roster.</span>
+            </label>
+          </div>
+          <div>
+            <input type="radio" name="pkg" id="pkgBoth" value="Both" class="plan-opt">
+            <label for="pkgBoth">
+              <span class="plan-name">BOTH</span>
+              <span class="plan-desc">Player cards and video reviews for the team.</span>
+            </label>
+          </div>
+          <div>
+            <input type="radio" name="pkg" id="pkgUnsure" value="Not sure yet" class="plan-opt">
+            <label for="pkgUnsure">
+              <span class="plan-name">NOT SURE YET</span>
+              <span class="plan-desc">Just exploring — I'd like to talk it through first.</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. NOTES -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">ANYTHING ELSE?</div>
+          <div class="form-block-sub">Timelines, tryout dates, or specific goals for the team</div>
+        </div>
+        <div class="form-block-tag optional">Optional</div>
+      </div>
+      <div class="form-block-body">
+        <div class="form-group" style="margin-bottom:0">
+          <textarea id="notes" placeholder="e.g. We'd like player cards ready before tryouts on..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. CONSENT & SUBMISSION -->
+    <div class="form-block">
+      <div class="form-block-header">
+        <div>
+          <div class="form-block-title">CONSENT & SUBMISSION</div>
+          <div class="form-block-sub">Review before you submit</div>
+        </div>
+      </div>
+      <div class="form-block-body">
+        <div class="check-row">
+          <input type="checkbox" id="consentData">
+          <span>I consent to Next Tier collecting and processing the team and roster information provided for the purpose of preparing team pricing and onboarding.</span>
+        </div>
+        <div class="check-row">
+          <input type="checkbox" id="consentContact">
+          <span>I agree to be contacted by Next Tier at the email or phone number provided about team pricing and services. Unsubscribe anytime.</span>
+        </div>
+        <div class="submit-wrap" style="margin-top:20px">
+          <button class="btn-submit" onclick="submitForm()">Submit team intake →</button>
+          <div class="submit-note">Your information is private and never shared or sold.</div>
+          <div class="submit-error" id="submitError"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /formArea -->
+</div><!-- /intake-body -->
+
+<script>
+const POSITIONS = ['Centre','Left Wing','Right Wing','Left Defense','Right Defense','Goaltender'];
+let rosterRowCount = 0;
+
+function addRosterRow(first, last, position, birthYear) {
+  const id = rosterRowCount++;
+  const table = document.getElementById('rosterTable');
+  const row = document.createElement('div');
+  row.className = 'roster-row';
+  row.id = 'rosterRow' + id;
+  row.innerHTML = `
+    <input type="text" placeholder="First name" class="roster-first" value="${first || ''}">
+    <input type="text" placeholder="Last name" class="roster-last" value="${last || ''}">
+    <select class="roster-position">
+      <option value="">Position</option>
+      ${POSITIONS.map(p => `<option${p === position ? ' selected' : ''}>${p}</option>`).join('')}
+    </select>
+    <input type="number" placeholder="Year" class="roster-year" min="1990" max="2020" value="${birthYear || ''}">
+    <button type="button" class="roster-row-remove" onclick="document.getElementById('rosterRow${id}').remove()">×</button>
+  `;
+  table.appendChild(row);
+}
+
+// Start with 3 blank rows so the section doesn't look empty
+addRosterRow();
+addRosterRow();
+addRosterRow();
+
+function collectRoster() {
+  const rows = document.querySelectorAll('.roster-row');
+  const roster = [];
+  rows.forEach(row => {
+    const first = row.querySelector('.roster-first').value.trim();
+    const last  = row.querySelector('.roster-last').value.trim();
+    const pos   = row.querySelector('.roster-position').value;
+    const year  = row.querySelector('.roster-year').value.trim();
+    if (first || last) roster.push({ firstName: first, lastName: last, position: pos, birthYear: year });
+  });
+  return roster;
+}
+
+function v(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+function collectFormData() {
+  const pkgEl = document.querySelector('input[name="pkg"]:checked');
+  return [
+    '',                                                    // row[0] unused
+    v('teamName'), v('currentLeague'), v('season'),        // 1-3
+    v('numPlayers'), v('contactName'), v('role'),           // 4-6
+    v('email'), v('phone'), v('hearAbout'),                  // 7-9
+    pkgEl ? pkgEl.value : '',                                // row[10] package interest
+    v('notes'),                                              // row[11]
+    JSON.stringify(collectRoster()),                         // row[12] roster JSON
+    document.getElementById('consentData').checked,          // row[13]
+    document.getElementById('consentContact').checked        // row[14]
+  ];
+}
+
+function showSuccessPanel() {
+  document.getElementById('formArea').style.display = 'none';
+  document.getElementById('successPanel').classList.add('visible');
+  setSubmitLoading(false);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showSubmitError(msg) {
+  const el = document.getElementById('submitError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function setSubmitLoading(loading) {
+  const btn = document.querySelector('.btn-submit');
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Saving…' : 'Submit team intake →';
+}
+
+async function submitForm() {
+  if (!v('teamName'))                                   { alert('Please enter the team name.'); return; }
+  if (!document.getElementById('currentLeague').value)  { alert('Please select a league.'); return; }
+  if (!v('contactName'))                                { alert('Please enter your name.'); return; }
+  if (!document.getElementById('role').value)           { alert('Please select your role.'); return; }
+  if (!v('email'))                                      { alert('Please enter your email address.'); return; }
+  if (!document.querySelector('input[name="pkg"]:checked')) { alert('Please select a package interest.'); return; }
+  if (!document.getElementById('consentData').checked)  { alert('Please accept the data consent to submit.'); return; }
+
+  document.getElementById('submitError').style.display = 'none';
+  setSubmitLoading(true);
+
+  try {
+    const user = NT.getUser ? NT.getUser() : null;
+    const res  = await NT.api({ type: 'teamIntake', row: collectFormData(), userId: user?.id || null });
+
+    if (res.status !== 'ok') throw new Error(res.message || 'Submission failed.');
+
+    showSuccessPanel();
+
+  } catch (err) {
+    showSubmitError(err.message || 'Submission failed. Please try again.');
+    setSubmitLoading(false);
+  }
+}
+</script>
+</body>
+</html>

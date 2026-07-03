@@ -16,6 +16,8 @@ const NT = (() => {
       firstName: row.first_name || row.firstName || '',
       lastName:  row.last_name  || row.lastName  || '',
       status:    row.status     || 'active',
+      teamId:    row.linked_player_id || row.teamId || null,
+      parentPlayerId: row.parent_player_id || row.parentPlayerId || null,
     };
   }
 
@@ -23,6 +25,7 @@ const NT = (() => {
     return {
       id:           r.id,
       userId:       r.user_id,
+      intakeId:     r.intake_id   || null,
       createdAt:    r.created_at  ? r.created_at.toString() : '',
       package:      r.package     || '',
       status:       r.status      || '',
@@ -34,6 +37,25 @@ const NT = (() => {
       jerseyNumber: r.jersey_number || '',
       pdsScore:     r.pds_score   || '',
       reportUrl:    r.report_path || '',
+    };
+  }
+
+  function _normalizeCoachNote(r) {
+    return {
+      id:               r.id,
+      playerId:         r.player_id,
+      coachId:          r.coach_id,
+      coachName:        r.coach_name        || '',
+      coachTitle:       r.coach_title       || '',
+      team:             r.team              || '',
+      entryDate:        r.entry_date || r.created_at || '',
+      overallGrade:     r.overall_grade     || '',
+      strengths:        r.strengths         || [],
+      areasImprovement: r.areas_improvement || [],
+      coachability:     r.coachability      || '',
+      practiceVsGame:   r.practice_vs_game  || '',
+      projectedRole:    r.projected_role    || '',
+      generalComments:  r.general_comments  || '',
     };
   }
 
@@ -169,6 +191,71 @@ const NT = (() => {
       return { status: 'ok' };
     }
 
+    if (type === 'getTeamMembers') {
+      const { data: { user } } = await _supabase.auth.getUser();
+      if (!user) return { status: 'error', message: 'Not authenticated.' };
+      const { data, error } = await _supabase.from('profiles')
+        .select('*').eq('linked_player_id', user.id).order('created_at', { ascending: false });
+      if (error) return { status: 'error', message: error.message };
+      return { status: 'ok', members: (data || []).map(_normalizeProfile) };
+    }
+
+    if (type === 'getTeamProducts') {
+      const { data: { user } } = await _supabase.auth.getUser();
+      if (!user) return { status: 'error', message: 'Not authenticated.' };
+      const { data: members, error: mErr } = await _supabase.from('profiles')
+        .select('id').eq('linked_player_id', user.id);
+      if (mErr) return { status: 'error', message: mErr.message };
+      if (!members?.length) return { status: 'ok', products: [] };
+      const ids = members.map(m => m.id);
+      const { data, error } = await _supabase.from('products')
+        .select('*').in('user_id', ids).order('created_at', { ascending: false });
+      if (error) return { status: 'error', message: error.message };
+      return { status: 'ok', products: (data || []).map(_normalizeProduct) };
+    }
+
+    if (type === 'getProductForPlayer') {
+      const { data, error } = await _supabase.from('products').select('*').eq('user_id', payload.playerId).order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (error) return { status: 'error', message: error.message };
+      return { status: 'ok', product: data ? _normalizeProduct(data) : null };
+    }
+
+    if (type === 'getCardJobs') {
+      const { data, error } = await _supabase.from('card_jobs_latest').select('*');
+      if (error) return { status: 'error', message: error.message };
+      return { status: 'ok', jobs: data || [] };
+    }
+
+    if (type === 'getCoachNotes') {
+      const { data, error } = await _supabase.from('coach_notes').select('*').eq('player_id', payload.playerId).order('entry_date', { ascending: false });
+      if (error) return { status: 'error', message: error.message };
+      return { status: 'ok', notes: (data || []).map(_normalizeCoachNote) };
+    }
+
+    if (type === 'addCoachNote') {
+      const { data: { user } } = await _supabase.auth.getUser();
+      if (!user) return { status: 'error', message: 'Not authenticated.' };
+      const { data: profile } = await _supabase.from('profiles').select('*').eq('id', user.id).single();
+      const coachName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || profile?.email || 'Coach';
+      const row = {
+        player_id:         payload.playerId,
+        coach_id:          user.id,
+        coach_name:        coachName,
+        coach_title:       payload.coachTitle || '',
+        team:              payload.team || '',
+        overall_grade:     payload.overallGrade,
+        strengths:         payload.strengths || [],
+        areas_improvement: payload.areasImprovement || [],
+        coachability:      payload.coachability || '',
+        practice_vs_game:  payload.practiceVsGame || '',
+        projected_role:    payload.projectedRole || '',
+        general_comments:  payload.generalComments || '',
+      };
+      const { data, error } = await _supabase.from('coach_notes').insert(row).select().single();
+      if (error) return { status: 'error', message: error.message };
+      return { status: 'ok', note: _normalizeCoachNote(data) };
+    }
+
     if (type === 'requestReset') {
       const redirectTo = (payload.resetUrlBase || (window.location.origin + '/reset-password?token=')).split('?')[0];
       await _supabase.auth.resetPasswordForEmail(payload.email, { redirectTo });
@@ -177,11 +264,16 @@ const NT = (() => {
 
     // ── Edge Function calls ────────────────────────────────────
     const edgeFnMap = {
-      intake:         'intake',
-      contact:        'contact',
-      uploadReport:   'upload-report',
-      viewReport:     'view-report',
-      deliverProduct: 'deliver-product',
+      intake:            'intake',
+      teamIntake:        'team-intake',
+      contact:           'contact',
+      uploadReport:      'upload-report',
+      viewReport:        'view-report',
+      deliverProduct:    'deliver-product',
+      approveCard:       'approve-card',
+      retryCardJob:      'retry-card-job',
+      createTeamMember:  'create-team-member',
+      createTeamAccount: 'create-team-account',
     };
 
     if (edgeFnMap[type]) {
