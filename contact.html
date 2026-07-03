@@ -598,21 +598,11 @@ nav {
 </div><!-- /contact-body -->
 
 <script>
-// ── Google Apps Script Integration ──
-// Reuse the same Apps Script endpoint as the intake form.
-// Submissions go to a separate "Contact" tab in your Google Sheet.
-//
-// In your Apps Script, add a doPost handler that routes by payload.type,
-// or deploy a second web app pointing at a Contact sheet.
-//
-// Paste your Web App URL here:
-const APPS_SCRIPT_URL = NT_API_URL;
-
 function collectFormData() {
   const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
   const radio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
   return [
-    new Date().toLocaleString('en-CA', { timeZone: 'America/Edmonton' }),
+    '',
     v('firstName'),
     v('lastName'),
     v('email'),
@@ -650,13 +640,9 @@ async function submitForm() {
   setLoading(true);
 
   try {
-    const payload = JSON.stringify({ type: 'contact', row: collectFormData() });
+    const res = await NT.api({ type: 'contact', row: collectFormData() });
+    if (res.status !== 'ok') throw new Error(res.message || 'Submission failed.');
 
-    await fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode:   'no-cors',
-      body:   payload
-    });
     document.getElementById('contactForm').style.display = 'none';
     document.getElementById('successPanel').classList.add('visible');
     window.scrollTo({ top: 0, behavior: 'smooth' });
