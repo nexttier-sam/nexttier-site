@@ -1,12 +1,17 @@
 ﻿<!DOCTYPE html>
 <script>
-// Supabase auth emails redirect to site_url (homepage). Bounce recovery/error hashes to the correct page.
+// Supabase auth emails redirect to site_url (homepage). Bounce recovery/error hashes
+// (implicit flow) or a stray ?code= (PKCE flow) to the correct page.
 (function(){
   var h = window.location.hash;
-  if (!h) return;
-  var p = new URLSearchParams(h.replace(/^#/,''));
-  if (p.get('type') === 'recovery' || p.get('error')) {
+  var p = h ? new URLSearchParams(h.replace(/^#/,'')) : null;
+  if (p && (p.get('type') === 'recovery' || p.get('error'))) {
     window.location.replace('/reset-password' + h);
+    return;
+  }
+  var q = new URLSearchParams(window.location.search);
+  if (q.get('code')) {
+    window.location.replace('/reset-password' + window.location.search);
   }
 })();
 </script>

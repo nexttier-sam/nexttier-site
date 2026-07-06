@@ -2,7 +2,12 @@
 // Requires: supabase-js CDN, then config.js, then this file.
 
 const NT = (() => {
-  const _supabase = supabase.createClient(NT_SUPABASE_URL, NT_SUPABASE_ANON_KEY);
+  // flowType pinned to 'implicit' — reset-password.html parses recovery tokens from the
+  // URL hash (#access_token&type=recovery); the PKCE flow (default in newer supabase-js)
+  // would deliver a ?code= param instead and break that page.
+  const _supabase = supabase.createClient(NT_SUPABASE_URL, NT_SUPABASE_ANON_KEY, {
+    auth: { flowType: 'implicit' },
+  });
   let _cachedUser  = null;
   let _cachedToken = null;
 
