@@ -145,6 +145,16 @@ cursor: pointer;
   transition: background .15s, box-shadow .15s !important;
 }
 .nav-cta:hover { background: #99CC00 !important; box-shadow: 0 0 24px rgba(170,221,0,0.4) !important; }
+.nav-cta-outline {
+  background: transparent !important;
+  color: var(--nt-green) !important;
+  border: 1px solid var(--nt-green);
+  box-shadow: none !important;
+}
+.nav-cta-outline:hover {
+  background: rgba(170,221,0,0.1) !important;
+  box-shadow: 0 0 16px rgba(170,221,0,0.2) !important;
+}
 
 /* â”€â”€ HERO â”€â”€ */
 
@@ -1590,7 +1600,7 @@ text-transform: uppercase;
 
 <a href="#tiers">Pricing</a>
 
-<a href="checkout">Purchase</a>
+<a href="checkout" class="nav-cta nav-cta-outline">Purchase</a>
 
 <a href="login" id="navLoginLink">Login</a>
 
