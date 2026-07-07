@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Next Tier — Player Card Profile</title>
+<title>Next Tier — Parent Intake</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="/config.js"></script>
@@ -245,49 +245,6 @@ nav {
   display: none;
 }
 
-/* REGION PICKER */
-.region-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-}
-.region-card {
-  position: relative;
-  border: 2px solid var(--nt-border-strong);
-  border-radius: 12px;
-  padding: 18px 20px;
-  cursor: pointer;
-  transition: border-color .15s, background .15s;
-  display: flex; align-items: center; gap: 14px;
-  background: #111111;
-}
-.region-card:hover { border-color: rgba(170,221,0,0.35); background: #161616; }
-.region-card input[type="radio"] {
-  position: absolute; opacity: 0; width: 0; height: 0;
-}
-.region-card.selected {
-  border-color: var(--nt-green);
-  background: var(--nt-green-l);
-}
-.region-flag {
-  font-size: 32px; line-height: 1; flex-shrink: 0;
-}
-.region-label { font-family: var(--font-display); font-size: 22px; letter-spacing: .04em; color: var(--nt-white); }
-.region-sub { font-size: 11px; font-weight: 300; color: var(--nt-muted); margin-top: 2px; }
-.region-check {
-  margin-left: auto; flex-shrink: 0;
-  width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid var(--nt-border-strong);
-  display: flex; align-items: center; justify-content: center;
-  transition: border-color .15s, background .15s;
-}
-.region-card.selected .region-check {
-  border-color: var(--nt-green);
-  background: var(--nt-green);
-}
-.region-card.selected .region-check::after {
-  content: '';
-  width: 6px; height: 6px; border-radius: 50%; background: #000;
-}
-
 /* LOADING OVERLAY */
 .loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:20px;}
 .loading-overlay.active{display:flex;}
@@ -373,9 +330,9 @@ nav {
 
 <div class="intake-header">
   <div class="intake-header-inner">
-    <div class="intake-eyebrow">Player profile intake</div>
-    <h1>BUILD YOUR<br>PLAYER <em>PROFILE.</em></h1>
-    <p class="intake-header-sub">Fill in your details below to create your account and submit your profile. Takes about 2 minutes.</p>
+    <div class="intake-eyebrow">Parent intake</div>
+    <h1>SIGN UP FOR<br>YOUR <em>PLAYER.</em></h1>
+    <p class="intake-header-sub">Create your parent account and build your player's profile below. Takes about 2 minutes.</p>
   </div>
 </div>
 
@@ -389,7 +346,7 @@ nav {
     <div class="success-title">PROFILE<br><em>SUBMITTED.</em></div>
     <p class="success-sub" id="successSub">Your account is ready and we've received your player's information. Your full Player Development Score and metric breakdown will be ready within 48 hours.</p>
     <div class="success-actions">
-      <a href="/dashboard-player" class="btn-primary-lg">Go to your dashboard</a>
+      <a href="/dashboard-parent" class="btn-primary-lg">Go to your dashboard</a>
       <a href="/" class="btn-outline-lg">Back to home</a>
     </div>
   </div>
@@ -409,23 +366,64 @@ nav {
     <div class="package-price"><span>$</span>125</div>
   </div>
 
-  <!-- 1. PLAYER INFORMATION -->
+  <!-- 1. YOUR ACCOUNT -->
   <div class="form-block">
     <div class="form-block-header">
       <div>
-        <div class="form-block-title">PLAYER INFORMATION</div>
-        <div class="form-block-sub">Basic details for the player profile</div>
+        <div class="form-block-title">YOUR ACCOUNT</div>
+        <div class="form-block-sub">You'll use this to log in and manage your player's profile</div>
       </div>
       <div class="form-block-tag">Required</div>
     </div>
     <div class="form-block-body">
       <div class="form-row">
         <div class="form-group">
-          <label>First name <span class="req">*</span></label>
+          <label>Your first name <span class="req">*</span></label>
+          <input type="text" id="parentFirst" placeholder="e.g. Jamie">
+        </div>
+        <div class="form-group">
+          <label>Your last name <span class="req">*</span></label>
+          <input type="text" id="parentLast" placeholder="e.g. Carter">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email address <span class="req">*</span></label>
+          <input type="email" id="email" placeholder="you@email.com">
+        </div>
+        <div class="form-group">
+          <label>Phone <span class="opt">(optional)</span></label>
+          <input type="tel" id="phone" placeholder="+1 780 555 0123">
+        </div>
+      </div>
+      <div id="acctSignedIn" class="acct-signed-in" style="display:none">
+        Signed in as <strong id="acctSignedInEmail"></strong>
+      </div>
+      <div class="form-group" id="pwGroup" style="margin-bottom:0">
+        <label>Create a password <span class="req">*</span></label>
+        <input type="password" id="password" placeholder="Min 8 characters" autocomplete="new-password">
+        <div class="acct-note">This creates your Next Tier parent account so you can log in later and track your player's profile.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. PLAYER INFORMATION -->
+  <div class="form-block">
+    <div class="form-block-header">
+      <div>
+        <div class="form-block-title">PLAYER INFORMATION</div>
+        <div class="form-block-sub">Basic details for your player's profile</div>
+      </div>
+      <div class="form-block-tag">Required</div>
+    </div>
+    <div class="form-block-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Player first name <span class="req">*</span></label>
           <input type="text" id="firstName" placeholder="e.g. Tyler">
         </div>
         <div class="form-group">
-          <label>Last name <span class="req">*</span></label>
+          <label>Player last name <span class="req">*</span></label>
           <input type="text" id="lastName" placeholder="e.g. Keating">
         </div>
       </div>
@@ -457,46 +455,7 @@ nav {
           <input type="number" id="weight" placeholder="e.g. 170">
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- 2. CONTACT INFORMATION -->
-  <div class="form-block">
-    <div class="form-block-header">
-      <div>
-        <div class="form-block-title">CONTACT INFORMATION</div>
-        <div class="form-block-sub">Who should receive the PDS report?</div>
-      </div>
-      <div class="form-block-tag">Required</div>
-    </div>
-    <div class="form-block-body">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Your name <span class="req">*</span></label>
-          <input type="text" id="contactName" placeholder="Parent, guardian, or player">
-        </div>
-        <div class="form-group">
-          <label>Relationship to player <span class="req">*</span></label>
-          <select id="relationship">
-            <option value="">Select</option>
-            <option>Parent / Guardian</option>
-            <option>The player</option>
-            <option>Coach / Trainer</option>
-            <option>Agent</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Email address <span class="req">*</span></label>
-          <input type="email" id="email" placeholder="you@email.com">
-        </div>
-        <div class="form-group">
-          <label>Phone <span class="opt">(optional)</span></label>
-          <input type="tel" id="phone" placeholder="+1 780 555 0123">
-        </div>
-      </div>
-      <div class="form-group">
+      <div class="form-group" style="margin-bottom:0">
         <label>How did you hear about Next Tier? <span class="opt">(optional)</span></label>
         <select id="hearAbout">
           <option value="">Select</option>
@@ -508,14 +467,6 @@ nav {
           <option>Other</option>
         </select>
       </div>
-      <div id="acctSignedIn" class="acct-signed-in" style="display:none">
-        Signed in as <strong id="acctSignedInEmail"></strong>
-      </div>
-      <div class="form-group" id="pwGroup" style="margin-bottom:0">
-        <label>Create a password <span class="req">*</span></label>
-        <input type="password" id="password" placeholder="Min 8 characters" autocomplete="new-password">
-        <div class="acct-note">This creates your Next Tier account so you can log in later and track your profile.</div>
-      </div>
     </div>
   </div>
 
@@ -524,7 +475,7 @@ nav {
     <div class="form-block-header">
       <div>
         <div class="form-block-title">TEAM</div>
-        <div class="form-block-sub">Where is the player competing right now?</div>
+        <div class="form-block-sub">Where is your player competing right now?</div>
       </div>
       <div class="form-block-tag">Required</div>
     </div>
@@ -584,7 +535,7 @@ nav {
     <div class="form-block-header">
       <div>
         <div class="form-block-title">PLAYER PHOTO</div>
-        <div class="form-block-sub">Used on your recruiting card — headshot or action photo</div>
+        <div class="form-block-sub">Used on your player's recruiting card — headshot or action photo</div>
       </div>
       <div class="form-block-tag optional">Optional</div>
     </div>
@@ -606,40 +557,7 @@ nav {
     </div>
   </div>
 
-  <!-- 5. REGION -->
-  <div class="form-block">
-    <div class="form-block-header">
-      <div>
-        <div class="form-block-title">YOUR REGION</div>
-        <div class="form-block-sub">Determines your payment currency and processing</div>
-      </div>
-      <div class="form-block-tag">Required</div>
-    </div>
-    <div class="form-block-body">
-      <div class="region-grid">
-        <label class="region-card" id="regionCA" onclick="selectRegion('CA')">
-          <input type="radio" name="region" value="CA">
-          <div class="region-flag">🇨🇦</div>
-          <div>
-            <div class="region-label">CANADA</div>
-            <div class="region-sub">Pay in CAD</div>
-          </div>
-          <div class="region-check"></div>
-        </label>
-        <label class="region-card" id="regionUS" onclick="selectRegion('US')">
-          <input type="radio" name="region" value="US">
-          <div class="region-flag">🇺🇸</div>
-          <div>
-            <div class="region-label">USA</div>
-            <div class="region-sub">Pay in USD</div>
-          </div>
-          <div class="region-check"></div>
-        </label>
-      </div>
-    </div>
-  </div>
-
-  <!-- 6. CONSENT & PAYMENT -->
+  <!-- 5. CONSENT & SUBMISSION -->
   <div class="form-block">
     <div class="form-block-header">
       <div>
@@ -650,7 +568,7 @@ nav {
     <div class="form-block-body">
       <div class="check-row">
         <input type="checkbox" id="consentData">
-        <span>I consent to Next Tier collecting and processing the player's performance data for the purpose of generating a Player Development Score and development recommendations.</span>
+        <span>I consent, as parent/guardian, to Next Tier collecting and processing my player's performance data for the purpose of generating a Player Development Score and development recommendations.</span>
       </div>
       <div class="check-row">
         <input type="checkbox" id="consentContact">
@@ -668,11 +586,10 @@ nav {
 </div><!-- /intake-body -->
 
 <script>
-let _selectedRegion = '';
 let _existingUser = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // If the visitor already has a session (e.g. returning customer), skip
+  // If the visitor already has a session (e.g. returning parent), skip
   // account creation and just use their existing account.
   const valid = await NT.validate();
   if (valid) {
@@ -682,31 +599,22 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('acctSignedInEmail').textContent = valid.email || '';
     const emailEl = document.getElementById('email');
     if (emailEl && valid.email) emailEl.value = valid.email;
+    if (valid.firstName) document.getElementById('parentFirst').value = valid.firstName;
+    if (valid.lastName)  document.getElementById('parentLast').value  = valid.lastName;
   }
 });
-
-function selectRegion(code) {
-  _selectedRegion = code;
-  document.getElementById('regionCA').classList.toggle('selected', code === 'CA');
-  document.getElementById('regionUS').classList.toggle('selected', code === 'US');
-  document.querySelector(`input[value="${code}"]`).checked = true;
-}
 
 function v(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : '';
 }
 
-function isChecked(id) {
-  const el = document.getElementById(id);
-  return el ? (el.checked ? 'Yes' : 'No') : 'No';
-}
-
 function collectRow() {
+  const contactName = [v('parentFirst'), v('parentLast')].filter(Boolean).join(' ');
   return [
     '',                                                           // row[0] unused
     v('firstName'), v('lastName'), v('dob'), v('position'),      // 1-4
-    v('height'), v('weight'), v('contactName'), v('relationship'),// 5-8
+    v('height'), v('weight'), contactName, 'Parent / Guardian',   // 5-8
     v('email'), v('phone'), v('hearAbout'), v('teamName'),        // 9-12
     v('currentLeague'), v('season'), v('jerseyNum'),              // 13-15
     'Player Card',                                                // row[16] package
@@ -716,17 +624,16 @@ function collectRow() {
 }
 
 async function submitForm() {
-  if (!v('firstName'))                                  { alert('Please enter the player\'s first name.'); return; }
-  if (!v('lastName'))                                   { alert('Please enter the player\'s last name.'); return; }
-  if (!document.getElementById('dob').value)            { alert('Please enter the player\'s date of birth.'); return; }
-  if (!document.getElementById('position').value)       { alert('Please select a position.'); return; }
-  if (!v('contactName'))                                { alert('Please enter your name.'); return; }
-  if (!document.getElementById('relationship').value)   { alert('Please select your relationship to the player.'); return; }
+  if (!v('parentFirst'))                                { alert('Please enter your first name.'); return; }
+  if (!v('parentLast'))                                 { alert('Please enter your last name.'); return; }
   if (!v('email'))                                      { alert('Please enter your email address.'); return; }
   if (!_existingUser && v('password').length < 8)       { alert('Please create a password of at least 8 characters.'); return; }
+  if (!v('firstName'))                                  { alert('Please enter your player\'s first name.'); return; }
+  if (!v('lastName'))                                   { alert('Please enter your player\'s last name.'); return; }
+  if (!document.getElementById('dob').value)            { alert('Please enter your player\'s date of birth.'); return; }
+  if (!document.getElementById('position').value)       { alert('Please select a position.'); return; }
   if (!v('teamName'))                                   { alert('Please enter the team name.'); return; }
   if (!document.getElementById('currentLeague').value)  { alert('Please select a league.'); return; }
-  if (!_selectedRegion)                                  { alert('Please select your region (Canada or USA).'); return; }
   if (!document.getElementById('consentData').checked)  { alert('Please accept the data consent to continue.'); return; }
 
   document.getElementById('submitError').style.display = 'none';
@@ -737,7 +644,7 @@ async function submitForm() {
     let userId = _existingUser?.id || null;
 
     if (!_existingUser) {
-      const regRes = await NT.register(v('email'), v('password'), 'player', v('firstName'), v('lastName'));
+      const regRes = await NT.register(v('email'), v('password'), 'parent', v('parentFirst'), v('parentLast'));
       if (regRes.status === 'error') throw new Error(regRes.message || 'Could not create your account.');
       if (regRes.status === 'ok') {
         NT.setSession(regRes.token, regRes.user);
@@ -753,7 +660,7 @@ async function submitForm() {
     if (!_existingUser) {
       document.getElementById('successSub').textContent = NT.getUser()
         ? 'Your account is ready and we\'ve received your player\'s information. Your full Player Development Score and metric breakdown will be ready within 48 hours.'
-        : 'We\'ve received your player\'s information. Check your email to confirm your new account, then sign in to see your profile. Your full Player Development Score will be ready within 48 hours.';
+        : 'We\'ve received your player\'s information. Check your email to confirm your new account, then sign in to see your dashboard. Your full Player Development Score will be ready within 48 hours.';
     }
     document.getElementById('formArea').style.display = 'none';
     document.getElementById('successPanel').classList.add('visible');

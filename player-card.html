@@ -1,794 +1,737 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Next Tier — Player Card</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title id="page-title">Player Card · Next Tier</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="/config.js"></script>
 <script src="/nt-auth.js"></script>
 <style>
-:root {
-  --nt-black:#000000;--nt-ice:#1A1A1A;--nt-white:#FFFFFF;
-  --nt-green:#AADD00;--nt-green-l:#1E2200;--nt-green-d:#99BF00;
-  --nt-slate:#CCCCCC;--nt-muted:#888888;--nt-red:#E8344A;
-  --nt-amber:#CCAA00;--nt-blue:#4DA6FF;
-  --nt-border:rgba(170,221,0,0.08);--nt-border-strong:rgba(170,221,0,0.18);
-  --font-display:'Bebas Neue',sans-serif;
-  --font-body:'DM Sans',sans-serif;
-  --font-mono:'DM Mono',monospace;
+:root[data-theme="dark"]{
+  --bg:#000;--bg-card:#111;--bg-el:#1a1a1a;--bg-row:#1f1f1f;--bg-hi:#1c2200;
+  --border:rgba(170,204,0,.15);--border-s:rgba(170,204,0,.07);
+  --txt:#fff;--txt2:#ccc;--muted:#666;
+  --green:#AACC00;--str-bg:#1c2200;--str-brd:rgba(170,204,0,.25);--str-txt:#AACC00;
+  --orange:#f59e0b;--red:#ef4444;--blue:#60a5fa;
+  --bar-bg:#2a2a2a;--bar-g:#4ade6e;--bar-y:#f59e0b;--bar-r:#ef4444;
+  --flg-bg:#2a0a0a;--flg-brd:#4a1a1a;--flg-txt:#ef4444;
+  --prj-bg:#0a1020;--prj-brd:#1a2a40;--prj-txt:#60a5fa;
+  --shadow:0 4px 24px rgba(0,0,0,.8);
+}
+:root[data-theme="light"]{
+  --bg:#f0f0f0;--bg-card:#fff;--bg-el:#f5f5f5;--bg-row:#eee;--bg-hi:#f0ff99;
+  --border:rgba(0,0,0,.15);--border-s:rgba(0,0,0,.07);
+  --txt:#000;--txt2:#2a2a2a;--muted:#666;
+  --green:#7aaa00;--str-bg:#f0ff99;--str-brd:#b3dd00;--str-txt:#5a7a00;
+  --orange:#d97706;--red:#dc2626;--blue:#2563eb;
+  --bar-bg:#e0e0e0;--bar-g:#16a34a;--bar-y:#d97706;--bar-r:#dc2626;
+  --flg-bg:#fef2f2;--flg-brd:#fecaca;--flg-txt:#dc2626;
+  --prj-bg:#eff6ff;--prj-brd:#bfdbfe;--prj-txt:#1d4ed8;
+  --shadow:0 4px 24px rgba(0,0,0,.1);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font-body);background:#0D0D0D;color:var(--nt-white);-webkit-font-smoothing:antialiased;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
 
-/* LOADING */
-.loading-overlay{position:fixed;inset:0;background:var(--nt-black);display:flex;align-items:center;justify-content:center;z-index:999;}
+.loading-overlay{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:999;}
 
-/* NAV */
-nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--nt-border);}
-.nav-logo{display:flex;align-items:center;text-decoration:none;}
-.nav-right{display:flex;align-items:center;gap:16px;}
-.nav-user{display:flex;align-items:center;gap:10px;}
-.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--nt-green);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;color:#000;}
-.nav-name{font-size:13px;color:rgba(255,255,255,0.6);}
-.nav-role{font-family:var(--font-mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-green);}
-.btn-logout{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:7px 14px;font-size:12px;color:rgba(255,255,255,0.4);cursor:pointer;font-family:var(--font-body);transition:all .15s;}
-.btn-logout:hover{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);}
+/* Theme toggle */
+.toggle-wrap{position:fixed;bottom:20px;right:20px;z-index:1000;display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:30px;padding:8px 14px;box-shadow:var(--shadow);cursor:pointer;user-select:none;transition:border-color .2s;}
+.toggle-wrap:hover{border-color:var(--green);}
+.toggle-lbl{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt2);}
+.toggle-sw{width:36px;height:20px;background:var(--bg-row);border:1px solid var(--border);border-radius:10px;position:relative;transition:background .3s;}
+[data-theme="light"] .toggle-sw{background:var(--green);}
+.toggle-sw::after{content:'';position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .25s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+[data-theme="light"] .toggle-sw::after{left:18px;}
 
-/* VIEW TABS */
-.view-bar{background:var(--nt-black);border-bottom:1px solid var(--nt-border);padding:0 32px;display:flex;align-items:center;gap:0;}
-.view-tab{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);padding:14px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--font-mono);}
-.view-tab:hover{color:var(--nt-white);}
-.view-tab.active{color:var(--nt-green);border-bottom-color:var(--nt-green);}
+/* Section nav */
+.snav{position:sticky;top:0;z-index:100;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;height:48px;padding:0 16px;gap:0;}
+.snav-brand{display:flex;align-items:center;text-decoration:none;flex-shrink:0;margin-right:8px;}
+.snav-links{display:flex;align-items:center;flex:1;overflow-x:auto;}
+.snav-link{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 14px;height:48px;display:flex;align-items:center;text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap;cursor:pointer;transition:color .15s,border-color .15s;}
+.snav-link:hover{color:var(--txt2);}
+.snav-link.active{color:var(--green);border-bottom-color:var(--green);}
+.snav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:auto;}
+.snav-user{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.06em;}
+.snav-logout{background:transparent;border:1px solid var(--border);border-radius:3px;padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:'Barlow',sans-serif;}
+.snav-logout:hover{color:var(--txt2);}
 
-/* STATUS PILL */
-.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:500;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase;}
-.pill-pending{background:#2A2000;color:#CCAA00;}
-.pill-active{background:#1C2200;color:#AADD00;}
-.pill-dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+/* Layout */
+.pw{max-width:1100px;margin:0 auto;padding:20px 16px 80px;}
 
-/* LAYOUT */
-.page-body{max-width:960px;margin:0 auto;padding:40px 24px 80px;}
+/* Section label */
+.sec-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border-s);display:flex;justify-content:space-between;}
 
-/* PLAYER HEADER */
-.player-header{background:#1A1A1A;border:1px solid var(--nt-border);border-radius:16px;padding:32px 36px;margin-bottom:24px;display:flex;align-items:center;gap:32px;position:relative;overflow:hidden;}
-.player-header::before{content:'';position:absolute;right:-60px;top:-60px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(170,221,0,0.06) 0%,transparent 70%);pointer-events:none;}
-.player-number{font-family:var(--font-display);font-size:96px;color:rgba(170,221,0,0.08);line-height:1;min-width:100px;text-align:center;flex-shrink:0;}
-.player-info{flex:1;}
-.player-name{font-family:var(--font-display);font-size:clamp(36px,4vw,56px);letter-spacing:.03em;color:var(--nt-white);line-height:.95;margin-bottom:10px;}
-.player-meta-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:14px;}
-.player-meta-item{font-family:var(--font-mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--nt-muted);}
-.player-meta-item strong{color:var(--nt-slate);font-weight:500;}
-.player-meta-sep{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.15);}
-.player-header-right{text-align:right;flex-shrink:0;}
-.pds-ring{display:flex;flex-direction:column;align-items:center;gap:4px;}
-.pds-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-muted);}
-.pds-score{font-family:var(--font-display);font-size:72px;color:var(--nt-green);line-height:1;}
-.pds-score-pending{font-family:var(--font-display);font-size:36px;color:var(--nt-muted);line-height:1;}
-.tier-badge{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:8px;background:var(--nt-green);color:#000;font-family:var(--font-display);font-size:26px;margin-top:6px;}
-.tier-badge.dim{background:rgba(255,255,255,0.07);color:var(--nt-muted);}
+/* Card */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:4px;margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow);}
 
-/* SECTION CARD */
-.card{background:#1E1E1E;border:1px solid var(--nt-border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
-.card-head{padding:18px 24px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;}
-.card-title{font-family:var(--font-display);font-size:18px;letter-spacing:.03em;color:var(--nt-white);}
-.card-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);}
-.card-body{padding:24px;}
+/* Page 1: Player header */
+.player-header{display:grid;grid-template-columns:220px 1fr;min-height:240px;}
+.photo-col{background:var(--bg-el);border-right:1px solid var(--border);padding:20px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.player-photo{width:88px;height:88px;border-radius:50%;background:var(--bg-row);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
+.player-name{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:.02em;text-align:center;line-height:1.1;text-transform:uppercase;}
+.team-info{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--txt2);letter-spacing:.06em;line-height:1.5;}
+.tag-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;}
+.tag{background:var(--bg-row);border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:9px;padding:3px 7px;color:var(--txt2);letter-spacing:.06em;}
+.tag.g{background:var(--str-bg);border-color:var(--str-brd);color:var(--str-txt);}
+.pds-badge{text-align:center;}
+.pds-num{font-family:'Barlow Condensed',sans-serif;font-size:48px;font-weight:800;color:var(--txt);line-height:1;}
+.pds-key{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.stats-col{padding:18px 20px;display:flex;flex-direction:column;justify-content:center;gap:12px;}
+.glance-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;}
+.stat-boxes{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
+.stat-boxes.r3{grid-template-columns:repeat(3,1fr);}
+.stat-box{background:var(--bg-el);border:1px solid var(--border);border-radius:3px;padding:9px 10px;text-align:center;}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--txt);line-height:1;}
+.stat-val.g{color:var(--green);}
+.stat-key{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;}
+.career-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.ctbl{width:100%;border-collapse:collapse;font-size:12px;}
+.ctbl th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:8px;text-align:center;border-bottom:1px solid var(--border);background:var(--bg-el);white-space:nowrap;}
+.ctbl th:first-child{text-align:left;}
+.ctbl td{padding:8px;border-bottom:1px solid var(--border-s);color:var(--txt2);text-align:center;white-space:nowrap;}
+.ctbl td:first-child{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.05em;}
+.ctbl tr.cur td{color:var(--green);font-weight:600;background:var(--bg-hi);}
+.star{display:inline-block;background:var(--green);color:#000;font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px;margin-left:4px;font-family:'IBM Plex Mono',monospace;}
 
-/* SKILL BARS */
-.skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.skill-item{}
-.skill-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-.skill-name{font-size:13px;font-weight:400;color:var(--nt-slate);}
-.skill-score{font-family:var(--font-mono);font-size:12px;color:var(--nt-green);font-weight:500;}
-.skill-bar-track{height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;}
-.skill-bar-fill{height:100%;border-radius:2px;background:var(--nt-green);transition:width .8s cubic-bezier(.4,0,.2,1);}
-.skill-bar-fill.mid{background:var(--nt-amber);}
-.skill-bar-fill.low{background:var(--nt-red);}
+/* Page 2: Scout assessment */
+.scout-grid{display:grid;grid-template-columns:220px 1fr;}
+.info-col{border-right:1px solid var(--border);padding:20px;}
+.info-tbl{width:100%;}
+.info-tbl td{padding:7px 0;border-bottom:1px solid var(--border-s);font-size:12px;}
+.info-tbl tr:last-child td{border-bottom:none;}
+.info-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding-right:12px;white-space:nowrap;}
+.info-val{color:var(--txt);font-weight:500;font-size:12px;}
+.info-val.orange{color:var(--orange);}
+.exec-box{margin-top:14px;padding:12px;background:var(--bg-el);border:1px solid var(--border);border-radius:3px;}
+.exec-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.exec-body{font-size:11px;color:var(--txt2);line-height:1.6;}
+.legend-box{margin-top:12px;padding:10px 12px;background:var(--bg-el);border:1px solid var(--border);border-radius:3px;}
+.legend-title{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.legend-item{font-size:10px;color:var(--txt2);margin-bottom:5px;display:flex;align-items:flex-start;gap:8px;}
+.l-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;margin-top:1px;}
+.l-g{background:var(--bar-g);}.l-y{background:var(--bar-y);}.l-r{background:var(--bar-r);}
 
-/* STATS TABLE */
-.stats-table{width:100%;border-collapse:collapse;}
-.stats-table th{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);text-align:left;padding:0 12px 12px 0;border-bottom:1px solid var(--nt-border);}
-.stats-table td{font-size:13px;color:var(--nt-slate);padding:12px 12px 12px 0;border-bottom:1px solid rgba(170,221,0,0.04);vertical-align:middle;}
-.stats-table tr:last-child td{border-bottom:none;}
-.stats-table td.season-col{font-family:var(--font-mono);font-size:11px;color:var(--nt-muted);}
-.stats-table td.highlight{font-weight:600;color:var(--nt-white);}
+/* Skills */
+.skills-col{padding:20px 36px 20px 20px;}
+.skill-axis{display:flex;justify-content:space-between;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border-s);}
+.axis-lbl{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.skill-row{display:grid;grid-template-columns:130px 1fr;align-items:center;gap:10px;margin-bottom:9px;}
+.skill-name{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--txt2);}
+.skill-bar-wrap{position:relative;padding:10px 0;}
+.skill-bar-bg{background:var(--bar-bg);border-radius:2px;height:5px;position:relative;overflow:visible;}
+.skill-bar-fill{height:100%;border-radius:2px;position:relative;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.fill-green{background:var(--bar-g);}.fill-yellow{background:var(--bar-y);}.fill-red{background:var(--bar-r);}
+.skill-bubble{position:absolute;right:-16px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;z-index:2;box-shadow:0 1px 6px rgba(0,0,0,.5);}
+.bubble-green{background:var(--bar-g);color:#000;}.bubble-yellow{background:var(--bar-y);color:#000;}.bubble-red{background:var(--bar-r);color:#fff;}
+.skill-note{grid-column:2/-1;font-size:10px;color:var(--muted);font-style:italic;margin-top:-6px;margin-bottom:4px;}
 
-/* PATHWAY TABLE */
-.pathway-table{width:100%;border-collapse:collapse;}
-.pathway-table th{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);text-align:left;padding:0 12px 12px 0;border-bottom:1px solid var(--nt-border);}
-.pathway-table td{font-size:13px;color:var(--nt-slate);padding:12px 12px 12px 0;border-bottom:1px solid rgba(170,221,0,0.04);}
-.pathway-table tr:last-child td{border-bottom:none;}
-.pct-bar{display:flex;align-items:center;gap:8px;}
-.pct-num{font-family:var(--font-mono);font-size:12px;color:var(--nt-green);min-width:36px;}
-.pct-track{flex:1;height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;}
-.pct-fill{height:100%;background:var(--nt-green);border-radius:2px;}
+/* Pathway table */
+.pw-tbl{width:100%;border-collapse:collapse;}
+.pw-tbl th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:8px 14px;text-align:left;border-bottom:1px solid var(--border);}
+.pw-tbl td{padding:12px 14px;border-bottom:1px solid var(--border-s);font-size:12px;color:var(--txt2);}
+.pw-tbl tr:last-child td{border-bottom:none;}
+.pw-name{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--txt);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:3px;}
+.pw-sub{font-size:10px;color:var(--muted);}
+.match-pct{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;line-height:1;}
+.match-pct.green{color:var(--green);}.match-pct.orange{color:var(--orange);}.match-pct.red{color:var(--red);}
+.tl-val{font-family:'IBM Plex Mono',monospace;font-size:11px;}
 
-/* DEV NOTES */
-.dev-note{padding:14px 16px;background:rgba(170,221,0,0.04);border-left:2px solid var(--nt-green);border-radius:0 8px 8px 0;margin-bottom:12px;}
-.dev-note:last-child{margin-bottom:0;}
-.dev-note-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--nt-green);margin-bottom:4px;}
-.dev-note-text{font-size:13px;font-weight:300;color:var(--nt-slate);line-height:1.6;}
+/* Dev notes */
+.note-sec{padding:20px 24px;border-bottom:1px solid var(--border-s);}
+.note-sec:last-of-type{border-bottom:none;}
+.note-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.note-badge{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:2px;}
+.nb-str{background:var(--str-bg);color:var(--str-txt);border:1px solid var(--str-brd);}
+.nb-flg{background:var(--flg-bg);color:var(--flg-txt);border:1px solid var(--flg-brd);}
+.nb-prj{background:var(--prj-bg);color:var(--prj-txt);border:1px solid var(--prj-brd);}
+.note-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--txt);}
+.note-body{font-size:13px;line-height:1.7;color:var(--txt2);}
+.note-body strong{color:var(--txt);font-weight:600;}
 
-/* INFO GRID */
-.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-.info-item{}
-.info-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:6px;}
-.info-val{font-size:15px;font-weight:500;color:var(--nt-white);}
-.info-val.green{color:var(--nt-green);}
+/* Projection footer */
+.proj-footer{display:grid;grid-template-columns:repeat(4,1fr);}
+.proj-cell{padding:16px 20px;border-right:1px solid var(--border-s);text-align:center;}
+.proj-cell:last-child{border-right:none;}
+.proj-key{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.proj-val{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--txt);line-height:1;}
+.proj-val.g{color:var(--green);}.proj-val.b{color:var(--blue);}.proj-val.o{color:var(--orange);}
 
-/* NARRATIVE (parent view) */
-.narrative{font-size:14px;font-weight:300;color:var(--nt-slate);line-height:1.75;margin-bottom:20px;}
-.narrative strong{color:var(--nt-white);font-weight:500;}
-.metric-row{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--nt-border);}
-.metric-row:last-child{border-bottom:none;}
-.metric-icon{width:36px;height:36px;border-radius:8px;background:#0D0D0D;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.metric-text{flex:1;}
-.metric-title{font-size:13px;font-weight:500;color:var(--nt-white);margin-bottom:2px;}
-.metric-desc{font-size:12px;font-weight:300;color:var(--nt-muted);}
-.metric-val{font-family:var(--font-display);font-size:28px;color:var(--nt-green);}
-.step-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--nt-border);}
+/* How to read */
+.htr{display:grid;grid-template-columns:repeat(3,1fr);}
+.htr-item{padding:16px 20px;border-right:1px solid var(--border-s);}
+.htr-item:last-child{border-right:none;}
+.htr-num{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase;}
+.htr-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--green);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.htr-body{font-size:11px;color:var(--txt2);line-height:1.6;}
+
+/* Coach note */
+.coach-note{margin:12px 16px 0;padding:10px 14px;background:var(--bg-el);border:1px solid var(--border);border-left:3px solid var(--blue);border-radius:3px;}
+.coach-note-lbl{font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--blue);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px;}
+.coach-note-txt{font-size:11px;color:var(--txt2);line-height:1.6;font-style:italic;}
+
+/* Doc footer */
+.doc-footer{padding:10px 20px;background:var(--bg-el);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.footer-id{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.1em;}
+.footer-brand{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--green);text-transform:uppercase;}
+.conf-bar{padding:5px 12px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;text-align:center;background:repeating-linear-gradient(45deg,transparent,transparent 8px,var(--border-s) 8px,var(--border-s) 9px);}
+
+/* Parent view */
+.parent-hero{padding:24px;border-bottom:1px solid var(--border-s);display:flex;align-items:center;gap:24px;}
+.parent-name{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;text-transform:uppercase;line-height:1;margin-bottom:4px;}
+.parent-sub{font-size:13px;color:var(--txt2);}
+.parent-ring{width:80px;height:80px;border-radius:50%;border:3px solid var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;background:var(--bg-el);}
+.parent-ring-num{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;color:var(--green);line-height:1;}
+.parent-ring-key{font-family:'IBM Plex Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;}
+.metric-row{display:grid;grid-template-columns:120px 1fr 80px;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border-s);align-items:start;}
+.metric-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;color:var(--txt);text-transform:uppercase;letter-spacing:.04em;}
+.metric-ctx{font-size:10px;color:var(--muted);margin-top:2px;}
+.metric-desc{font-size:11px;color:var(--txt2);line-height:1.6;}
+.metric-val{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-align:right;line-height:1.1;}
+.metric-val.g{color:var(--green);}.metric-val.r{color:var(--red);}.metric-val.y{color:var(--orange);}
+.verdict-row{display:flex;gap:12px;align-items:flex-start;padding:16px 20px;border-bottom:1px solid var(--border-s);}
+.verdict-badge{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:2px;flex-shrink:0;background:var(--str-bg);color:var(--str-txt);border:1px solid var(--str-brd);}
+.verdict-text{font-size:13px;color:var(--txt2);line-height:1.7;}
+.verdict-text strong{color:var(--txt);}
+.steps-sec{padding:20px 24px;}
+.step-item{display:grid;grid-template-columns:32px 1fr;gap:16px;padding:18px 0;border-bottom:1px solid var(--border-s);align-items:start;}
 .step-item:last-child{border-bottom:none;}
-.step-num{width:28px;height:28px;border-radius:50%;background:var(--nt-green-l);border:1px solid rgba(170,221,0,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;color:var(--nt-green);flex-shrink:0;margin-top:1px;}
-.step-body{}
-.step-title{font-size:13px;font-weight:500;color:var(--nt-white);margin-bottom:3px;}
-.step-desc{font-size:12px;font-weight:300;color:var(--nt-muted);line-height:1.5;}
+.step-num{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--green);line-height:1;}
+.step-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--txt);margin-bottom:6px;}
+.step-body{font-size:13px;color:var(--txt2);line-height:1.75;}
 
-/* MARKETING VIEW */
-.mkt-hero{background:linear-gradient(135deg,#0D0D0D 0%,#1A1A1A 100%);border:1px solid var(--nt-border-strong);border-radius:16px;padding:48px 40px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden;}
-.mkt-hero::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(170,221,0,0.02) 39px,rgba(170,221,0,0.02) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(170,221,0,0.02) 39px,rgba(170,221,0,0.02) 40px);pointer-events:none;}
-.mkt-tagline{font-family:var(--font-display);font-size:clamp(42px,6vw,80px);letter-spacing:.04em;color:var(--nt-white);line-height:.9;margin-bottom:20px;position:relative;}
-.mkt-tagline em{color:var(--nt-green);font-style:normal;}
-.mkt-name{font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--nt-muted);margin-bottom:32px;position:relative;}
-.mkt-pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;position:relative;}
-.mkt-pillar{background:rgba(255,255,255,0.04);border:1px solid var(--nt-border);border-radius:10px;padding:20px;}
-.mkt-pillar-title{font-family:var(--font-display);font-size:22px;letter-spacing:.04em;color:var(--nt-green);margin-bottom:4px;}
-.mkt-pillar-desc{font-size:12px;font-weight:300;color:var(--nt-muted);line-height:1.55;}
+/* Marketing view */
+.mkt-hero{padding:24px;background:linear-gradient(135deg,var(--bg-el) 0%,var(--bg-card) 100%);border-bottom:1px solid var(--border-s);display:flex;align-items:flex-start;gap:20px;}
+.mkt-text{flex:1;}
+.mkt-tagline{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;line-height:1.1;margin-bottom:8px;}
+.mkt-tagline em{font-style:normal;color:var(--green);}
+.mkt-sub{font-size:12px;color:var(--txt2);line-height:1.65;}
+.mkt-badges{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;}
+.mkt-badge{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:2px;}
+.mkt-badge.g{background:var(--str-bg);border:1px solid var(--str-brd);color:var(--str-txt);}
+.mkt-badge.b{background:var(--prj-bg);border:1px solid var(--prj-brd);color:var(--prj-txt);}
+.mkt-nums{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border-s);}
+.mkt-num{padding:16px;border-right:1px solid var(--border-s);text-align:center;}
+.mkt-num:last-child{border-right:none;}
+.mkt-num-val{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;color:var(--green);line-height:1;margin-bottom:4px;}
+.mkt-num-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.mkt-num-ctx{font-size:9px;color:var(--muted);line-height:1.4;}
+.mkt-pillars{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--border-s);}
+.mkt-pillar{padding:18px 20px;border-right:1px solid var(--border-s);}
+.mkt-pillar:last-child{border-right:none;}
+.mkt-pillar-icon{font-size:18px;margin-bottom:6px;}
+.mkt-pillar-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:5px;}
+.mkt-pillar-body{font-size:11px;color:var(--txt2);line-height:1.65;}
 
-/* PENDING STATE */
-.pending-state{text-align:center;padding:72px 32px;}
-.pending-icon{width:72px;height:72px;border-radius:50%;background:var(--nt-green-l);border:1px solid rgba(170,221,0,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;}
-.pending-title{font-family:var(--font-display);font-size:36px;letter-spacing:.04em;color:var(--nt-white);margin-bottom:12px;}
-.pending-sub{font-size:14px;font-weight:300;color:var(--nt-muted);max-width:440px;margin:0 auto 32px;line-height:1.65;}
-.progress-steps{display:flex;justify-content:center;gap:0;margin-bottom:40px;}
-.progress-step{display:flex;flex-direction:column;align-items:center;gap:8px;}
-.progress-step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:500;}
-.progress-step-dot.done{background:var(--nt-green);color:#000;}
-.progress-step-dot.active{background:#2A2000;border:1px solid rgba(170,221,0,0.3);color:var(--nt-amber);}
-.progress-step-dot.todo{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:var(--nt-muted);}
-.progress-step-label{font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--nt-muted);max-width:72px;text-align:center;line-height:1.4;}
-.progress-connector{height:1px;width:48px;background:rgba(255,255,255,0.08);margin-top:16px;}
+/* Pending */
+.pending-wrap{text-align:center;padding:64px 32px;}
+.pending-icon{width:64px;height:64px;border-radius:50%;background:var(--str-bg);border:1px solid var(--str-brd);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.pending-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;}
+.pending-sub{font-size:13px;color:var(--muted);max-width:440px;margin:0 auto 28px;line-height:1.65;}
+.prog-steps{display:flex;justify-content:center;margin-bottom:36px;}
+.prog-step{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.prog-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;}
+.prog-dot.done{background:var(--green);color:#000;}
+.prog-dot.act{background:#2a2000;border:1px solid rgba(170,204,0,.3);color:var(--orange);}
+.prog-dot.todo{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);}
+.prog-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);max-width:72px;text-align:center;line-height:1.4;}
+.prog-conn{height:1px;width:48px;background:rgba(255,255,255,.08);margin-top:16px;}
 
-/* BUTTONS */
-.btn{border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-body);text-decoration:none;display:inline-block;transition:background .15s,color .15s;padding:10px 22px;}
-.btn-primary{background:var(--nt-green);color:#000;}
-.btn-primary:hover{background:#99CC00;}
-.btn-outline{background:transparent;color:var(--nt-slate);border:1px solid var(--nt-border-strong);}
-.btn-outline:hover{background:rgba(255,255,255,0.06);}
-.btn-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+/* Buttons */
+.btn{border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Barlow',sans-serif;text-decoration:none;display:inline-block;padding:9px 18px;}
+.btn-outline{background:transparent;color:var(--txt2);border:1px solid var(--border);}
+.btn-outline:hover{background:var(--bg-el);}
+.btn-primary{background:var(--green);color:#000;}
+.btn-primary:hover{opacity:.9;}
+.btn-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
 
-/* PRINT */
-@media print{nav,.view-bar,.btn-row,.btn{display:none!important;}.page-body{padding:0;max-width:100%;}.card{break-inside:avoid;}.player-header{break-inside:avoid;}}
+/* Coach Notes tab */
+.cn-entry{padding:0;}
+.cn-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:18px 20px 14px;border-bottom:1px solid var(--border-s);}
+.cn-coach{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;color:var(--txt);text-transform:uppercase;letter-spacing:.04em;}
+.cn-meta{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;}
+.cn-grade{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;color:#fff;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:6px;padding:6px 16px;text-align:center;line-height:1;flex-shrink:0;}
+.cn-grade-lbl{display:block;font-family:'IBM Plex Mono',monospace;font-size:7px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;opacity:.8;margin-top:3px;}
+.cn-block{padding:12px 20px;border-bottom:1px solid var(--border-s);}
+.cn-block:last-of-type{border-bottom:none;}
+.cn-block-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:#a78bfa;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;font-weight:600;}
+.cn-block ul{margin:0;padding-left:18px;}
+.cn-block li{font-size:12px;color:var(--txt2);line-height:1.7;}
+.cn-text{font-size:12px;color:var(--txt2);line-height:1.7;white-space:pre-wrap;}
+.cn-disclaimer{padding:10px 20px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.06em;font-style:italic;background:var(--bg-el);}
+.cn-form-row{display:flex;flex-direction:column;gap:5px;}
+.cn-form-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.cn-form-hint{font-size:10px;color:var(--muted);font-style:italic;}
+.cn-form-row input,.cn-form-row select,.cn-form-row textarea{background:var(--bg-el);border:1px solid var(--border);border-radius:3px;color:var(--txt);font-family:'Barlow',sans-serif;font-size:13px;padding:8px 10px;resize:vertical;}
+.cn-form-row input:focus,.cn-form-row select:focus,.cn-form-row textarea:focus{outline:none;border-color:#7c3aed;}
+.cn-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.cn-empty{text-align:center;padding:40px 24px;font-size:12px;color:var(--muted);}
+.cn-error{font-size:11px;color:var(--red);min-height:14px;}
+@media(max-width:640px){.cn-form-grid{grid-template-columns:1fr;}.cn-head{flex-direction:column;}}
 
-@media(max-width:700px){
-  .player-header{flex-direction:column;align-items:flex-start;gap:20px;}.player-number{font-size:56px;min-width:unset;}
-  .skill-grid{grid-template-columns:1fr;}.info-grid{grid-template-columns:1fr 1fr;}.mkt-pillars{grid-template-columns:1fr;}
-  .page-body{padding:24px 16px 60px;}nav{padding:0 16px;}.view-bar{padding:0 16px;}
-  .progress-steps{gap:0;}.progress-connector{width:24px;}
+@media(max-width:900px){.player-header,.scout-grid{grid-template-columns:180px 1fr;}}
+@media(max-width:640px){
+  .player-header,.scout-grid{grid-template-columns:1fr;}
+  .photo-col,.info-col{border-right:none;border-bottom:1px solid var(--border);}
+  .proj-footer{grid-template-columns:1fr 1fr;}
+  .htr{grid-template-columns:1fr;}
+  .mkt-nums,.mkt-pillars{grid-template-columns:1fr 1fr;}
+  .metric-row{grid-template-columns:1fr;}.metric-val{text-align:left;}
+  .snav-links{display:none;}
+  .toggle-wrap{bottom:12px;right:12px;}
 }
+@media print{.snav,.toggle-wrap,.btn-row{display:none!important;}.pw{padding:0;max-width:100%;}.card{break-inside:avoid;}}
 </style>
 </head>
 <body>
 
 <div class="loading-overlay" id="loadingOverlay">
-  <div><img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></div>
+  <img src="/nexttierlogo.png" alt="Next Tier" style="height:56px">
 </div>
 
-<nav>
-  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:40px;width:auto;"></a>
-  <div class="nav-right">
-    <div class="nav-user">
-      <div class="nav-avatar" id="navAvatar">—</div>
-      <div>
-        <div class="nav-name" id="navName">—</div>
-        <div class="nav-role" id="navRole">—</div>
-      </div>
-    </div>
-    <button class="btn-logout" onclick="NT.logout()">Log out</button>
+<div class="toggle-wrap" onclick="toggleTheme()" role="button">
+  <span class="toggle-lbl" id="toggleLbl">Light Mode</span>
+  <div class="toggle-sw"></div>
+</div>
+
+<nav class="snav" id="snav" style="display:none">
+  <a href="/" class="snav-brand"><img src="/nexttierlogo.png" alt="Next Tier" style="height:28px"></a>
+  <div class="snav-links">
+    <a class="snav-link active" id="lnk-s1" href="#s1" onclick="lnkClick(this,'scout')">Player Card</a>
+    <a class="snav-link" id="lnk-s2" href="#s2" onclick="lnkClick(this,'scout')">Scout Report</a>
+    <a class="snav-link" id="lnk-s3" href="#s3" onclick="lnkClick(this,'scout')">Dev Notes</a>
+    <a class="snav-link" id="lnk-parent" href="#views" onclick="lnkClick(this,'parent');return false">Parent View</a>
+    <a class="snav-link" id="lnk-market" href="#views" onclick="lnkClick(this,'market');return false">Player Marketing</a>
+    <a class="snav-link" id="lnk-coach" href="#views" onclick="lnkClick(this,'coach');return false" style="display:none">Coach Notes</a>
+  </div>
+  <div class="snav-right">
+    <span class="snav-user" id="snavUser"></span>
+    <button class="snav-logout" onclick="NT.logout()">Log out</button>
   </div>
 </nav>
 
-<!-- View tabs — only shown when report is active -->
-<div class="view-bar" id="viewBar" style="display:none;">
-  <button class="view-tab active" data-view="scout" onclick="switchView('scout',this)">Coach / Scout</button>
-  <button class="view-tab" data-view="parent" onclick="switchView('parent',this)">Parent</button>
-  <button class="view-tab" data-view="marketing" onclick="switchView('marketing',this)">Player Marketing</button>
-</div>
-
-<div class="page-body">
-
-  <!-- PENDING STATE -->
-  <div id="statePending" style="display:none;">
-    <div class="card">
-      <div class="pending-state">
-        <div class="pending-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-          </svg>
-        </div>
-        <div class="pending-title">REPORT IN PREPARATION</div>
-        <div class="pending-sub">Your player profile has been received. Our evaluators are reviewing your film and compiling your Player Development Score.</div>
-
-        <div class="progress-steps">
-          <div class="progress-step">
-            <div class="progress-step-dot done">✓</div>
-            <div class="progress-step-label">Profile submitted</div>
-          </div>
-          <div class="progress-connector"></div>
-          <div class="progress-step">
-            <div class="progress-step-dot active">2</div>
-            <div class="progress-step-label">Film review</div>
-          </div>
-          <div class="progress-connector"></div>
-          <div class="progress-step">
-            <div class="progress-step-dot todo">3</div>
-            <div class="progress-step-label">Score calculated</div>
-          </div>
-          <div class="progress-connector"></div>
-          <div class="progress-step">
-            <div class="progress-step-dot todo">4</div>
-            <div class="progress-step-label">Report ready</div>
-          </div>
-        </div>
-
-        <!-- Player details submitted -->
-        <div id="pendingDetails"></div>
-
-        <div class="btn-row" style="justify-content:center;">
-          <a href="dashboard player" class="btn btn-outline">← Dashboard</a>
-          <a href="contact" class="btn btn-outline">Questions? Contact us</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ACTIVE REPORT — COACH/SCOUT VIEW -->
-  <div id="viewScout" style="display:none;">
-
-    <!-- Player header -->
-    <div class="player-header" id="playerHeader">
-      <div class="player-number" id="hdrNumber">#00</div>
-      <div class="player-info">
-        <div class="player-name" id="hdrName">—</div>
-        <div class="player-meta-row">
-          <div class="player-meta-item"><strong id="hdrPosition">—</strong></div>
-          <div class="player-meta-sep"></div>
-          <div class="player-meta-item"><strong id="hdrTeam">—</strong></div>
-          <div class="player-meta-sep"></div>
-          <div class="player-meta-item"><strong id="hdrLeague">—</strong></div>
-        </div>
-        <div id="hdrPill" class="pill pill-active"><span class="pill-dot"></span><span id="hdrStatus">Active</span></div>
-      </div>
-      <div class="player-header-right">
-        <div class="pds-ring">
-          <div class="pds-label">PDS</div>
-          <div class="pds-score" id="hdrPDS">—</div>
-          <div class="tier-badge" id="hdrTier">—</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Info grid -->
-    <div class="card" id="cardInfo">
-      <div class="card-head">
-        <div class="card-title">PLAYER INFO</div>
-        <div class="card-eyebrow" id="infoReportDate">—</div>
-      </div>
-      <div class="card-body">
-        <div class="info-grid" id="infoGrid">
-          <!-- populated by JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Skills breakdown -->
-    <div class="card" id="cardSkills" style="display:none;">
-      <div class="card-head">
-        <div class="card-title">14-METRIC SKILL BREAKDOWN</div>
-        <div class="card-eyebrow" id="skillsSubtitle">PDS Components</div>
-      </div>
-      <div class="card-body">
-        <div class="skill-grid" id="skillGrid">
-          <!-- populated by JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Career stats -->
-    <div class="card" id="cardStats" style="display:none;">
-      <div class="card-head"><div class="card-title">CAREER STATS</div></div>
-      <div class="card-body" style="padding:0 24px;">
-        <table class="stats-table" id="statsTable">
-          <thead>
-            <tr>
-              <th>Season</th>
-              <th>Team</th>
-              <th>League</th>
-              <th>GP</th>
-              <th>G</th>
-              <th>A</th>
-              <th>PTS</th>
-              <th>PIM</th>
-              <th>PPG</th>
-              <th>Pts/GP</th>
-            </tr>
-          </thead>
-          <tbody id="statsBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Pathways -->
-    <div class="card" id="cardPathways" style="display:none;">
-      <div class="card-head"><div class="card-title">PATHWAY PROBABILITY</div></div>
-      <div class="card-body" style="padding:0 24px;">
-        <table class="pathway-table" id="pathwayTable">
-          <thead>
-            <tr>
-              <th>Pathway</th>
-              <th>Probability</th>
-              <th>Timeline</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody id="pathwayBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Dev notes -->
-    <div class="card" id="cardDev" style="display:none;">
-      <div class="card-head"><div class="card-title">DEVELOPMENT NOTES</div></div>
-      <div class="card-body" id="devNotesBody"></div>
-    </div>
-
-    <!-- Executive summary (fallback when no full data) -->
-    <div class="card" id="cardExec" style="display:none;">
-      <div class="card-head"><div class="card-title">EVALUATOR SUMMARY</div></div>
-      <div class="card-body">
-        <div class="narrative" id="execSummaryText"></div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <a href="dashboard player" class="btn btn-outline">← Dashboard</a>
-      <button class="btn btn-outline" onclick="window.print()">Print / Save PDF</button>
-      <a href="contact" class="btn btn-outline">Contact support</a>
-    </div>
-  </div>
-
-  <!-- PARENT VIEW -->
-  <div id="viewParent" style="display:none;">
-    <div class="player-header">
-      <div class="player-number" id="p_hdrNumber">#00</div>
-      <div class="player-info">
-        <div class="player-name" id="p_hdrName">—</div>
-        <div class="player-meta-row">
-          <div class="player-meta-item"><strong id="p_hdrPosition">—</strong></div>
-          <div class="player-meta-sep"></div>
-          <div class="player-meta-item"><strong id="p_hdrTeam">—</strong></div>
-        </div>
-      </div>
-      <div class="player-header-right">
-        <div class="pds-ring">
-          <div class="pds-label">PDS</div>
-          <div class="pds-score" id="p_hdrPDS">—</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><div class="card-title">WHAT THIS SCORE MEANS</div></div>
-      <div class="card-body">
-        <div class="narrative" id="parentNarrativeIntro"></div>
-        <div id="parentMetricsList"></div>
-      </div>
-    </div>
-
-    <div class="card" id="cardParentVerdict" style="display:none;">
-      <div class="card-head"><div class="card-title">OVERALL VERDICT</div></div>
-      <div class="card-body">
-        <div class="narrative" id="parentVerdictText"></div>
-      </div>
-    </div>
-
-    <div class="card" id="cardParentSteps" style="display:none;">
-      <div class="card-head"><div class="card-title">RECOMMENDED NEXT STEPS</div></div>
-      <div class="card-body" id="parentStepsList"></div>
-    </div>
-
-    <div class="btn-row">
-      <a href="dashboard player" class="btn btn-outline">← Dashboard</a>
-      <a href="contact" class="btn btn-outline">Contact support</a>
-    </div>
-  </div>
-
-  <!-- MARKETING VIEW -->
-  <div id="viewMarketing" style="display:none;">
-    <div class="mkt-hero">
-      <div class="mkt-tagline" id="mktTagline">BUILT FOR<br><em>NEXT LEVEL</em></div>
-      <div class="mkt-name" id="mktName">—</div>
-      <div class="mkt-pillars" id="mktPillars">
-        <!-- populated by JS -->
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><div class="card-title">AT A GLANCE</div></div>
-      <div class="card-body">
-        <div class="info-grid" id="mktInfoGrid"></div>
-      </div>
-    </div>
-
-    <div class="card" id="cardMktSkills" style="display:none;">
-      <div class="card-head"><div class="card-title">TOP SKILLS</div></div>
-      <div class="card-body">
-        <div class="skill-grid" id="mktSkillGrid"></div>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="window.print()">Download PDF</button>
-      <a href="dashboard player" class="btn btn-outline">← Dashboard</a>
-    </div>
-  </div>
-
-</div><!-- /page-body -->
+<div class="pw" id="root"></div>
+<div class="pw" id="statePending" style="display:none"></div>
 
 <script>
-// ─── View switching ──────────────────────────────────────────────────────────
-function switchView(name, btn) {
-  ['Scout','Parent','Marketing'].forEach(v => {
-    document.getElementById('view' + v).style.display = 'none';
-  });
-  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view' + name.charAt(0).toUpperCase() + name.slice(1)).style.display = '';
-  btn.classList.add('active');
+function toggleTheme(){
+  const h=document.documentElement,dark=h.getAttribute('data-theme')==='dark';
+  h.setAttribute('data-theme',dark?'light':'dark');
+  document.getElementById('toggleLbl').textContent=dark?'Dark Mode':'Light Mode';
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-function esc(str) {
-  const d = document.createElement('div');
-  d.textContent = str ?? '—';
-  return d.innerHTML;
+function switchView(name){
+  document.querySelectorAll('[data-view]').forEach(el=>el.style.display=el.dataset.view===name?'':'none');
+}
+function lnkClick(el,view){
+  document.querySelectorAll('.snav-link').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+  switchView(view);
 }
 
-function barClass(score) {
-  if (score >= 70) return '';
-  if (score >= 45) return 'mid';
-  return 'low';
+function esc(s){const d=document.createElement('div');d.textContent=s??'—';return d.innerHTML;}
+function bc(n){return n>=75?'green':n>=55?'yellow':'red';}
+function tierFromPDS(n){return n>=85?'A+':n>=75?'A':n>=65?'B+':n>=55?'B':n>=45?'C+':n>=35?'C':'D';}
+function fmtDate(iso){return iso?new Date(iso).toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'}):'—';}
+
+function skillBarHTML(sk){
+  const s=Math.round(sk.score??sk.value??0),c=sk.color||bc(s),n=esc(sk.label??sk.name??'—');
+  return `<div class="skill-row"><div class="skill-name">${n}</div><div class="skill-bar-wrap"><div class="skill-bar-bg"><div class="skill-bar-fill fill-${c}" style="width:${s}%"><div class="skill-bubble bubble-${c}">${s}</div></div></div></div></div>${sk.note?`<div class="skill-note">${esc(sk.note)}</div>`:''}`;
 }
 
-function tierFromPDS(pds) {
-  if (pds >= 85) return 'A+';
-  if (pds >= 75) return 'A';
-  if (pds >= 65) return 'B+';
-  if (pds >= 55) return 'B';
-  if (pds >= 45) return 'C+';
-  if (pds >= 35) return 'C';
-  return 'D';
+function photoPlaceholder(){
+  return '<svg width="40" height="40" viewBox="0 0 60 60" fill="currentColor" style="opacity:.3"><circle cx="30" cy="20" r="12"/><path d="M8 52c0-12.15 9.85-22 22-22s22 9.85 22 22"/></svg>';
 }
 
-function fmtDate(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-CA', { year:'numeric', month:'short', day:'numeric' });
-}
+function renderFull(P, product){
+  const pds  = P.pds ?? product.pdsScore ?? '—';
+  const t    = P.tier ?? (isNaN(+pds) ? '—' : tierFromPDS(+pds));
+  const tLbl = P.tierLabel || '';
+  const num  = P.number ?? product.jerseyNumber ?? '—';
+  const fn   = P.firstName ?? product.firstName ?? '';
+  const ln   = P.lastName  ?? product.lastName  ?? '';
+  const name = [fn,ln].filter(Boolean).join(' ') || '—';
+  const pos  = P.position ?? product.position ?? '—';
+  const tm   = P.team     ?? product.team     ?? '—';
+  const lg   = P.league   ?? product.league   ?? '—';
+  const rId  = P.reportId || '';
+  const rDate= P.reportDate || fmtDate(product.createdAt);
+  const S    = P.stats || {};
+  if(S.gp && S.pts && !S.ptsPerGP) S.ptsPerGP = (S.pts/S.gp).toFixed(2);
 
-// ─── Render from full PLAYER JSON object ─────────────────────────────────────
-function renderFull(P, product) {
-  document.getElementById('viewBar').style.display = '';
+  document.getElementById('page-title').textContent = name+' · Player Card · Next Tier';
+  document.getElementById('snav').style.display = '';
+  document.getElementById('snavUser').textContent = name;
 
-  const pds    = P.pds   ?? product.pdsScore ?? '—';
-  const tier   = P.tier  ?? tierFromPDS(+pds);
-  const num    = P.number ?? product.jerseyNumber ?? '—';
-  const name   = [P.firstName ?? product.firstName, P.lastName ?? product.lastName].filter(Boolean).join(' ') || '—';
-  const pos    = P.position  ?? product.position  ?? '—';
-  const team   = P.team      ?? product.team      ?? '—';
-  const league = P.league    ?? product.league    ?? '—';
+  // Career rows
+  const cRows = (P.career||[]).map(r=>{
+    const pg=r.pts&&r.gp?(r.pts/r.gp).toFixed(2):'—';
+    return `<tr${r.current?' class="cur"':''}><td>${esc(r.season)}${r.current?'<span class="star">★</span>':''}</td><td>${esc(r.team)}</td><td>${esc(r.league)}</td><td>${r.gp??'—'}</td><td>${r.g??'—'}</td><td>${r.a??'—'}</td><td>${r.pts??'—'}</td><td>${r.pim??'—'}</td><td>${pg}</td></tr>`;
+  }).join('');
+  const fallbackRow = !cRows && S.gp ? `<tr class="cur"><td>${esc(P.season||'—')}</td><td>${esc(tm)}</td><td>${esc(lg)}</td><td>${S.gp}</td><td>${S.g??'—'}</td><td>${S.a??'—'}</td><td>${S.pts??'—'}</td><td>${S.pim??'—'}</td><td>${S.ptsPerGP||'—'}</td></tr>` : '';
 
-  // ── Scout view header ──
-  ['','p_'].forEach(pfx => {
-    const n = document.getElementById(pfx + 'hdrName');    if (n) n.textContent = name;
-    const u = document.getElementById(pfx + 'hdrNumber');  if (u) u.textContent = '#' + num;
-    const o = document.getElementById(pfx + 'hdrPosition');if (o) o.textContent = pos;
-    const t = document.getElementById(pfx + 'hdrTeam');    if (t) t.textContent = team;
-    const l = document.getElementById(pfx + 'hdrLeague');  if (l) l.textContent = league;
-    const s = document.getElementById(pfx + 'hdrPDS');     if (s) s.textContent = pds;
-  });
-
-  const tierEl = document.getElementById('hdrTier');
-  if (tierEl) tierEl.textContent = tier;
-
-  document.getElementById('infoReportDate').textContent = P.reportDate ? 'Report: ' + P.reportDate : 'Submitted ' + fmtDate(product.createdAt);
-
-  // ── Info grid ──
+  // Info rows
   const infoRows = P.infoRows || [
-    { label:'Position', value: pos },
-    { label:'Team',     value: team },
-    { label:'League',   value: league },
-    { label:'Jersey #', value: num ? '#' + num : '—' },
-    { label:'Season',   value: P.season   || '—' },
-    { label:'Next Level',value: P.nextLevel|| '—' },
+    {label:'Position',value:pos},{label:'Team',value:tm},{label:'League',value:lg},
+    {label:'Jersey',value:num!=='—'?'#'+num:'—'},{label:'Season',value:P.season||'—'},
+    {label:'Height',value:P.height||'—'},{label:'Weight',value:P.weight||'—'},
+    {label:'Born',value:P.birthYear||'—',style:'orange'},{label:'Hometown',value:P.hometown||'—'},
   ];
-  const infoGrid = document.getElementById('infoGrid');
-  infoGrid.innerHTML = infoRows.map(r =>
-    `<div class="info-item"><div class="info-label">${esc(r.label)}</div><div class="info-val">${esc(r.value)}</div></div>`
-  ).join('');
 
-  // Mirror to marketing info grid
-  document.getElementById('mktInfoGrid').innerHTML = infoGrid.innerHTML;
+  // Dev notes
+  const devNotes = (P.devNotes||[]).map(n=>{
+    if(typeof n==='string') return `<div class="note-sec"><div class="note-body">${n}</div></div>`;
+    const type=n.type||(n.label?.toLowerCase().includes('flag')?'flag':n.label?.toLowerCase().includes('proj')?'proj':'strength');
+    const cls=type==='flag'?'nb-flg':type==='proj'?'nb-prj':'nb-str';
+    const lbl=type==='flag'?'Development Flag':type==='proj'?'Projection / Context':'Strength';
+    return `<div class="note-sec"><div class="note-head"><span class="note-badge ${cls}">${lbl}</span>${n.title||n.label?`<span class="note-title">${esc(n.title||n.label)}</span>`:''}</div><div class="note-body">${n.body||n.text||esc(n.note)||''}</div></div>`;
+  }).join('');
 
-  // ── Skills ──
-  if (P.skills && P.skills.length) {
-    const sg = document.getElementById('skillGrid');
-    sg.innerHTML = P.skills.map(sk => {
-      const pct = Math.round(sk.score ?? sk.value ?? 0);
-      const cls = barClass(pct);
-      return `<div class="skill-item">
-        <div class="skill-row"><span class="skill-name">${esc(sk.label ?? sk.name)}</span><span class="skill-score">${pct}</span></div>
-        <div class="skill-bar-track"><div class="skill-bar-fill ${cls}" style="width:${pct}%"></div></div>
-      </div>`;
-    }).join('');
-    document.getElementById('cardSkills').style.display = '';
+  // Pathway rows
+  const pwCols = (P.pathways||[]).some(p=>p.notes||p.note)
+    ? '<th>Pathway</th><th>Match</th><th>Timeline</th><th>Notes</th>'
+    : '<th>Pathway</th><th>Match</th><th>Timeline</th>';
+  const pwRows = (P.pathways||[]).map(p=>{
+    const pct=Math.round(+(p.probability||p.pct)||0);
+    const color=pct>=70?'green':pct>=50?'orange':'red';
+    return `<tr><td><span class="pw-name">${esc(p.label??p.pathway??p.name??'—')}</span>${p.sub?`<span class="pw-sub">${esc(p.sub)}</span>`:''}</td><td><div class="match-pct ${color}">${pct}%</div></td><td><div class="tl-val">${esc(p.timeline||'—')}</div></td>${p.notes||p.note?`<td style="font-size:11px;color:var(--muted)">${esc(p.notes||p.note)}</td>`:''}</tr>`;
+  }).join('');
 
-    // Top skills for marketing (top 6 by score)
-    const top = [...P.skills].sort((a,b) => (b.score ?? b.value ?? 0) - (a.score ?? a.value ?? 0)).slice(0,6);
-    const mktSG = document.getElementById('mktSkillGrid');
-    mktSG.innerHTML = top.map(sk => {
-      const pct = Math.round(sk.score ?? sk.value ?? 0);
-      return `<div class="skill-item">
-        <div class="skill-row"><span class="skill-name">${esc(sk.label ?? sk.name)}</span><span class="skill-score">${pct}</span></div>
-        <div class="skill-bar-track"><div class="skill-bar-fill" style="width:${pct}%"></div></div>
-      </div>`;
-    }).join('');
-    document.getElementById('cardMktSkills').style.display = '';
-  }
+  // Parent metrics
+  const pmRows = (P.parentMetrics||[]).map(m=>{
+    const vc=m.signal==='red'?'r':m.signal==='yellow'?'y':'g';
+    return `<div class="metric-row"><div><div class="metric-label">${esc(m.metric||m.label||m.title)}</div><div class="metric-ctx">${esc(m.context||m.desc||'')}</div></div><div class="metric-desc">${esc(m.note||m.benchmark||'')}</div><div class="metric-val ${vc}">${esc(m.value||'')}</div></div>`;
+  }).join('');
 
-  // ── Career stats ──
-  if (P.career && P.career.length) {
-    const tbody = document.getElementById('statsBody');
-    tbody.innerHTML = P.career.map(r => `<tr>
-      <td class="season-col">${esc(r.season)}</td>
-      <td>${esc(r.team)}</td>
-      <td class="season-col">${esc(r.league)}</td>
-      <td class="highlight">${r.gp ?? '—'}</td>
-      <td>${r.g ?? '—'}</td>
-      <td>${r.a ?? '—'}</td>
-      <td class="highlight">${r.pts ?? '—'}</td>
-      <td>${r.pim ?? '—'}</td>
-      <td>${r.ppg ?? '—'}</td>
-      <td>${r.ptsPerGP ?? '—'}</td>
-    </tr>`).join('');
-    document.getElementById('cardStats').style.display = '';
-  } else if (P.stats) {
-    const s = P.stats;
-    document.getElementById('statsBody').innerHTML = `<tr>
-      <td class="season-col">${esc(P.season || '—')}</td>
-      <td>${esc(team)}</td>
-      <td class="season-col">${esc(league)}</td>
-      <td class="highlight">${s.gp ?? '—'}</td>
-      <td>${s.g ?? '—'}</td>
-      <td>${s.a ?? '—'}</td>
-      <td class="highlight">${s.pts ?? '—'}</td>
-      <td>${s.pim ?? '—'}</td>
-      <td>${s.ppg ?? '—'}</td>
-      <td>${s.ptsPerGP ?? '—'}</td>
-    </tr>`;
-    document.getElementById('cardStats').style.display = '';
-  }
+  // Parent steps
+  const psRows = (P.parentSteps||[]).map((s,i)=>{
+    const title=typeof s==='string'?s:(s.title||s.step||'');
+    const body=typeof s==='string'?'':(s.body||s.desc||'');
+    return `<div class="step-item"><div class="step-num">${i+1}</div><div><div class="step-title">${esc(title)}</div>${body?`<div class="step-body">${esc(body)}</div>`:''}</div></div>`;
+  }).join('');
 
-  // ── Pathways ──
-  if (P.pathways && P.pathways.length) {
-    const pb = document.getElementById('pathwayBody');
-    pb.innerHTML = P.pathways.map(p => {
-      const pct = Math.round(+p.probability || 0);
-      return `<tr>
-        <td><strong style="color:var(--nt-white)">${esc(p.label ?? p.pathway ?? p.name)}</strong></td>
-        <td><div class="pct-bar"><span class="pct-num">${pct}%</span><div class="pct-track"><div class="pct-fill" style="width:${pct}%"></div></div></div></td>
-        <td style="color:var(--nt-muted);font-size:12px;">${esc(p.timeline ?? '—')}</td>
-        <td style="font-size:12px;">${esc(p.notes ?? p.note ?? '—')}</td>
-      </tr>`;
-    }).join('');
-    document.getElementById('cardPathways').style.display = '';
-  }
+  // Marketing pillars
+  const defaultPillars = [{title:'PDS '+pds,body:'Player Development Score — across 14 evaluated metrics'},{title:'Tier '+t+(tLbl?' · '+tLbl:''),body:'Rating tier assigned by Next Tier evaluators'},{title:pos,body:'Evaluated position — '+lg}];
+  const pillarsHTML = (P.mktPillars||defaultPillars).map(p=>`<div class="mkt-pillar">${p.icon?`<div class="mkt-pillar-icon">${p.icon}</div>`:''}<div class="mkt-pillar-title">${esc(p.title||p.label)}</div><div class="mkt-pillar-body">${p.body||p.desc||p.description||''}</div></div>`).join('');
 
-  // ── Dev notes ──
-  const devNotes = P.devNotes || P.htrItems;
-  if (devNotes && devNotes.length) {
-    const dn = document.getElementById('devNotesBody');
-    dn.innerHTML = devNotes.map(n => {
-      if (typeof n === 'string') return `<div class="dev-note"><div class="dev-note-text">${esc(n)}</div></div>`;
-      return `<div class="dev-note">
-        ${n.label ? `<div class="dev-note-label">${esc(n.label)}</div>` : ''}
-        <div class="dev-note-text">${esc(n.text ?? n.note ?? n)}</div>
-      </div>`;
-    }).join('');
-    document.getElementById('cardDev').style.display = '';
-  }
+  const mktNums = P.mktNumbers ? P.mktNumbers.map(n=>`<div class="mkt-num"><div class="mkt-num-val">${esc(n.val)}</div><div class="mkt-num-lbl">${esc(n.label)}</div><div class="mkt-num-ctx">${esc(n.ctx||'')}</div></div>`).join('')
+    : `<div class="mkt-num"><div class="mkt-num-val">${pds}</div><div class="mkt-num-lbl">PDS Score</div><div class="mkt-num-ctx">Out of 100</div></div><div class="mkt-num"><div class="mkt-num-val">${t}</div><div class="mkt-num-lbl">Tier</div><div class="mkt-num-ctx">${tLbl}</div></div><div class="mkt-num"><div class="mkt-num-val">${esc(pos)}</div><div class="mkt-num-lbl">Position</div><div class="mkt-num-ctx">${esc(lg)}</div></div><div class="mkt-num"><div class="mkt-num-val">${num!=='—'?'#'+num:'—'}</div><div class="mkt-num-lbl">Jersey</div><div class="mkt-num-ctx">${esc(tm)}</div></div>`;
 
-  // ── Exec summary ──
-  if (P.execSummary) {
-    document.getElementById('execSummaryText').textContent = P.execSummary;
-    document.getElementById('cardExec').style.display = '';
-  }
+  const projHTML = (P.pdsProjected||P.reEval||P.nextLevel) ? `<div class="proj-footer" style="border-top:1px solid var(--border)"><div class="proj-cell"><div class="proj-key">Current PDS</div><div class="proj-val">${pds}</div></div><div class="proj-cell"><div class="proj-key">Projected PDS</div><div class="proj-val g">${P.pdsProjected||'—'}</div></div><div class="proj-cell"><div class="proj-key">Re-Eval</div><div class="proj-val o">${P.reEval||'—'}</div></div><div class="proj-cell"><div class="proj-key">Next Level</div><div class="proj-val b">${P.nextLevel||'—'}</div></div></div>` : '';
 
-  // ── Parent view ──
-  const pn = P.parentNarrative || {};
-  document.getElementById('parentNarrativeIntro').innerHTML =
-    esc(pn.intro || `Your player has earned a Player Development Score of <strong>${pds}</strong>, placing them in the ${tier} tier. This score reflects their current skill level and development trajectory across 14 evaluated metrics.`);
+  const htrHTML = (P.htrItems||[]).length ? `<div style="border-top:1px solid var(--border)"><div style="padding:10px 20px;background:var(--bg-el);border-bottom:1px solid var(--border-s)"><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase">HOW TO READ THIS CARD</span></div><div class="htr">${P.htrItems.map(h=>`<div class="htr-item"><div class="htr-num">${esc(h.num)}</div><div class="htr-title">${esc(h.title)}</div><div class="htr-body">${esc(h.body)}</div></div>`).join('')}</div></div>` : '';
 
-  if (P.parentMetrics && P.parentMetrics.length) {
-    const pm = document.getElementById('parentMetricsList');
-    pm.innerHTML = P.parentMetrics.map(m => `
-      <div class="metric-row">
-        <div class="metric-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-        <div class="metric-text"><div class="metric-title">${esc(m.label ?? m.title)}</div><div class="metric-desc">${esc(m.desc ?? m.description ?? '')}</div></div>
-        ${m.value !== undefined ? `<div class="metric-val">${esc(m.value)}</div>` : ''}
-      </div>`).join('');
-  }
+  const coachNoteHTML = P.coachNote ? `<div class="coach-note"><div class="coach-note-lbl">Coach / Evaluator Notes</div><div class="coach-note-txt">${esc(P.coachNote)}</div></div>` : '';
 
-  if (P.parentVerdict) {
-    document.getElementById('parentVerdictText').textContent = P.parentVerdict;
-    document.getElementById('cardParentVerdict').style.display = '';
-  }
+  const execHTML = P.execSummary ? `<div class="exec-box"><div class="exec-title">Next Tier Assessment</div><div class="exec-body">${esc(P.execSummary)}</div></div>` : '';
 
-  if (P.parentSteps && P.parentSteps.length) {
-    const ps = document.getElementById('parentStepsList');
-    ps.innerHTML = P.parentSteps.map((s, i) => {
-      const title = typeof s === 'string' ? s : (s.title ?? s.step ?? '');
-      const desc  = typeof s === 'string' ? '' : (s.desc ?? s.description ?? '');
-      return `<div class="step-item">
-        <div class="step-num">${i+1}</div>
-        <div class="step-body"><div class="step-title">${esc(title)}</div>${desc ? `<div class="step-desc">${esc(desc)}</div>` : ''}</div>
-      </div>`;
-    }).join('');
-    document.getElementById('cardParentSteps').style.display = '';
-  }
+  const skillsBlock = (P.skills||[]).length ? `<div class="skill-axis"><span class="axis-lbl">Poor</span><span class="axis-lbl">Average</span><span class="axis-lbl">Great</span></div>${P.skills.map(skillBarHTML).join('')}` : '';
+  const pwBlock = pwRows ? `<div style="margin-top:16px"><div class="glance-lbl" style="margin-bottom:10px">03 · Pathway Assessment</div><table class="pw-tbl"><thead><tr>${pwCols}</tr></thead><tbody>${pwRows}</tbody></table></div>` : '';
 
-  // ── Marketing view ──
-  const tagWord1 = P.mktTaglineWord1 || 'BUILT FOR';
-  const tagEm    = P.mktTaglineEm1  || 'NEXT LEVEL';
-  document.getElementById('mktTagline').innerHTML = `${esc(tagWord1)}<br><em>${esc(tagEm)}</em>`;
-  document.getElementById('mktName').textContent  = name + ' · ' + pos + ' · ' + team;
+  const parentIntro = (P.parentNarrative&&P.parentNarrative.intro) || `Your player earned a Player Development Score of <strong>${pds}</strong>, placing them in the ${t} tier across 14 evaluated metrics.`;
 
-  if (P.mktPillars && P.mktPillars.length) {
-    document.getElementById('mktPillars').innerHTML = P.mktPillars.map(p =>
-      `<div class="mkt-pillar"><div class="mkt-pillar-title">${esc(p.title ?? p.label)}</div><div class="mkt-pillar-desc">${esc(p.desc ?? p.description ?? '')}</div></div>`
-    ).join('');
-  } else {
-    document.getElementById('mktPillars').innerHTML = `
-      <div class="mkt-pillar"><div class="mkt-pillar-title">PDS ${pds}</div><div class="mkt-pillar-desc">Player Development Score — top-${100 - Math.round(+pds)}% of evaluated players</div></div>
-      <div class="mkt-pillar"><div class="mkt-pillar-title">TIER ${tier}</div><div class="mkt-pillar-desc">Rating tier based on 14-metric evaluation</div></div>
-      <div class="mkt-pillar"><div class="mkt-pillar-title">${esc(pos)}</div><div class="mkt-pillar-desc">Evaluated position — ${esc(league)}</div></div>`;
-  }
+  if (!devNotes) document.getElementById('lnk-s3').style.display = 'none';
+
+  document.getElementById('root').innerHTML = `
+<div data-view="scout">
+  <div id="s1" class="sec-lbl" style="scroll-margin-top:52px"><span>Page 1 · Player Card</span><span>${rId}</span></div>
+  <div class="card">
+    <div class="player-header">
+      <div class="photo-col">
+        <div class="player-photo">${P.photoSrc?`<img src="${esc(P.photoSrc)}" style="width:100%;height:100%;object-fit:cover;object-position:center top" alt="${esc(name)}">`:photoPlaceholder()}</div>
+        <div class="player-name">${esc(fn)}<br>${esc(ln)}</div>
+        <div class="team-info">${esc(tm)} · ${esc(lg)} · ${esc(pos)}</div>
+        ${P.birthYear||P.age?`<div class="tag-row"><span class="tag">${P.birthYear||''}${P.birthYear&&P.age?' · ':''}${P.age?'Age '+P.age:''}</span></div>`:''}
+        ${P.height||P.weight?`<div class="tag-row"><span class="tag">${esc(P.height||'')}${P.height&&P.weight?' · ':''}${esc(P.weight||'')}</span></div>`:''}
+        ${P.hometown?`<div class="tag-row"><span class="tag">${esc(P.hometown.toUpperCase())}</span></div>`:''}
+        <div class="pds-badge" style="margin-top:8px"><div class="pds-num">${pds}</div><div class="pds-key">Player Dev Score</div></div>
+        <div class="tag-row"><span class="tag g">Tier ${t}${tLbl?' · '+tLbl:''}</span></div>
+      </div>
+      <div class="stats-col">
+        ${S.g!==undefined?`<div class="glance-lbl">Season at a Glance · ${esc(P.season||'')}</div>
+        <div class="stat-boxes"><div class="stat-box"><div class="stat-val g">${S.g}</div><div class="stat-key">Goals</div></div><div class="stat-box"><div class="stat-val g">${S.a}</div><div class="stat-key">Assists</div></div><div class="stat-box"><div class="stat-val g">${S.pts}</div><div class="stat-key">Points</div></div><div class="stat-box"><div class="stat-val g">${S.gp}</div><div class="stat-key">Games</div></div></div>
+        <div class="stat-boxes r3" style="margin-top:7px"><div class="stat-box"><div class="stat-val g">${S.ptsPerGP||'—'}</div><div class="stat-key">Pts / GP</div></div><div class="stat-box"><div class="stat-val">${S.ppg??'—'}</div><div class="stat-key">PP Goals</div></div><div class="stat-box"><div class="stat-val">${S.pim??'—'}</div><div class="stat-key">PIM</div></div></div>`:''}
+        ${cRows||fallbackRow?`<div style="margin-top:8px"><div class="glance-lbl" style="margin-bottom:6px">Career History</div><div class="career-wrap"><table class="ctbl"><thead><tr><th>Season</th><th>Team</th><th>Lge</th><th>GP</th><th>G</th><th>A</th><th>Pts</th><th>PIM</th><th>Pts/GP</th></tr></thead><tbody>${cRows||fallbackRow}</tbody></table></div></div>`:''}
+      </div>
+    </div>
+    ${coachNoteHTML}
+    <div class="doc-footer"><div class="footer-id">Next Tier · ${rId} · ${rDate}</div><div class="footer-brand">Next Tier</div></div>
+  </div>
+
+  <div id="s2" class="sec-lbl" style="scroll-margin-top:52px"><span>Page 2 · Scout Assessment · ${rId}</span><span>Next Tier · ${rDate}</span></div>
+  <div class="card">
+    <div class="scout-grid">
+      <div class="info-col">
+        <table class="info-tbl"><tbody>${infoRows.map(r=>`<tr><td class="info-lbl">${esc(r.label)}</td><td class="info-val${r.style?' '+r.style:''}">${esc(r.value)}</td></tr>`).join('')}</tbody></table>
+        ${execHTML}
+        <div class="legend-box"><div class="legend-title">Legend</div><div class="legend-item"><div class="l-dot l-g"></div>Green ≥75 — top quartile vs. cohort</div><div class="legend-item"><div class="l-dot l-y"></div>Yellow 55–74 — above average</div><div class="legend-item"><div class="l-dot l-r"></div>Red &lt;55 — development priority</div></div>
+      </div>
+      <div class="skills-col">${skillsBlock||''}${pwBlock}</div>
+    </div>
+    <div class="doc-footer"><div class="footer-id">Next Tier · ${rId} · Scout Report · ${rDate}</div><div class="footer-brand">Next Tier</div></div>
+  </div>
+
+  ${devNotes?`<div id="s3" class="sec-lbl" style="scroll-margin-top:52px"><span>Page 3 · Development Notes · Confidential</span><span>Next Tier Scout Notes — ${rDate}</span></div>
+  <div class="card"><div class="conf-bar">Confidential · Next Tier · ${rId}</div>${devNotes}${projHTML}${htrHTML}<div class="doc-footer"><div class="footer-id">Next Tier · ${rId} · AI Engine · ${rDate}</div><div class="footer-brand">Next Tier</div></div></div>`:''}
+
+  <div class="btn-row"><a href="/dashboard-player" class="btn btn-outline">← Dashboard</a><button class="btn btn-outline" onclick="window.print()">Print / Save PDF</button><a href="/contact" class="btn btn-outline">Contact support</a></div>
+</div>
+
+<div data-view="parent" style="display:none" id="views">
+  <div class="sec-lbl"><span>Parent View · ${esc(name)}</span></div>
+  <div class="card">
+    <div class="parent-hero"><div style="flex:1"><div class="parent-name">${esc(name)}</div><div class="parent-sub">${esc(pos)} · ${esc(tm)} · ${esc(lg)}</div></div><div class="parent-ring"><div class="parent-ring-num">${pds}</div><div class="parent-ring-key">PDS</div></div></div>
+    ${pmRows||`<div style="padding:20px 24px;font-size:13px;color:var(--txt2);line-height:1.75">${parentIntro}</div>`}
+    ${P.parentVerdict?`<div class="verdict-row"><span class="verdict-badge">Overall Verdict</span><div class="verdict-text">${esc(P.parentVerdict)}</div></div>`:''}
+    ${psRows?`<div class="steps-sec"><div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Recommended Next Steps</div>${psRows}</div>`:''}
+  </div>
+  <div class="btn-row"><a href="/dashboard-player" class="btn btn-outline">← Dashboard</a><a href="/contact" class="btn btn-outline">Contact support</a></div>
+</div>
+
+<div data-view="market" style="display:none">
+  <div class="sec-lbl"><span>Player Marketing · ${esc(name)}</span></div>
+  <div class="card">
+    <div class="mkt-hero"><div class="mkt-text"><div class="mkt-tagline">${esc(P.mktTaglineWord1||'Built for')}<br><em>${esc(P.mktTaglineEm1||'Next Level')}</em></div><div class="mkt-sub">${esc(P.mktSub||name+' · '+pos+' · '+tm)}</div></div><div class="mkt-badges"><span class="mkt-badge g">PDS ${pds} · Tier ${t}</span><span class="mkt-badge b">${esc(lg)}</span></div></div>
+    <div class="mkt-nums">${mktNums}</div>
+    <div class="mkt-pillars">${pillarsHTML}</div>
+  </div>
+  <div class="btn-row"><button class="btn btn-primary" onclick="window.print()">Download PDF</button><a href="/dashboard-player" class="btn btn-outline">← Dashboard</a></div>
+</div>
+
+<div data-view="coach" style="display:none">
+  <div id="coachTabBody"></div>
+</div>`;
 }
 
-// ─── Render simplified (plain number pdsScore only) ───────────────────────────
-function renderSimple(product) {
-  document.getElementById('viewBar').style.display = '';
+function renderSimple(product){
+  const pds  = product.pdsScore || '—';
+  const t    = isNaN(+pds) ? '—' : tierFromPDS(+pds);
+  const name = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
+  const num  = product.jerseyNumber || '—';
+  const pos  = product.position || '—';
+  const tm   = product.team || '—';
+  const lg   = product.league || '—';
 
-  const pds    = product.pdsScore || '—';
-  const tier   = isNaN(+pds) ? '—' : tierFromPDS(+pds);
-  const name   = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
-  const num    = product.jerseyNumber || '—';
-  const pos    = product.position  || '—';
-  const team   = product.team      || '—';
-  const league = product.league    || '—';
+  document.getElementById('page-title').textContent = name+' · Player Card · Next Tier';
+  document.getElementById('snav').style.display = '';
+  document.getElementById('snavUser').textContent = name;
+  document.getElementById('lnk-s2').style.display = 'none';
+  document.getElementById('lnk-s3').style.display = 'none';
 
-  ['','p_'].forEach(pfx => {
-    const n = document.getElementById(pfx + 'hdrName');   if (n) n.textContent = name;
-    const u = document.getElementById(pfx + 'hdrNumber'); if (u) u.textContent = '#' + num;
-    const o = document.getElementById(pfx + 'hdrPosition'); if (o) o.textContent = pos;
-    const t = document.getElementById(pfx + 'hdrTeam');   if (t) t.textContent = team;
-    const l = document.getElementById(pfx + 'hdrLeague'); if (l) l.textContent = league;
-    const s = document.getElementById(pfx + 'hdrPDS');    if (s) s.textContent = pds;
+  const infoRows = [{l:'Player',v:name},{l:'Position',v:pos},{l:'Jersey',v:num!=='—'?'#'+num:'—'},{l:'Team',v:tm},{l:'League',v:lg},{l:'Package',v:product.package||'—'}];
+  const infoHTML = infoRows.map(r=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-s);font-size:13px"><span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em">${r.l}</span><span style="color:var(--txt)">${esc(r.v)}</span></div>`).join('');
+
+  document.getElementById('root').innerHTML = `
+<div data-view="scout">
+  <div id="s1" class="sec-lbl"><span>Player Card · ${esc(name)}</span><span>Submitted ${fmtDate(product.createdAt)}</span></div>
+  <div class="card">
+    <div class="player-header">
+      <div class="photo-col">
+        <div class="player-photo">${photoPlaceholder()}</div>
+        <div class="player-name">${esc(name)}</div>
+        <div class="team-info">${esc(tm)} · ${esc(lg)} · ${esc(pos)}</div>
+        <div class="pds-badge" style="margin-top:8px"><div class="pds-num">${pds}</div><div class="pds-key">Player Dev Score</div></div>
+        <div class="tag-row"><span class="tag g">Tier ${t}</span></div>
+      </div>
+      <div class="stats-col"><div class="glance-lbl">Player Info</div><div style="margin-top:12px">${infoHTML}</div></div>
+    </div>
+    <div class="doc-footer"><div class="footer-id">Next Tier · Submitted ${fmtDate(product.createdAt)}</div><div class="footer-brand">Next Tier</div></div>
+  </div>
+  <div class="btn-row"><a href="/dashboard-player" class="btn btn-outline">← Dashboard</a><button class="btn btn-outline" onclick="window.print()">Print</button></div>
+</div>
+<div data-view="parent" style="display:none" id="views">
+  <div class="sec-lbl"><span>Parent View · ${esc(name)}</span></div>
+  <div class="card">
+    <div class="parent-hero"><div style="flex:1"><div class="parent-name">${esc(name)}</div><div class="parent-sub">${esc(pos)} · ${esc(tm)}</div></div><div class="parent-ring"><div class="parent-ring-num">${pds}</div><div class="parent-ring-key">PDS</div></div></div>
+    <div style="padding:20px 24px;font-size:13px;color:var(--txt2);line-height:1.75">Your player earned a PDS of <strong>${pds}</strong> (Tier ${t}). A detailed breakdown will be available once the full review is complete.</div>
+  </div>
+  <div class="btn-row"><a href="/dashboard-player" class="btn btn-outline">← Dashboard</a></div>
+</div>
+<div data-view="market" style="display:none">
+  <div class="sec-lbl"><span>Player Marketing · ${esc(name)}</span></div>
+  <div class="card">
+    <div class="mkt-hero"><div class="mkt-text"><div class="mkt-tagline">Built for<br><em>Next Level</em></div><div class="mkt-sub">${esc(name+' · '+pos+' · '+tm)}</div></div><div class="mkt-badges"><span class="mkt-badge g">PDS ${pds} · Tier ${t}</span><span class="mkt-badge b">${esc(lg)}</span></div></div>
+    <div class="mkt-nums"><div class="mkt-num"><div class="mkt-num-val">${pds}</div><div class="mkt-num-lbl">PDS Score</div><div class="mkt-num-ctx">Out of 100</div></div><div class="mkt-num"><div class="mkt-num-val">${t}</div><div class="mkt-num-lbl">Tier</div></div><div class="mkt-num"><div class="mkt-num-val">${esc(pos)}</div><div class="mkt-num-lbl">Position</div><div class="mkt-num-ctx">${esc(lg)}</div></div><div class="mkt-num"><div class="mkt-num-val">${num!=='—'?'#'+num:'—'}</div><div class="mkt-num-lbl">Jersey</div><div class="mkt-num-ctx">${esc(tm)}</div></div></div>
+  </div>
+  <div class="btn-row"><button class="btn btn-primary" onclick="window.print()">Download PDF</button><a href="/dashboard-player" class="btn btn-outline">← Dashboard</a></div>
+</div>
+
+<div data-view="coach" style="display:none">
+  <div id="coachTabBody"></div>
+</div>`;
+}
+
+function renderPending(product){
+  const name = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
+  const rows = [{l:'Player',v:name},{l:'Position',v:product.position||'—'},{l:'Team',v:product.team||'—'},{l:'League',v:product.league||'—'},{l:'Jersey',v:product.jerseyNumber?'#'+product.jerseyNumber:'—'},{l:'Package',v:product.package||'—'},{l:'Submitted',v:fmtDate(product.createdAt)}];
+  const rowsHTML = rows.map(r=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border-s);font-size:13px"><span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em">${r.l}</span><span>${esc(r.v)}</span></div>`).join('');
+
+  document.getElementById('statePending').style.display = '';
+  document.getElementById('statePending').innerHTML = `<div class="card"><div class="pending-wrap">
+    <div class="pending-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#AACC00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+    <div class="pending-title">Report In Preparation</div>
+    <div class="pending-sub">Your profile has been received. Our evaluators are reviewing your film and compiling your Player Development Score.</div>
+    <div class="prog-steps">
+      <div class="prog-step"><div class="prog-dot done">✓</div><div class="prog-lbl">Profile submitted</div></div>
+      <div class="prog-conn"></div>
+      <div class="prog-step"><div class="prog-dot act">2</div><div class="prog-lbl">Film review</div></div>
+      <div class="prog-conn"></div>
+      <div class="prog-step"><div class="prog-dot todo">3</div><div class="prog-lbl">Score calculated</div></div>
+      <div class="prog-conn"></div>
+      <div class="prog-step"><div class="prog-dot todo">4</div><div class="prog-lbl">Report ready</div></div>
+    </div>
+    <div class="card" style="text-align:left;margin:0 0 24px">
+      <div style="padding:10px 20px;background:var(--bg-el);border-bottom:1px solid var(--border-s)"><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase">Submitted Profile</span></div>
+      <div style="padding:12px 20px">${rowsHTML}</div>
+    </div>
+    <div class="btn-row" style="justify-content:center"><a href="/dashboard-player" class="btn btn-outline">← Dashboard</a><a href="/contact" class="btn btn-outline">Questions? Contact us</a></div>
+  </div></div>`;
+}
+
+// ── Coach Notes tab ────────────────────────────────────────────
+const COACH_GRADE_OPTS = ['A','B','C','D','F'];
+const COACH_ROLE_OPTS  = ['Top-Line / Top-Pair','Middle-Six','Bottom-Six / Third-Pair','Depth / Project','Not Yet Projectable'];
+let _coachCtx = { playerId: null, canEdit: false, defaultTeam: '' };
+
+function coachNoteCardHTML(n){
+  const strengths = (n.strengths||[]).map(s=>`<li>${esc(s)}</li>`).join('');
+  const areas     = (n.areasImprovement||[]).map(s=>`<li>${esc(s)}</li>`).join('');
+  const metaParts = [n.coachTitle, n.team].filter(Boolean);
+  return `<div class="card">
+    <div class="cn-entry">
+      <div class="cn-head">
+        <div>
+          <div class="cn-coach">${esc(n.coachName)}</div>
+          <div class="cn-meta">${metaParts.map(esc).join(' · ')}${metaParts.length?' · ':''}${fmtDate(n.entryDate)}</div>
+        </div>
+        <div class="cn-grade">${esc(n.overallGrade)}<span class="cn-grade-lbl">Coach Grade</span></div>
+      </div>
+      ${strengths?`<div class="cn-block"><div class="cn-block-lbl">Strengths</div><ul>${strengths}</ul></div>`:''}
+      ${areas?`<div class="cn-block"><div class="cn-block-lbl">Areas for Improvement</div><ul>${areas}</ul></div>`:''}
+      ${n.coachability?`<div class="cn-block"><div class="cn-block-lbl">Coachability / Attitude</div><div class="cn-text">${esc(n.coachability)}</div></div>`:''}
+      ${n.practiceVsGame?`<div class="cn-block"><div class="cn-block-lbl">Practice vs. Game Performance</div><div class="cn-text">${esc(n.practiceVsGame)}</div></div>`:''}
+      ${n.projectedRole?`<div class="cn-block"><div class="cn-block-lbl">Projected Role Next Season</div><div class="cn-text">${esc(n.projectedRole)}</div></div>`:''}
+      ${n.generalComments?`<div class="cn-block"><div class="cn-block-lbl">General Comments</div><div class="cn-text">${esc(n.generalComments)}</div></div>`:''}
+    </div>
+    <div class="cn-disclaimer">Coach evaluation — subjective, not derived from statistical model</div>
+  </div>`;
+}
+
+function coachFormHTML(defaultTeam){
+  return `<div class="card">
+    <div class="sec-lbl" style="margin:0;padding:14px 20px;border-bottom:1px solid var(--border-s)"><span>New Coach Evaluation</span></div>
+    <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+      <div class="cn-form-grid">
+        <div class="cn-form-row"><label class="cn-form-lbl">Role / Title</label><input id="cnTitle" type="text" placeholder="e.g. Head Coach"></div>
+        <div class="cn-form-row"><label class="cn-form-lbl">Team</label><input id="cnTeam" type="text" placeholder="Team" value="${esc(defaultTeam||'')}"></div>
+        <div class="cn-form-row"><label class="cn-form-lbl">Overall Grade</label><select id="cnGrade">${COACH_GRADE_OPTS.map(g=>`<option${g==='C'?' selected':''}>${g}</option>`).join('')}</select></div>
+      </div>
+      <div class="cn-form-row"><label class="cn-form-lbl">Strengths</label><span class="cn-form-hint">2–4 short bullets, one per line</span><textarea id="cnStrengths" rows="3"></textarea></div>
+      <div class="cn-form-row"><label class="cn-form-lbl">Areas for Improvement</label><span class="cn-form-hint">2–4 short bullets, one per line</span><textarea id="cnAreas" rows="3"></textarea></div>
+      <div class="cn-form-grid">
+        <div class="cn-form-row"><label class="cn-form-lbl">Coachability / Attitude</label><select id="cnCoachability"><option value="">—</option><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
+        <div class="cn-form-row" style="grid-column:span 2"><label class="cn-form-lbl">Projected Role Next Season</label><select id="cnRole"><option value="">—</option>${COACH_ROLE_OPTS.map(r=>`<option>${esc(r)}</option>`).join('')}</select></div>
+      </div>
+      <div class="cn-form-row"><label class="cn-form-lbl">Practice vs. Game Performance</label><textarea id="cnPvG" rows="2" placeholder="e.g. great in practice, disappears in games — or vice versa"></textarea></div>
+      <div class="cn-form-row"><label class="cn-form-lbl">General Comments</label><textarea id="cnComments" rows="4"></textarea></div>
+      <div class="cn-error" id="cnError"></div>
+      <div class="btn-row"><button class="btn btn-primary" id="cnSubmitBtn" onclick="submitCoachNote()">Submit Evaluation</button></div>
+    </div>
+  </div>`;
+}
+
+async function submitCoachNote(){
+  const grade = document.getElementById('cnGrade').value;
+  const errEl = document.getElementById('cnError');
+  errEl.textContent = '';
+  if (!grade) { errEl.textContent = 'Overall grade is required.'; return; }
+
+  const strengths = document.getElementById('cnStrengths').value.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,4);
+  const areas     = document.getElementById('cnAreas').value.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,4);
+
+  const btn = document.getElementById('cnSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const res = await NT.api({
+    type: 'addCoachNote', token: NT.getToken(), playerId: _coachCtx.playerId,
+    coachTitle:       document.getElementById('cnTitle').value.trim(),
+    team:             document.getElementById('cnTeam').value.trim(),
+    overallGrade:     grade,
+    strengths, areasImprovement: areas,
+    coachability:     document.getElementById('cnCoachability').value,
+    practiceVsGame:   document.getElementById('cnPvG').value.trim(),
+    projectedRole:    document.getElementById('cnRole').value,
+    generalComments:  document.getElementById('cnComments').value.trim(),
   });
 
-  const tierEl = document.getElementById('hdrTier');
-  if (tierEl) { tierEl.textContent = tier; if (tier === '—') tierEl.classList.add('dim'); }
-
-  document.getElementById('infoReportDate').textContent = 'Submitted ' + fmtDate(product.createdAt);
-
-  const infoRows = [
-    { label:'Player',   value: name },
-    { label:'Position', value: pos },
-    { label:'Jersey #', value: num !== '—' ? '#' + num : '—' },
-    { label:'Team',     value: team },
-    { label:'League',   value: league },
-    { label:'Package',  value: product.package || '—' },
-  ];
-  const html = infoRows.map(r => `<div class="info-item"><div class="info-label">${esc(r.label)}</div><div class="info-val">${esc(r.value)}</div></div>`).join('');
-  document.getElementById('infoGrid').innerHTML = html;
-  document.getElementById('mktInfoGrid').innerHTML = html;
-
-  document.getElementById('parentNarrativeIntro').innerHTML =
-    `Your player has earned a Player Development Score of <strong>${pds}</strong>, placing them in the ${tier} tier. A detailed breakdown and development roadmap will be available once our evaluators complete the full review.`;
-
-  const tagline = document.getElementById('mktTagline');
-  tagline.innerHTML = `BUILT FOR<br><em>NEXT LEVEL</em>`;
-  document.getElementById('mktName').textContent = name + ' · ' + pos + ' · ' + team;
-  document.getElementById('mktPillars').innerHTML = `
-    <div class="mkt-pillar"><div class="mkt-pillar-title">PDS ${pds}</div><div class="mkt-pillar-desc">Player Development Score — evaluated across key performance metrics</div></div>
-    <div class="mkt-pillar"><div class="mkt-pillar-title">TIER ${tier}</div><div class="mkt-pillar-desc">Rating tier assigned by Next Tier evaluators</div></div>
-    <div class="mkt-pillar"><div class="mkt-pillar-title">${esc(pos)}</div><div class="mkt-pillar-desc">Evaluated position — ${esc(league)}</div></div>`;
+  if (res.status !== 'ok') {
+    errEl.textContent = res.message || 'Failed to save evaluation.';
+    btn.disabled = false; btn.textContent = 'Submit Evaluation';
+    return;
+  }
+  await loadCoachTab(_coachCtx.playerId, _coachCtx.canEdit, _coachCtx.defaultTeam);
 }
 
-// ─── Render pending state ─────────────────────────────────────────────────────
-function renderPending(product) {
-  document.getElementById('statePending').style.display = '';
+async function loadCoachTab(playerId, canEdit, defaultTeam){
+  _coachCtx = { playerId, canEdit, defaultTeam };
+  const lnk = document.getElementById('lnk-coach');
+  const body = document.getElementById('coachTabBody');
+  if (!body) return;
 
-  const name   = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
-  const details = [
-    { label:'Player',   value: name },
-    { label:'Position', value: product.position   || '—' },
-    { label:'Team',     value: product.team        || '—' },
-    { label:'League',   value: product.league      || '—' },
-    { label:'Jersey #', value: product.jerseyNumber ? '#' + product.jerseyNumber : '—' },
-    { label:'Package',  value: product.package     || '—' },
-    { label:'Submitted',value: fmtDate(product.createdAt) },
-  ];
-  document.getElementById('pendingDetails').innerHTML = `
-    <div class="card" style="margin:0 0 28px;text-align:left;">
-      <div class="card-head"><div class="card-title">SUBMITTED PROFILE</div></div>
-      <div class="card-body"><div class="info-grid">${
-        details.map(r => `<div class="info-item"><div class="info-label">${esc(r.label)}</div><div class="info-val">${esc(r.value)}</div></div>`).join('')
-      }</div></div>
-    </div>`;
+  let notes = [];
+  try {
+    const res = await NT.api({type:'getCoachNotes', token:NT.getToken(), playerId});
+    if (res.status==='ok') notes = res.notes || [];
+  } catch(_){}
+
+  lnk.style.display = (canEdit || notes.length) ? '' : 'none';
+
+  const countLbl = notes.length ? ` · ${notes.length} entr${notes.length===1?'y':'ies'}` : '';
+  const history = notes.length
+    ? notes.map(coachNoteCardHTML).join('')
+    : `<div class="card"><div class="cn-empty">No coach evaluation submitted yet.</div></div>`;
+
+  body.innerHTML = `
+    <div class="sec-lbl"><span>Coach Notes${countLbl}</span></div>
+    ${canEdit ? coachFormHTML(defaultTeam) : ''}
+    ${history}
+  `;
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  const user = await NT.guard(['player', 'parent']);
+  const params   = new URLSearchParams(window.location.search);
+  const viewPid  = params.get('pid');
+  const isCoachView = !!viewPid;
+
+  const user = await NT.guard(isCoachView ? ['team','admin','coach'] : ['player','parent']);
   if (!user) return;
 
-  document.getElementById('navAvatar').textContent = (user.firstName || '?')[0].toUpperCase();
-  document.getElementById('navName').textContent   = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email || '—';
-  document.getElementById('navRole').textContent   = user.role || '—';
+  const canEditCoachNotes = ['team','admin','coach'].includes(user.role);
 
   let product = null;
   try {
-    const res = await NT.api({ type: 'getProduct', token: NT.getToken() });
-    if (res.status === 'ok') product = res.product;
-  } catch (_) {}
+    const res = isCoachView
+      ? await NT.api({type:'getProductForPlayer', token:NT.getToken(), playerId:viewPid})
+      : await NT.api({type:'getProduct', token:NT.getToken()});
+    if (res.status==='ok') product = res.product;
+  } catch(_){}
 
   document.getElementById('loadingOverlay').style.display = 'none';
 
-  if (!product) {
-    window.location.href = 'checkout';
-    return;
-  }
+  if (!product) { window.location.href = isCoachView ? (user.role === 'coach' ? '/dashboard-coach' : '/dashboard-team') : '/checkout'; return; }
+  if (product.status !== 'active') { renderPending(product); return; }
 
-  if (product.status !== 'active') {
-    renderPending(product);
-    return;
-  }
-
-  // Active — try to parse pdsScore as full PLAYER JSON
-  let playerObj = null;
+  let P = null;
   if (product.pdsScore && typeof product.pdsScore === 'string' && product.pdsScore.trim().startsWith('{')) {
-    try { playerObj = JSON.parse(product.pdsScore); } catch (_) {}
+    try { P = JSON.parse(product.pdsScore); } catch(_){}
   } else if (product.pdsScore && typeof product.pdsScore === 'object') {
-    playerObj = product.pdsScore;
+    P = product.pdsScore;
   }
 
-  document.getElementById('viewScout').style.display = '';
+  if (P) { renderFull(P, product); } else { renderSimple(product); }
 
-  if (playerObj) {
-    renderFull(playerObj, product);
-  } else {
-    renderSimple(product);
-  }
+  await loadCoachTab(product.userId, canEditCoachNotes, product.team);
 });
 </script>
 </body>

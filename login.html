@@ -278,6 +278,10 @@ async function doRegister() {
       succEl.style.display = 'block';
       const dest = getRedirect();
       setTimeout(() => { window.location.href = dest || dashboardFor(role); }, 800);
+    } else if (res.status === 'confirm_email') {
+      succEl.textContent = res.message;
+      succEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = 'Create account →';
     } else {
       showErr(errEl, res.message);
       btn.disabled = false; btn.textContent = 'Create account →';

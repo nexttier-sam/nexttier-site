@@ -337,6 +337,19 @@ nav {
 }
 .btn-outline-lg:hover { background: #1E1E1E; }
 
+/* ACCOUNT NOTE */
+.acct-note {
+  font-size: 12px; font-weight: 300; color: var(--nt-muted);
+  margin-top: -8px; margin-bottom: 16px;
+}
+.acct-signed-in {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--nt-green-l); border: 1px solid rgba(170,221,0,0.2);
+  border-radius: 8px; padding: 12px 14px;
+  font-size: 13px; color: #CCCCCC; margin-bottom: 4px;
+}
+.acct-signed-in strong { color: var(--nt-white); }
+
 @media (max-width: 640px) {
   .form-row, .form-row-3 { grid-template-columns: 1fr; }
   .plan-grid { grid-template-columns: 1fr; }
@@ -354,9 +367,9 @@ nav {
 <!-- NAV -->
 <nav>
   <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></a>
-  <a href="/" class="nav-back">
+  <a href="/get-started" class="nav-back">
     <svg viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    Back to home
+    Back to get started
   </a>
 </nav>
 
@@ -365,7 +378,7 @@ nav {
   <div class="intake-header-inner">
     <div class="intake-eyebrow">Team intake</div>
     <h1>BRING YOUR<br>WHOLE TEAM <em>ONBOARD.</em></h1>
-    <p class="intake-header-sub">Tell us about your team and roster. We'll follow up with team pricing and next steps within 1 business day.</p>
+    <p class="intake-header-sub">Create your team account and tell us about your roster below. We'll follow up with team pricing and next steps within 1 business day.</p>
   </div>
 </div>
 
@@ -378,10 +391,10 @@ nav {
       <svg viewBox="0 0 32 32" fill="none"><path d="M6 16l7 7L26 9" stroke="#AADD00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
     <div class="success-title">TEAM INTAKE<br><em>SUBMITTED.</em></div>
-    <p class="success-sub">We've received your team's information. Someone from Next Tier will reach out within 1 business day with team pricing and onboarding steps.</p>
+    <p class="success-sub" id="successSub">Your account is ready and we've received your team's information. Someone from Next Tier will reach out within 1 business day with team pricing and onboarding steps.</p>
     <div class="success-actions">
-      <a href="/" class="btn-primary-lg">Back to home</a>
-      <a href="#" class="btn-outline-lg" onclick="location.reload()">Submit another team</a>
+      <a href="/dashboard-team" class="btn-primary-lg">Go to your dashboard</a>
+      <a href="/" class="btn-outline-lg">Back to home</a>
     </div>
   </div>
 
@@ -486,7 +499,7 @@ nav {
             <input type="tel" id="phone" placeholder="+1 780 555 0123">
           </div>
         </div>
-        <div class="form-group" style="margin-bottom:0">
+        <div class="form-group">
           <label>How did you hear about Next Tier? <span class="opt">(optional)</span></label>
           <select id="hearAbout">
             <option value="">Select</option>
@@ -497,6 +510,14 @@ nav {
             <option>Team / league partnership</option>
             <option>Other</option>
           </select>
+        </div>
+        <div id="acctSignedIn" class="acct-signed-in" style="display:none">
+          Signed in as <strong id="acctSignedInEmail"></strong>
+        </div>
+        <div class="form-group" id="pwGroup" style="margin-bottom:0">
+          <label>Create a password <span class="req">*</span></label>
+          <input type="password" id="password" placeholder="Min 8 characters" autocomplete="new-password">
+          <div class="acct-note">This creates your Next Tier team account so you can log in later and manage your roster.</div>
         </div>
       </div>
     </div>
@@ -609,6 +630,21 @@ nav {
 <script>
 const POSITIONS = ['Centre','Left Wing','Right Wing','Left Defense','Right Defense','Goaltender'];
 let rosterRowCount = 0;
+let _existingUser = null;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  // If the visitor already has a session (e.g. returning coach/manager), skip
+  // account creation and just use their existing account.
+  const valid = await NT.validate();
+  if (valid) {
+    _existingUser = valid;
+    document.getElementById('pwGroup').style.display = 'none';
+    document.getElementById('acctSignedIn').style.display = 'flex';
+    document.getElementById('acctSignedInEmail').textContent = valid.email || '';
+    const emailEl = document.getElementById('email');
+    if (emailEl && valid.email) emailEl.value = valid.email;
+  }
+});
 
 function addRosterRow(first, last, position, birthYear) {
   const id = rosterRowCount++;
@@ -693,6 +729,7 @@ async function submitForm() {
   if (!v('contactName'))                                { alert('Please enter your name.'); return; }
   if (!document.getElementById('role').value)           { alert('Please select your role.'); return; }
   if (!v('email'))                                      { alert('Please enter your email address.'); return; }
+  if (!_existingUser && v('password').length < 8)       { alert('Please create a password of at least 8 characters.'); return; }
   if (!document.querySelector('input[name="pkg"]:checked')) { alert('Please select a package interest.'); return; }
   if (!document.getElementById('consentData').checked)  { alert('Please accept the data consent to submit.'); return; }
 
@@ -700,11 +737,30 @@ async function submitForm() {
   setSubmitLoading(true);
 
   try {
-    const user = NT.getUser ? NT.getUser() : null;
-    const res  = await NT.api({ type: 'teamIntake', row: collectFormData(), userId: user?.id || null });
+    let userId = _existingUser?.id || null;
 
+    if (!_existingUser) {
+      const nameParts = v('contactName').split(' ');
+      const firstName = nameParts.shift() || '';
+      const lastName  = nameParts.join(' ');
+      const regRes = await NT.register(v('email'), v('password'), 'team', firstName, lastName);
+      if (regRes.status === 'error') throw new Error(regRes.message || 'Could not create your account.');
+      if (regRes.status === 'ok') {
+        NT.setSession(regRes.token, regRes.user);
+        userId = regRes.user.id;
+      } else if (regRes.status === 'confirm_email') {
+        userId = regRes.userId || null;
+      }
+    }
+
+    const res = await NT.api({ type: 'teamIntake', row: collectFormData(), userId });
     if (res.status !== 'ok') throw new Error(res.message || 'Submission failed.');
 
+    if (!_existingUser) {
+      document.getElementById('successSub').textContent = NT.getUser()
+        ? 'Your account is ready and we\'ve received your team\'s information. Someone from Next Tier will reach out within 1 business day with team pricing and onboarding steps.'
+        : 'We\'ve received your team\'s information. Check your email to confirm your new account, then sign in to see your dashboard. Someone from Next Tier will reach out within 1 business day.';
+    }
     showSuccessPanel();
 
   } catch (err) {

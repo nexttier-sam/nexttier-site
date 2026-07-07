@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Get Started</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="/config.js"></script>
+<script src="/nt-auth.js"></script>
+<style>
+:root {
+  --nt-black: #000000;
+  --nt-ice: #161616;
+  --nt-white: #FFFFFF;
+  --nt-green: #AADD00;
+  --nt-green-d: #99BF00;
+  --nt-green-l: #1C2200;
+  --nt-slate: #CCCCCC;
+  --nt-muted: #777777;
+  --nt-border: rgba(170,221,0,0.1);
+  --nt-border-strong: rgba(170,221,0,0.2);
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: #111111;
+  color: var(--nt-white);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--nt-black);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 56px;
+}
+.nav-logo { display:flex; align-items:center; text-decoration:none; }
+.nav-back {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: rgba(255,255,255,0.4);
+  text-decoration: none; transition: color .15s;
+}
+.nav-back:hover { color: rgba(255,255,255,0.7); }
+.nav-back svg { width: 14px; height: 14px; }
+
+/* HEADER */
+.gs-header {
+  background: var(--nt-black);
+  padding: 56px 32px 44px;
+  position: relative; overflow: hidden;
+  text-align: center;
+}
+.gs-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(170,221,0,0.03) 39px, rgba(170,221,0,0.03) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(170,221,0,0.03) 39px, rgba(170,221,0,0.03) 40px);
+  pointer-events: none;
+}
+.gs-header-inner { max-width: 720px; margin: 0 auto; position: relative; }
+.gs-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: .1em;
+  color: var(--nt-green); text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.gs-eyebrow::before, .gs-eyebrow::after { content: ''; width: 16px; height: 1px; background: var(--nt-green); }
+.gs-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 5vw, 58px);
+  line-height: .95; letter-spacing: .02em;
+  color: var(--nt-white);
+}
+.gs-header h1 em { color: var(--nt-green); font-style: normal; }
+.gs-header-sub {
+  margin-top: 14px;
+  font-size: 14px; font-weight: 300; color: rgba(255,255,255,0.4);
+}
+
+/* BODY */
+.gs-body {
+  max-width: 980px; margin: 0 auto;
+  padding: 44px 24px 90px;
+}
+.gs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.gs-card {
+  display: flex; flex-direction: column;
+  background: #1E1E1E;
+  border: 1px solid var(--nt-border);
+  border-radius: 16px;
+  padding: 30px 26px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s, background .15s, transform .15s;
+}
+.gs-card:hover {
+  border-color: var(--nt-green);
+  background: #212800;
+  transform: translateY(-2px);
+}
+.gs-card-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: var(--nt-green-l);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+.gs-card-icon svg { width: 26px; height: 26px; }
+.gs-card-title {
+  font-family: var(--font-display);
+  font-size: 26px; letter-spacing: .03em;
+  color: var(--nt-white); margin-bottom: 8px;
+}
+.gs-card-desc {
+  font-size: 13px; font-weight: 300; color: var(--nt-muted);
+  line-height: 1.6; margin-bottom: 22px; flex-grow: 1;
+}
+.gs-card-cta {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 500; color: var(--nt-green);
+  font-family: var(--font-body);
+}
+.gs-card-cta svg { width: 14px; height: 14px; transition: transform .15s; }
+.gs-card:hover .gs-card-cta svg { transform: translateX(3px); }
+
+.gs-footer-note {
+  text-align: center; margin-top: 32px;
+  font-size: 12px; color: rgba(255,255,255,0.3);
+}
+.gs-footer-note a { color: rgba(255,255,255,0.5); }
+
+@media (max-width: 780px) {
+  .gs-grid { grid-template-columns: 1fr; }
+  nav { padding: 0 16px; }
+  .gs-header { padding: 40px 20px 32px; }
+  .gs-body { padding: 32px 16px 60px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:56px;width:auto;"></a>
+  <a href="/" class="nav-back">
+    <svg viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Back to home
+  </a>
+</nav>
+
+<div class="gs-header">
+  <div class="gs-header-inner">
+    <div class="gs-eyebrow">Get started</div>
+    <h1>WHO'S <em>SIGNING UP?</em></h1>
+    <p class="gs-header-sub">Pick the option that fits — it takes you straight to the right form. Takes about 2 minutes.</p>
+  </div>
+</div>
+
+<div class="gs-body">
+  <div class="gs-grid">
+
+    <a href="/intake-player-card" class="gs-card">
+      <div class="gs-card-icon">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="11" r="6" stroke="#AADD00" stroke-width="2"/><path d="M4 28c0-6.6 5.4-12 12-12s12 5.4 12 12" stroke="#AADD00" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="gs-card-title">I'M A PLAYER</div>
+      <div class="gs-card-desc">Build your own recruiting profile — get your Player Development Score, metric breakdown, and a shareable player card.</div>
+      <div class="gs-card-cta">Start player intake <svg viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </a>
+
+    <a href="/intake-parent" class="gs-card">
+      <div class="gs-card-icon">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="11" cy="9" r="4.5" stroke="#AADD00" stroke-width="2"/><circle cx="22" cy="12" r="3.5" stroke="#AADD00" stroke-width="2"/><path d="M3 27c0-5.2 3.6-9.5 8-9.5s8 4.3 8 9.5M17.5 27c.4-4 3-7 6.5-7s6 3.4 6 7.5" stroke="#AADD00" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="gs-card-title">I'M A PARENT</div>
+      <div class="gs-card-desc">Sign up on behalf of your player — build their profile, track their development, and manage everything from one account.</div>
+      <div class="gs-card-cta">Start parent intake <svg viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </a>
+
+    <a href="/team-intake" class="gs-card">
+      <div class="gs-card-icon">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="9" cy="10" r="3.5" stroke="#AADD00" stroke-width="2"/><circle cx="23" cy="10" r="3.5" stroke="#AADD00" stroke-width="2"/><circle cx="16" cy="16" r="3.5" stroke="#AADD00" stroke-width="2"/><path d="M2 27c0-4.4 3-8 7-8M30 27c0-4.4-3-8-7-8M9 27c0-4.7 3.1-8.5 7-8.5s7 3.8 7 8.5" stroke="#AADD00" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="gs-card-title">I'M A TEAM</div>
+      <div class="gs-card-desc">Bring your whole roster onboard — tell us about your team and we'll follow up with roster-based pricing.</div>
+      <div class="gs-card-cta">Start team intake <svg viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </a>
+
+  </div>
+
+  <div class="gs-footer-note">Already have an account? <a href="/login">Sign in</a> instead.</div>
+</div>
+
+</body>
+</html>

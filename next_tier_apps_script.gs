@@ -9,12 +9,13 @@
 // ════════════════════════════════════════════════════════════════
 
 const TABS = {
-  intake:   'Intake',
-  contact:  'Contact',
-  users:    'Users',
-  sessions: 'Sessions',
-  products: 'Products',
-  resets:   'PasswordResets'
+  intake:     'Intake',
+  teamIntake: 'TeamIntake',
+  contact:    'Contact',
+  users:      'Users',
+  sessions:   'Sessions',
+  products:   'Products',
+  resets:     'PasswordResets'
 };
 
 const SESSION_TTL_HOURS = 24;
@@ -47,6 +48,12 @@ function initSheets() {
     'Height','Weight','Contact Name','Relationship','Email','Phone',
     'How Did You Hear','Team Name','League','Season','Jersey Number',
     'Package Selected','Consent - Data','Consent - Contact'
+  ]);
+
+  ensureTab(ss, TABS.teamIntake, [
+    'Submission Date','Team Name','League','Season','Number of Players',
+    'Contact Name','Role','Email','Phone','How Did You Hear',
+    'Package Interest','Notes','Roster (JSON)','Consent - Data','Consent - Contact'
   ]);
 
   ensureTab(ss, TABS.contact, [
@@ -111,6 +118,7 @@ function doPost(e) {
 
     switch (type) {
       case 'intake':      return handleIntake(payload);
+      case 'teamIntake':  return handleTeamIntake(payload);
       case 'contact':     return handleContact(payload);
       case 'register':    return handleRegister(payload);
       case 'login':       return handleLogin(payload);
@@ -142,6 +150,7 @@ function doGet(e) {
       const type    = payload.type || 'intake';
       switch (type) {
         case 'intake':      return handleIntake(payload);
+        case 'teamIntake':  return handleTeamIntake(payload);
         case 'contact':     return handleContact(payload);
         case 'register':    return handleRegister(payload);
         case 'login':       return handleLogin(payload);
@@ -247,6 +256,67 @@ function handleIntake(payload) {
   }
 
   return jsonCors({ status: 'ok', message: 'Row written to Intake tab.' });
+}
+
+// ── Team Intake ───────────────────────────────────────────────────
+function handleTeamIntake(payload) {
+  if (!payload.row || !Array.isArray(payload.row)) {
+    return jsonCors({ status: 'error', message: 'No row data in payload.' });
+  }
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(TABS.teamIntake);
+  if (!sheet) {
+    return jsonCors({ status: 'error', message: 'TeamIntake sheet not found. Run initSheets() first.' });
+  }
+  sheet.appendRow(payload.row);
+
+  // Send notification email
+  try {
+    const r          = payload.row;
+    // row layout: [date, teamName, league, season, numPlayers, contactName,
+    //              role, email, phone, howHeard, packageInterest, notes, rosterJson, consentData, consentContact]
+    const teamName    = r[1]  || '—';
+    const league      = r[2]  || '—';
+    const season      = r[3]  || '—';
+    const numPlayers  = r[4]  || '—';
+    const contactName = r[5]  || '—';
+    const role        = r[6]  || '—';
+    const email       = r[7]  || '—';
+    const phone       = r[8]  || '—';
+    const pkgInterest = r[10] || '—';
+    const notes       = r[11] || '—';
+    const submitted   = r[0]  || new Date().toLocaleString();
+
+    const subject = '🏒 New Team Intake — ' + teamName;
+    const body =
+      'A new team submitted the team intake form on Next Tier.\n\n' +
+      '─────────────────────────────\n' +
+      'TEAM\n' +
+      'Name:      ' + teamName    + '\n' +
+      'League:    ' + league      + '\n' +
+      'Season:    ' + season      + '\n' +
+      'Roster #:  ' + numPlayers  + '\n\n' +
+      'CONTACT\n' +
+      'Name:      ' + contactName + '\n' +
+      'Role:      ' + role        + '\n' +
+      'Email:     ' + email       + '\n' +
+      'Phone:     ' + phone       + '\n\n' +
+      'Package interest: ' + pkgInterest + '\n' +
+      'Notes: ' + notes + '\n\n' +
+      'Submitted: ' + submitted  + '\n' +
+      '─────────────────────────────\n' +
+      'View the full roster in the TeamIntake tab (Roster JSON column).';
+
+    MailApp.sendEmail({
+      to:      'sam.mclean@nexttierstats.com,pearce.fraser@nexttierstats.com',
+      subject: subject,
+      body:    body
+    });
+  } catch (mailErr) {
+    Logger.log('Team intake email notification failed: ' + mailErr.message);
+  }
+
+  return jsonCors({ status: 'ok', message: 'Row written to TeamIntake tab.' });
 }
 
 // ── Contact ───────────────────────────────────────────────────────

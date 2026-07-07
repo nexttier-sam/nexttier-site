@@ -100,7 +100,7 @@ const NT = (() => {
       options: { data: { role, firstName, lastName } },
     });
     if (error) return { status: 'error', message: error.message };
-    if (!data.session) return { status: 'error', message: 'Registration failed. Please try again.' };
+    if (!data.session) return { status: 'confirm_email', message: 'Account created — check your email to confirm your address before signing in.', userId: data.user?.id || null };
     const user = { id: data.user.id, email: data.user.email, role, firstName, lastName: lastName || '' };
     _cachedUser  = user;
     _cachedToken = data.session.access_token;
