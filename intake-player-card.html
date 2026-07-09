@@ -657,8 +657,8 @@ nav {
         <span>I agree to receive the PDS report and occasional development insights from Next Tier at the email address provided. Unsubscribe anytime.</span>
       </div>
       <div class="submit-wrap" style="margin-top:20px">
-        <button class="btn-submit" id="btnSubmit" onclick="submitForm()">Create account & submit profile →</button>
-        <div class="submit-note">Your information is private and never shared or sold. You can complete payment any time from your dashboard.</div>
+        <button class="btn-submit" id="btnSubmit" onclick="submitForm()">Create account & continue to payment →</button>
+        <div class="submit-note">Your information is private and never shared or sold. You'll be redirected to Stripe to pay $125 securely.</div>
         <div class="submit-error" id="submitError"></div>
       </div>
     </div>
@@ -668,6 +668,13 @@ nav {
 </div><!-- /intake-body -->
 
 <script>
+const STRIPE_URLS = {
+  playerCard: {
+    US: 'https://buy.stripe.com/00w9AVeAqc7sa0n3hB7ss04',
+    CA: 'https://buy.stripe.com/eVqfZjfEu8Vg7Sfg4n7ss05'
+  }
+};
+
 let _selectedRegion = '';
 let _existingUser = null;
 
@@ -750,11 +757,21 @@ async function submitForm() {
     const res = await NT.api({ type: 'intake', row: collectRow(), userId });
     if (res.status !== 'ok') throw new Error(res.message || 'Submission failed.');
 
-    if (!_existingUser) {
-      document.getElementById('successSub').textContent = NT.getUser()
-        ? 'Your account is ready and we\'ve received your player\'s information. Your full Player Development Score and metric breakdown will be ready within 48 hours.'
-        : 'We\'ve received your player\'s information. Check your email to confirm your new account, then sign in to see your profile. Your full Player Development Score will be ready within 48 hours.';
+    // Profile is saved — hand off to Stripe to collect the $125 payment.
+    // If the visitor doesn't have a session yet (email-confirmation required
+    // registration), there's no token to redirect with; fall back to the
+    // success panel telling them to confirm their email first.
+    if (NT.getUser() && userId) {
+      const stripeParams = new URLSearchParams({
+        client_reference_id: userId,
+        prefilled_email:     v('email') || ''
+      }).toString();
+      window.location.href = STRIPE_URLS.playerCard[_selectedRegion] + '?' + stripeParams;
+      return;
     }
+
+    document.getElementById('successSub').textContent =
+      'We\'ve received your player\'s information. Check your email to confirm your new account, then sign in and continue to payment from your dashboard.';
     document.getElementById('formArea').style.display = 'none';
     document.getElementById('successPanel').classList.add('visible');
     document.getElementById('loadingOverlay').classList.remove('active');
