@@ -224,20 +224,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
 .mkt-pillar-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--green);margin-bottom:5px;}
 .mkt-pillar-body{font-size:11px;color:var(--txt2);line-height:1.65;}
 
-/* Pending */
-.pending-wrap{text-align:center;padding:64px 32px;}
-.pending-icon{width:64px;height:64px;border-radius:50%;background:var(--str-bg);border:1px solid var(--str-brd);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
-.pending-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:10px;}
-.pending-sub{font-size:13px;color:var(--muted);max-width:440px;margin:0 auto 28px;line-height:1.65;}
-.prog-steps{display:flex;justify-content:center;margin-bottom:36px;}
-.prog-step{display:flex;flex-direction:column;align-items:center;gap:8px;}
-.prog-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;}
-.prog-dot.done{background:var(--green);color:#000;}
-.prog-dot.act{background:#2a2000;border:1px solid rgba(170,204,0,.3);color:var(--orange);}
-.prog-dot.todo{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);}
-.prog-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);max-width:72px;text-align:center;line-height:1.4;}
-.prog-conn{height:1px;width:48px;background:rgba(255,255,255,.08);margin-top:16px;}
-
 /* Buttons */
 .btn{border:none;border-radius:4px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Barlow',sans-serif;text-decoration:none;display:inline-block;padding:9px 18px;}
 .btn-outline{background:transparent;color:var(--txt2);border:1px solid var(--border);}
@@ -562,50 +548,45 @@ function renderSimple(product){
 </div>`;
 }
 
-function renderPending(product){
-  const name = [product.firstName, product.lastName].filter(Boolean).join(' ') || '—';
-  const rows = [{l:'Player',v:name},{l:'Position',v:product.position||'—'},{l:'Team',v:product.team||'—'},{l:'League',v:product.league||'—'},{l:'Jersey',v:product.jerseyNumber?'#'+product.jerseyNumber:'—'},{l:'Package',v:product.package||'—'},{l:'Submitted',v:fmtDate(product.createdAt)}];
-  const rowsHTML = rows.map(r=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border-s);font-size:13px"><span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em">${r.l}</span><span>${esc(r.v)}</span></div>`).join('');
-
+function renderPending(backHref){
+  backHref = backHref || '/dashboard-player';
   document.getElementById('statePending').style.display = '';
-  document.getElementById('statePending').innerHTML = `<div class="card"><div class="pending-wrap">
-    <div class="pending-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#AACC00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-    <div class="pending-title">Report In Preparation</div>
-    <div class="pending-sub">Your profile has been received. Our evaluators are reviewing your film and compiling your Player Development Score.</div>
-    <div class="prog-steps">
-      <div class="prog-step"><div class="prog-dot done">✓</div><div class="prog-lbl">Profile submitted</div></div>
-      <div class="prog-conn"></div>
-      <div class="prog-step"><div class="prog-dot act">2</div><div class="prog-lbl">Film review</div></div>
-      <div class="prog-conn"></div>
-      <div class="prog-step"><div class="prog-dot todo">3</div><div class="prog-lbl">Score calculated</div></div>
-      <div class="prog-conn"></div>
-      <div class="prog-step"><div class="prog-dot todo">4</div><div class="prog-lbl">Report ready</div></div>
-    </div>
-    <div class="card" style="text-align:left;margin:0 0 24px">
-      <div style="padding:10px 20px;background:var(--bg-el);border-bottom:1px solid var(--border-s)"><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase">Submitted Profile</span></div>
-      <div style="padding:12px 20px">${rowsHTML}</div>
-    </div>
-    <div class="btn-row" style="justify-content:center"><a href="/dashboard-player" class="btn btn-outline">← Dashboard</a><a href="/contact" class="btn btn-outline">Questions? Contact us</a></div>
-  </div></div>`;
+  document.getElementById('statePending').innerHTML = `<div id="coachTabBody"></div>
+  <div class="btn-row" style="justify-content:center"><a href="${esc(backHref)}" class="btn btn-outline">← Dashboard</a><a href="/contact" class="btn btn-outline">Questions? Contact us</a></div>`;
+}
+
+function renderNoEval(name, backHref){
+  document.getElementById('page-title').textContent = (name||'Player')+' · Player Card · Next Tier';
+  document.getElementById('statePending').style.display = '';
+  document.getElementById('statePending').innerHTML = `<div class="card">
+    <div class="sec-lbl"><span>${esc(name||'Player')}</span></div>
+    <div style="padding:28px 20px;text-align:center;color:var(--muted);font-size:13px">No evaluation has been ordered for this player yet — Coach Notes can still be added below.</div>
+  </div>
+  <div id="coachTabBody"></div>
+  <div class="btn-row" style="justify-content:center"><a href="${esc(backHref)}" class="btn btn-outline">← Dashboard</a></div>`;
 }
 
 // ── Coach Notes tab ────────────────────────────────────────────
 const COACH_GRADE_OPTS = ['A','B','C','D','F'];
 const COACH_ROLE_OPTS  = ['Top-Line / Top-Pair','Middle-Six','Bottom-Six / Third-Pair','Depth / Project','Not Yet Projectable'];
-let _coachCtx = { playerId: null, canEdit: false, defaultTeam: '' };
+let _coachCtx = { playerId: null, canEdit: false, defaultTeam: '', canEditExisting: false, notes: [] };
 
-function coachNoteCardHTML(n){
+function coachNoteCardHTML(n, canEditExisting){
   const strengths = (n.strengths||[]).map(s=>`<li>${esc(s)}</li>`).join('');
   const areas     = (n.areasImprovement||[]).map(s=>`<li>${esc(s)}</li>`).join('');
   const metaParts = [n.coachTitle, n.team].filter(Boolean);
+  const editedLbl = n.updatedAt ? ` · <span title="Edited ${esc(fmtDate(n.updatedAt))}">edited</span>` : '';
   return `<div class="card">
     <div class="cn-entry">
       <div class="cn-head">
         <div>
           <div class="cn-coach">${esc(n.coachName)}</div>
-          <div class="cn-meta">${metaParts.map(esc).join(' · ')}${metaParts.length?' · ':''}${fmtDate(n.entryDate)}</div>
+          <div class="cn-meta">${metaParts.map(esc).join(' · ')}${metaParts.length?' · ':''}${fmtDate(n.entryDate)}${editedLbl}</div>
         </div>
-        <div class="cn-grade">${esc(n.overallGrade)}<span class="cn-grade-lbl">Coach Grade</span></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${canEditExisting ? `<button class="btn btn-outline" style="padding:5px 12px;font-size:10px" onclick="editCoachNote('${esc(n.id)}')">Edit</button>` : ''}
+          <div class="cn-grade">${esc(n.overallGrade)}<span class="cn-grade-lbl">Coach Grade</span></div>
+        </div>
       </div>
       ${strengths?`<div class="cn-block"><div class="cn-block-lbl">Strengths</div><ul>${strengths}</ul></div>`:''}
       ${areas?`<div class="cn-block"><div class="cn-block-lbl">Areas for Improvement</div><ul>${areas}</ul></div>`:''}
@@ -618,27 +599,44 @@ function coachNoteCardHTML(n){
   </div>`;
 }
 
-function coachFormHTML(defaultTeam){
+function coachFormHTML(defaultTeam, editingNote){
+  const n = editingNote || null;
   return `<div class="card">
-    <div class="sec-lbl" style="margin:0;padding:14px 20px;border-bottom:1px solid var(--border-s)"><span>New Coach Evaluation</span></div>
+    <div class="sec-lbl" style="margin:0;padding:14px 20px;border-bottom:1px solid var(--border-s)"><span>${n?'Edit Coach Evaluation':'New Coach Evaluation'}</span></div>
     <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px">
       <div class="cn-form-grid">
-        <div class="cn-form-row"><label class="cn-form-lbl">Role / Title</label><input id="cnTitle" type="text" placeholder="e.g. Head Coach"></div>
-        <div class="cn-form-row"><label class="cn-form-lbl">Team</label><input id="cnTeam" type="text" placeholder="Team" value="${esc(defaultTeam||'')}"></div>
-        <div class="cn-form-row"><label class="cn-form-lbl">Overall Grade</label><select id="cnGrade">${COACH_GRADE_OPTS.map(g=>`<option${g==='C'?' selected':''}>${g}</option>`).join('')}</select></div>
+        <div class="cn-form-row"><label class="cn-form-lbl">Role / Title</label><input id="cnTitle" type="text" placeholder="e.g. Head Coach" value="${esc(n?.coachTitle||'')}"></div>
+        <div class="cn-form-row"><label class="cn-form-lbl">Team</label><input id="cnTeam" type="text" placeholder="Team" value="${esc(n?.team||defaultTeam||'')}"></div>
+        <div class="cn-form-row"><label class="cn-form-lbl">Overall Grade</label><select id="cnGrade">${COACH_GRADE_OPTS.map(g=>`<option${g===(n?.overallGrade||'C')?' selected':''}>${g}</option>`).join('')}</select></div>
       </div>
-      <div class="cn-form-row"><label class="cn-form-lbl">Strengths</label><span class="cn-form-hint">2–4 short bullets, one per line</span><textarea id="cnStrengths" rows="3"></textarea></div>
-      <div class="cn-form-row"><label class="cn-form-lbl">Areas for Improvement</label><span class="cn-form-hint">2–4 short bullets, one per line</span><textarea id="cnAreas" rows="3"></textarea></div>
+      <div class="cn-form-row"><label class="cn-form-lbl">Strengths</label><span class="cn-form-hint">2–4 short bullets, one per line</span><textarea id="cnStrengths" rows="3">${esc((n?.strengths||[]).join('\n'))}</textarea></div>
+      <div class="cn-form-row"><label class="cn-form-lbl">Areas for Improvement</label><span class="cn-form-hint">2–4 short bullets, one per line</span><textarea id="cnAreas" rows="3">${esc((n?.areasImprovement||[]).join('\n'))}</textarea></div>
       <div class="cn-form-grid">
-        <div class="cn-form-row"><label class="cn-form-lbl">Coachability / Attitude</label><select id="cnCoachability"><option value="">—</option><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
-        <div class="cn-form-row" style="grid-column:span 2"><label class="cn-form-lbl">Projected Role Next Season</label><select id="cnRole"><option value="">—</option>${COACH_ROLE_OPTS.map(r=>`<option>${esc(r)}</option>`).join('')}</select></div>
+        <div class="cn-form-row"><label class="cn-form-lbl">Coachability / Attitude</label><select id="cnCoachability"><option value="">—</option>${(()=>{const cur=n?(n.coachability||''):'3';return [1,2,3,4,5].map(v=>`<option${String(v)===String(cur)?' selected':''}>${v}</option>`).join('');})()}</select></div>
+        <div class="cn-form-row" style="grid-column:span 2"><label class="cn-form-lbl">Projected Role Next Season</label><select id="cnRole"><option value="">—</option>${COACH_ROLE_OPTS.map(r=>`<option${r===(n?.projectedRole||'')?' selected':''}>${esc(r)}</option>`).join('')}</select></div>
       </div>
-      <div class="cn-form-row"><label class="cn-form-lbl">Practice vs. Game Performance</label><textarea id="cnPvG" rows="2" placeholder="e.g. great in practice, disappears in games — or vice versa"></textarea></div>
-      <div class="cn-form-row"><label class="cn-form-lbl">General Comments</label><textarea id="cnComments" rows="4"></textarea></div>
+      <div class="cn-form-row"><label class="cn-form-lbl">Practice vs. Game Performance</label><textarea id="cnPvG" rows="2" placeholder="e.g. great in practice, disappears in games — or vice versa">${esc(n?.practiceVsGame||'')}</textarea></div>
+      <div class="cn-form-row"><label class="cn-form-lbl">General Comments</label><textarea id="cnComments" rows="4">${esc(n?.generalComments||'')}</textarea></div>
       <div class="cn-error" id="cnError"></div>
-      <div class="btn-row"><button class="btn btn-primary" id="cnSubmitBtn" onclick="submitCoachNote()">Submit Evaluation</button></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="cnSubmitBtn" onclick="submitCoachNote()">${n?'Save Changes':'Submit Evaluation'}</button>
+        ${n?`<button class="btn btn-outline" onclick="cancelEditCoachNote()">Cancel</button>`:''}
+      </div>
     </div>
   </div>`;
+}
+
+function editCoachNote(noteId){
+  const note = (_coachCtx.notes||[]).find(n => n.id === noteId);
+  if (!note) return;
+  _coachCtx.editingNoteId = noteId;
+  renderCoachTab();
+  document.getElementById('coachTabBody').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function cancelEditCoachNote(){
+  _coachCtx.editingNoteId = null;
+  renderCoachTab();
 }
 
 async function submitCoachNote(){
@@ -653,8 +651,9 @@ async function submitCoachNote(){
   const btn = document.getElementById('cnSubmitBtn');
   btn.disabled = true; btn.textContent = 'Saving…';
 
-  const res = await NT.api({
-    type: 'addCoachNote', token: NT.getToken(), playerId: _coachCtx.playerId,
+  const editingNoteId = _coachCtx.editingNoteId;
+  const payload = {
+    token: NT.getToken(), playerId: _coachCtx.playerId,
     coachTitle:       document.getElementById('cnTitle').value.trim(),
     team:             document.getElementById('cnTeam').value.trim(),
     overallGrade:     grade,
@@ -663,21 +662,41 @@ async function submitCoachNote(){
     practiceVsGame:   document.getElementById('cnPvG').value.trim(),
     projectedRole:    document.getElementById('cnRole').value,
     generalComments:  document.getElementById('cnComments').value.trim(),
-  });
+  };
+  const res = editingNoteId
+    ? await NT.api({ type: 'updateCoachNote', noteId: editingNoteId, ...payload })
+    : await NT.api({ type: 'addCoachNote', ...payload });
 
   if (res.status !== 'ok') {
     errEl.textContent = res.message || 'Failed to save evaluation.';
-    btn.disabled = false; btn.textContent = 'Submit Evaluation';
+    btn.disabled = false; btn.textContent = editingNoteId ? 'Save Changes' : 'Submit Evaluation';
     return;
   }
-  await loadCoachTab(_coachCtx.playerId, _coachCtx.canEdit, _coachCtx.defaultTeam);
+  _coachCtx.editingNoteId = null;
+  await loadCoachTab(_coachCtx.playerId, _coachCtx.canEdit, _coachCtx.defaultTeam, _coachCtx.canEditExisting);
 }
 
-async function loadCoachTab(playerId, canEdit, defaultTeam){
-  _coachCtx = { playerId, canEdit, defaultTeam };
-  const lnk = document.getElementById('lnk-coach');
+function renderCoachTab(){
   const body = document.getElementById('coachTabBody');
   if (!body) return;
+  const notes = _coachCtx.notes || [];
+  const countLbl = notes.length ? ` · ${notes.length} entr${notes.length===1?'y':'ies'}` : '';
+  const editingNote = notes.find(n => n.id === _coachCtx.editingNoteId) || null;
+  const history = notes.length
+    ? notes.map(n => coachNoteCardHTML(n, _coachCtx.canEditExisting)).join('')
+    : `<div class="card"><div class="cn-empty">No coach evaluation submitted yet.</div></div>`;
+
+  body.innerHTML = `
+    <div class="sec-lbl"><span>Coach Notes${countLbl}</span></div>
+    ${_coachCtx.canEdit && !editingNote ? coachFormHTML(_coachCtx.defaultTeam) : ''}
+    ${editingNote ? coachFormHTML(_coachCtx.defaultTeam, editingNote) : ''}
+    ${history}
+  `;
+}
+
+async function loadCoachTab(playerId, canEdit, defaultTeam, canEditExisting){
+  _coachCtx = { playerId, canEdit, defaultTeam, canEditExisting, notes: [], editingNoteId: null };
+  const lnk = document.getElementById('lnk-coach');
 
   let notes = [];
   try {
@@ -686,28 +705,22 @@ async function loadCoachTab(playerId, canEdit, defaultTeam){
   } catch(_){}
 
   lnk.style.display = (canEdit || notes.length) ? '' : 'none';
-
-  const countLbl = notes.length ? ` · ${notes.length} entr${notes.length===1?'y':'ies'}` : '';
-  const history = notes.length
-    ? notes.map(coachNoteCardHTML).join('')
-    : `<div class="card"><div class="cn-empty">No coach evaluation submitted yet.</div></div>`;
-
-  body.innerHTML = `
-    <div class="sec-lbl"><span>Coach Notes${countLbl}</span></div>
-    ${canEdit ? coachFormHTML(defaultTeam) : ''}
-    ${history}
-  `;
+  _coachCtx.notes = notes;
+  renderCoachTab();
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
   const params   = new URLSearchParams(window.location.search);
   const viewPid  = params.get('pid');
+  const viewName = params.get('name') || '';
   const isCoachView = !!viewPid;
 
   const user = await NT.guard(isCoachView ? ['team','admin','coach'] : ['player','parent']);
   if (!user) return;
 
   const canEditCoachNotes = ['team','admin','coach'].includes(user.role);
+  const canEditExistingCoachNotes = ['team','admin'].includes(user.role);
+  const backHref = isCoachView ? (user.role === 'coach' ? '/dashboard-coach' : '/dashboard-team') : '/dashboard-player';
 
   let product = null;
   try {
@@ -719,8 +732,17 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('loadingOverlay').style.display = 'none';
 
-  if (!product) { window.location.href = isCoachView ? (user.role === 'coach' ? '/dashboard-coach' : '/dashboard-team') : '/checkout'; return; }
-  if (product.status !== 'active') { renderPending(product); return; }
+  if (!product) {
+    if (!isCoachView) { window.location.href = '/checkout'; return; }
+    renderNoEval(viewName, backHref);
+    await loadCoachTab(viewPid, canEditCoachNotes, '', canEditExistingCoachNotes);
+    return;
+  }
+  if (product.status !== 'active') {
+    renderPending(backHref);
+    await loadCoachTab(product.userId, canEditCoachNotes, product.team, canEditExistingCoachNotes);
+    return;
+  }
 
   let P = null;
   if (product.pdsScore && typeof product.pdsScore === 'string' && product.pdsScore.trim().startsWith('{')) {
@@ -731,7 +753,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   if (P) { renderFull(P, product); } else { renderSimple(product); }
 
-  await loadCoachTab(product.userId, canEditCoachNotes, product.team);
+  await loadCoachTab(product.userId, canEditCoachNotes, product.team, canEditExistingCoachNotes);
 });
 </script>
 </body>
