@@ -175,7 +175,7 @@ tr:last-child td{border-bottom:none;}
         <label>Package</label>
         <select id="pPackage">
           <option value="Player Card">Player Card — $125</option>
-          <option value="Player Card + Video Review">Player Card + Video Review — $225</option>
+          <option value="Player Card + Video Review" disabled>Player Card + Video Review (Coming soon)</option>
         </select>
       </div>
       <div style="padding:10px 12px;background:#111;border-radius:7px;font-size:12px;color:var(--nt-muted);line-height:1.6;margin-top:4px;">
@@ -238,17 +238,24 @@ tr:last-child td{border-bottom:none;}
 
 <!-- ORDER EVAL MODAL (existing player) -->
 <div class="modal-overlay" id="orderEvalModal">
-  <div class="modal" style="max-width:460px;">
+  <div class="modal" style="max-width:460px;max-height:90vh;overflow-y:auto;">
     <div class="modal-title">ORDER EVALUATION</div>
     <div class="modal-sub">Submit an evaluation request for <strong id="oePlayerName"></strong>.</div>
     <div class="modal-group">
       <label>Package</label>
       <select id="oePackage">
         <option value="Player Card">Player Card — $125</option>
-        <option value="Player Card + Video Review">Player Card + Video Review — $225</option>
+        <option value="Player Card + Video Review" disabled>Player Card + Video Review (Coming soon)</option>
       </select>
     </div>
+
+    <div class="modal-divider"><span>Player info</span></div>
+
     <div class="modal-row">
+      <div class="modal-group">
+        <label>Date of birth</label>
+        <input type="date" id="oeDob">
+      </div>
       <div class="modal-group">
         <label>Position</label>
         <select id="oePosition">
@@ -261,11 +268,20 @@ tr:last-child td{border-bottom:none;}
           <option value="G">Goalie (G)</option>
         </select>
       </div>
+    </div>
+    <div class="modal-row">
       <div class="modal-group">
-        <label>Jersey #</label>
-        <input type="text" id="oeJersey" placeholder="e.g. 19">
+        <label>Height</label>
+        <input type="text" id="oeHeight" placeholder="e.g. 5'11&quot;">
+      </div>
+      <div class="modal-group">
+        <label>Weight (lbs)</label>
+        <input type="number" id="oeWeight" placeholder="e.g. 170">
       </div>
     </div>
+
+    <div class="modal-divider"><span>Team</span></div>
+
     <div class="modal-row">
       <div class="modal-group">
         <label>Team name</label>
@@ -273,16 +289,71 @@ tr:last-child td{border-bottom:none;}
       </div>
       <div class="modal-group">
         <label>League</label>
-        <input type="text" id="oeLeague" placeholder="e.g. MJHL">
+        <select id="oeLeague">
+          <option value="">Select league</option>
+          <optgroup label="Alberta">
+            <option>AEHL U18</option>
+            <option>AEHL U15</option>
+            <option>AJHL</option>
+            <option>AMHL U18 AAA</option>
+            <option>AMHL U15 AAA</option>
+          </optgroup>
+          <optgroup label="BC / West">
+            <option>BCHL</option>
+            <option>PJHL</option>
+            <option>BCEHL U18</option>
+          </optgroup>
+          <optgroup label="National / US">
+            <option>USHL</option>
+            <option>NAHL</option>
+            <option>OJHL</option>
+            <option>NCAA D1</option>
+            <option>NCAA D2/D3</option>
+            <option>ACHA</option>
+          </optgroup>
+          <option value="other">Other</option>
+        </select>
       </div>
     </div>
+    <div class="modal-row">
+      <div class="modal-group">
+        <label>Season</label>
+        <select id="oeSeason">
+          <option>2025–26</option>
+          <option>2024–25</option>
+          <option>2026–27 (upcoming)</option>
+        </select>
+      </div>
+      <div class="modal-group">
+        <label>Jersey #</label>
+        <input type="text" id="oeJersey" placeholder="e.g. 19">
+      </div>
+    </div>
+
+    <div class="modal-divider"><span>Contact & payment</span></div>
+
+    <div class="modal-row">
+      <div class="modal-group">
+        <label>Phone</label>
+        <input type="tel" id="oePhone" placeholder="+1 780 555 0123">
+      </div>
+      <div class="modal-group">
+        <label>Region</label>
+        <select id="oeRegion">
+          <option value="">Select region</option>
+          <option value="CA">Canada — pay in CAD</option>
+          <option value="US">USA — pay in USD</option>
+        </select>
+      </div>
+    </div>
+
     <div style="padding:10px 12px;background:#111;border-radius:7px;font-size:12px;color:var(--nt-muted);line-height:1.6;">
-      Submitting creates a pending evaluation. Next Tier will contact you to confirm payment.
+      Submitting saves the evaluation details, then takes you straight to Stripe to pay $125 securely.
     </div>
     <div class="modal-error" id="orderEvalError"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeOrderEvalModal()">Cancel</button>
-      <button class="btn-save" id="btnOrderEval" onclick="doOrderEval()" style="background:var(--nt-green);color:#000;">Submit evaluation →</button>
+      <button class="btn-save" id="btnOrderEval" onclick="doOrderEval()" style="background:var(--nt-green);color:#000;">Continue to payment →</button>
     </div>
   </div>
 </div>
@@ -452,6 +523,7 @@ function renderMemberTable(members) {
       <td><span class="status-badge status-${escHtml(m.status)}"><span class="status-dot"></span>${escHtml(m.status)}</span></td>
       <td style="color:var(--nt-muted);">${pCount}</td>
       <td>
+        ${m.role === 'player' ? `<a class="action-btn" href="/player-card?pid=${encodeURIComponent(m.id)}&name=${encodeURIComponent([m.firstName,m.lastName].filter(Boolean).join(' '))}">Coach Notes →</a>` : ''}
         ${m.role === 'player' && m.status === 'active' ? `<button class="action-btn green" onclick="openOrderEvalModal('${escHtml(m.id)}','${escHtml(m.firstName)}','${escHtml(m.lastName)}')">Order eval</button>` : ''}
         ${m.status === 'active'
           ? `<button class="action-btn danger" onclick="quickSuspend('${escHtml(m.id)}')">Suspend</button>`
@@ -475,7 +547,7 @@ function renderProductTable(products) {
       <td style="font-family:var(--font-mono);color:var(--nt-blue);">${escHtml(p.pdsScore || '—')}</td>
       <td>${escHtml(p.position || '—')}</td>
       <td style="color:var(--nt-muted);font-size:12px;">${fmtDate(p.createdAt)}</td>
-      <td>${p.status === 'active' ? `<a class="action-btn" href="/player-card?pid=${encodeURIComponent(p.userId)}">Coach Notes →</a>` : ''}</td>
+      <td><a class="action-btn" href="/player-card?pid=${encodeURIComponent(p.userId)}&name=${encodeURIComponent([p.firstName,p.lastName].filter(Boolean).join(' '))}">Coach Notes →</a></td>
     </tr>
   `).join('');
 }
@@ -658,16 +730,26 @@ async function doAddPlayer() {
 }
 
 // ── Order Eval for existing player ───────────────────────────────────────────
+// Same Stripe Payment Links / client_reference_id handoff as intake-player-card.html —
+// the stripe-webhook function matches on user_id to attach payment to this pending row.
+const STRIPE_URLS = {
+  playerCard: {
+    US: 'https://buy.stripe.com/00w9AVeAqc7sa0n3hB7ss04',
+    CA: 'https://buy.stripe.com/eVqfZjfEu8Vg7Sfg4n7ss05'
+  }
+};
+
 let _orderEvalPlayerId = null;
 
 function openOrderEvalModal(playerId, firstName, lastName) {
   _orderEvalPlayerId = playerId;
   document.getElementById('oePlayerName').textContent = firstName + ' ' + lastName;
   document.getElementById('oePackage').value = 'Player Card';
-  ['oePosition','oeJersey','oeTeam','oeLeague'].forEach(id => document.getElementById(id).value = '');
+  ['oeDob','oePosition','oeHeight','oeWeight','oeJersey','oeTeam','oeLeague','oePhone','oeRegion'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('oeSeason').value = '2025–26';
   document.getElementById('orderEvalError').style.display = 'none';
   document.getElementById('btnOrderEval').disabled = false;
-  document.getElementById('btnOrderEval').textContent = 'Submit evaluation →';
+  document.getElementById('btnOrderEval').textContent = 'Continue to payment →';
   document.getElementById('orderEvalModal').classList.add('open');
 }
 
@@ -678,16 +760,23 @@ function closeOrderEvalModal() {
 
 async function doOrderEval() {
   const playerId = _orderEvalPlayerId;
+  const dob      = document.getElementById('oeDob').value;
   const position = document.getElementById('oePosition').value;
+  const height   = document.getElementById('oeHeight').value.trim();
+  const weight   = document.getElementById('oeWeight').value.trim();
   const jersey   = document.getElementById('oeJersey').value.trim();
   const teamName = document.getElementById('oeTeam').value.trim();
-  const league   = document.getElementById('oeLeague').value.trim();
+  const league   = document.getElementById('oeLeague').value;
+  const season   = document.getElementById('oeSeason').value;
+  const phone    = document.getElementById('oePhone').value.trim();
   const pkg      = document.getElementById('oePackage').value;
+  const region   = document.getElementById('oeRegion').value;
   const errEl    = document.getElementById('orderEvalError');
   const btn      = document.getElementById('btnOrderEval');
 
   errEl.style.display = 'none';
   if (!playerId) { showModalErr(errEl, 'No player selected.'); return; }
+  if (!region)   { showModalErr(errEl, 'Please select a region.'); return; }
 
   const player = allMembers.find(m => m.id === playerId);
   if (!player) { showModalErr(errEl, 'Player not found.'); return; }
@@ -700,13 +789,18 @@ async function doOrderEval() {
   const row = new Array(19).fill('');
   row[1]  = player.firstName;
   row[2]  = player.lastName;
+  row[3]  = dob;
   row[4]  = position;
+  row[5]  = height;
+  row[6]  = weight;
   row[7]  = adminName;
   row[8]  = 'Team Admin';
   row[9]  = player.email;
+  row[10] = phone;
   row[11] = 'Team Account';
   row[12] = teamName;
   row[13] = league;
+  row[14] = season;
   row[15] = jersey;
   row[16] = pkg;
   row[17] = true;
@@ -714,12 +808,16 @@ async function doOrderEval() {
 
   const res = await NT.api({ type: 'intake', row, userId: playerId });
   if (res.status === 'ok') {
-    closeOrderEvalModal();
-    showToast('Evaluation request submitted for ' + player.firstName + '.');
-    await Promise.all([loadMembers(), loadProducts()]);
+    // Pending row is saved — hand off straight to Stripe to collect payment,
+    // same client_reference_id handoff the stripe-webhook function expects.
+    const stripeParams = new URLSearchParams({
+      client_reference_id: playerId,
+      prefilled_email:     player.email || ''
+    }).toString();
+    window.location.href = STRIPE_URLS.playerCard[region] + '?' + stripeParams;
   } else {
     showModalErr(errEl, res.message || 'Failed to submit evaluation.');
-    btn.disabled = false; btn.textContent = 'Submit evaluation →';
+    btn.disabled = false; btn.textContent = 'Continue to payment →';
   }
 }
 
