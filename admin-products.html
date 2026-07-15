@@ -271,13 +271,17 @@ function renderTable() {
     } else if (job && job.status === 'qa_failed') {
       const qaSnippet = (job.qa_report || '').split('\n').filter(l => l.includes('[ERROR]')).slice(0, 3).join(' · ');
       statusPill = `<span class="status-pill failed" title="${escHtml(qaSnippet)}">qa failed</span>`;
-      actionCell = `<button class="action-btn" onclick="retryCardJob('${escHtml(p.intakeId || '')}')">Retry</button>`;
+      actionCell = `
+        <button class="action-btn" onclick="retryCardJob('${escHtml(p.intakeId || '')}')">Retry</button>
+        <button class="action-btn deliver" onclick="toggleDeliver('${p.id}')">Deliver manually →</button>`;
     } else if (job && ['queued', 'scouting', 'generating_card'].includes(job.status)) {
       statusPill = `<span class="status-pill pending">generating…</span>`;
       actionCell = `<span style="color:var(--nt-muted);font-size:11px;">${escHtml(job.status)}</span>`;
     } else if (job && job.status === 'failed') {
       statusPill = `<span class="status-pill failed" title="${escHtml(job.error_message || '')}">pipeline failed</span>`;
-      actionCell = `<button class="action-btn" onclick="retryCardJob('${escHtml(p.intakeId || '')}')">Retry</button>`;
+      actionCell = `
+        <button class="action-btn" onclick="retryCardJob('${escHtml(p.intakeId || '')}')">Retry</button>
+        <button class="action-btn deliver" onclick="toggleDeliver('${p.id}')">Deliver manually →</button>`;
     }
 
     return `
