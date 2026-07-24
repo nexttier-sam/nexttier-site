@@ -166,7 +166,7 @@ nav {
   border: 1px solid var(--nt-border-strong);
   border-radius: 8px;
   padding: 10px 14px;
-  font-size: 14px; font-weight: 300;
+  font-size: 16px; font-weight: 300;
   color: var(--nt-white);
   font-family: var(--font-body);
   outline: none;
@@ -389,7 +389,8 @@ nav {
     <div class="success-title">PROFILE<br><em>SUBMITTED.</em></div>
     <p class="success-sub" id="successSub">Your account is ready and we've received your player's information. Your full Player Development Score and metric breakdown will be ready within 48 hours.</p>
     <div class="success-actions">
-      <a href="/dashboard-player" class="btn-primary-lg">Go to your dashboard</a>
+      <a href="#" id="successPayLink" class="btn-primary-lg" style="display:none">Purchase player card →</a>
+      <a href="/dashboard-player" id="successDashLink" class="btn-outline-lg">Go to your dashboard</a>
       <a href="/" class="btn-outline-lg">Back to home</a>
     </div>
   </div>
@@ -657,8 +658,8 @@ nav {
         <span>I agree to receive the PDS report and occasional development insights from Next Tier at the email address provided. Unsubscribe anytime.</span>
       </div>
       <div class="submit-wrap" style="margin-top:20px">
-        <button class="btn-submit" id="btnSubmit" onclick="submitForm()">Create account & continue to payment →</button>
-        <div class="submit-note">Your information is private and never shared or sold. You'll be redirected to Stripe to pay $125 securely.</div>
+        <button class="btn-submit" id="btnSubmit" onclick="submitForm()">Create account →</button>
+        <div class="submit-note">Your information is private and never shared or sold. Creating an account is free — you can pay the $125 for your full report now or anytime later from your dashboard.</div>
         <div class="submit-error" id="submitError"></div>
       </div>
     </div>
@@ -757,21 +758,24 @@ async function submitForm() {
     const res = await NT.api({ type: 'intake', row: collectRow(), userId });
     if (res.status !== 'ok') throw new Error(res.message || 'Submission failed.');
 
-    // Profile is saved — hand off to Stripe to collect the $125 payment.
-    // If the visitor doesn't have a session yet (email-confirmation required
-    // registration), there's no token to redirect with; fall back to the
-    // success panel telling them to confirm their email first.
+    // Account + profile are saved regardless of payment. If the visitor has an
+    // active session, offer Stripe as an optional next step; otherwise (email
+    // confirmation required) point them to sign in and pay later.
+    const payLink = document.getElementById('successPayLink');
     if (NT.getUser() && userId) {
       const stripeParams = new URLSearchParams({
         client_reference_id: userId,
         prefilled_email:     v('email') || ''
       }).toString();
-      window.location.href = STRIPE_URLS.playerCard[_selectedRegion] + '?' + stripeParams;
-      return;
+      payLink.href = STRIPE_URLS.playerCard[_selectedRegion] + '?' + stripeParams;
+      payLink.style.display = '';
+      document.getElementById('successSub').textContent =
+        'Your free account is ready and we\'ve received your player\'s information. Pay $125 now to unlock the full Player Development Score and metric breakdown, or do it anytime later from your dashboard.';
+    } else {
+      document.getElementById('successSub').textContent =
+        'We\'ve received your player\'s information. Check your email to confirm your new account, then sign in — you can pay for your full report anytime from your dashboard.';
     }
 
-    document.getElementById('successSub').textContent =
-      'We\'ve received your player\'s information. Check your email to confirm your new account, then sign in and continue to payment from your dashboard.';
     document.getElementById('formArea').style.display = 'none';
     document.getElementById('successPanel').classList.add('visible');
     document.getElementById('loadingOverlay').classList.remove('active');
