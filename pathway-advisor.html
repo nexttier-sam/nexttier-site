@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Tier — Pathway Advisor</title>
+<meta name="description" content="Chat with the Next Tier Pathway Advisor about where to play next season and what it'll take to get there.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="/config.js?v=3"></script>
+<script src="/nt-auth.js?v=2"></script>
+<style>
+:root {
+  --nt-black:#000000;--nt-white:#FFFFFF;
+  --nt-green:#AADD00;
+  --nt-slate:#CCCCCC;--nt-muted:#888888;
+  --nt-border:rgba(170,221,0,0.08);--nt-border-strong:rgba(170,221,0,0.18);
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:var(--font-body);background:#0d0d0f;color:#e8eaed;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;position:relative;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse at center,rgba(170,221,0,0.10) 0%,rgba(170,221,0,0) 70%);pointer-events:none;z-index:0;}
+
+/* NAV (matches coverage.html) */
+nav{background:var(--nt-black);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:56px;flex-shrink:0;border-bottom:1px solid var(--nt-border);}
+.nav-logo{display:flex;align-items:center;text-decoration:none;}
+.nav-links{display:flex;align-items:center;gap:24px;}
+.nav-links a{font-size:13px;font-weight:400;color:rgba(255,255,255,0.5);text-decoration:none;transition:color .15s;}
+.nav-links a:hover{color:#fff;}
+.nav-links a.current{color:var(--nt-green);}
+.nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;cursor:pointer;}
+.nav-toggle span{display:block;width:22px;height:2px;background:#fff;}
+.nav-cta{background:var(--nt-green)!important;color:#000!important;font-weight:700!important;font-size:15px!important;font-family:var(--font-display)!important;letter-spacing:.06em;text-transform:uppercase;padding:10px 28px!important;border-radius:8px;box-shadow:0 0 16px rgba(170,221,0,0.25);transition:background .15s,box-shadow .15s!important;}
+.nav-cta:hover{background:#99CC00!important;box-shadow:0 0 24px rgba(170,221,0,0.4)!important;}
+@media (max-width:860px){
+  .nav-links{display:none;position:absolute;top:56px;left:0;right:0;background:var(--nt-black);flex-direction:column;padding:8px 24px 16px;border-bottom:1px solid var(--nt-border);}
+  nav.nav-open .nav-links{display:flex;}
+  .nav-links a{padding:14px 8px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:15px;}
+  .nav-links .nav-cta{text-align:center;margin-top:8px;}
+  .nav-toggle{display:flex;}
+}
+
+/* Full-page chat layout — elevated take on the site's black/green language, just
+   filling the viewport instead of a floating panel. */
+.chat-page{flex:1;display:flex;flex-direction:column;min-height:0;max-width:760px;width:100%;margin:0 auto;background:rgba(21,21,21,0.85);backdrop-filter:blur(6px);border-left:1px solid var(--nt-border-strong);border-right:1px solid var(--nt-border-strong);position:relative;z-index:1;}
+.chat-head{padding:18px 24px;border-bottom:1px solid var(--nt-border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,#131313 0%,#101010 100%);flex-shrink:0;}
+.chat-head-id{display:flex;align-items:center;gap:12px;}
+.chat-head-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,rgba(170,221,0,0.22),rgba(170,221,0,0.04));border:1px solid var(--nt-border-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chat-head-mark svg{width:19px;height:19px;}
+.chat-head-title{font-family:var(--font-display);font-size:26px;letter-spacing:.03em;color:var(--nt-white);line-height:1;}
+.chat-head-sub{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--nt-green);margin-top:4px;display:flex;align-items:center;gap:6px;}
+.chat-head-sub::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--nt-green);box-shadow:0 0 8px rgba(170,221,0,0.9);animation:nt-pulse-dot 2s infinite ease-in-out;}
+@keyframes nt-pulse-dot{0%,100%{opacity:1;}50%{opacity:.4;}}
+.chat-head-ctrls{display:flex;align-items:center;gap:2px;}
+.chat-new{background:none;border:1px solid transparent;color:var(--nt-muted);font-size:12px;font-family:var(--font-mono);letter-spacing:.03em;text-transform:uppercase;cursor:pointer;padding:7px 12px;line-height:1;border-radius:7px;transition:color .15s,border-color .15s,background .15s;}
+.chat-new:hover{color:#fff;border-color:var(--nt-border-strong);background:rgba(255,255,255,0.03);}
+.chat-body{flex:1;overflow-y:auto;padding:28px 24px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth;}
+.chat-body::-webkit-scrollbar{width:8px;}
+.chat-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:8px;}
+.chat-body::-webkit-scrollbar-thumb:hover{background:rgba(170,221,0,0.25);}
+.chat-empty{margin:auto 0;text-align:center;padding:12px 6px;}
+.chat-empty-mark{width:56px;height:56px;border-radius:16px;margin:0 auto 18px;background:linear-gradient(135deg,rgba(170,221,0,0.18),rgba(170,221,0,0.02));border:1px solid var(--nt-border-strong);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(170,221,0,0.08);}
+.chat-empty-mark svg{width:26px;height:26px;}
+.chat-empty-title{font-family:var(--font-display);font-size:34px;letter-spacing:.02em;color:var(--nt-white);margin-bottom:10px;}
+.chat-empty-sub{font-size:14px;font-weight:300;color:var(--nt-muted);line-height:1.5;margin-bottom:24px;max-width:420px;margin-left:auto;margin-right:auto;}
+.chat-suggest{display:flex;flex-direction:column;gap:8px;max-width:440px;margin:0 auto;}
+.chat-suggest-btn{background:#1A1A1A;border:1px solid var(--nt-border-strong);color:var(--nt-slate);font-size:13px;text-align:left;padding:12px 16px;border-radius:10px;cursor:pointer;font-family:var(--font-body);transition:border-color .15s,background .15s,transform .15s;}
+.chat-suggest-btn:hover{border-color:var(--nt-green);background:#1E1E1E;transform:translateX(2px);}
+.chat-row{display:flex;align-items:flex-end;gap:8px;max-width:80%;animation:nt-msg-in .25s ease;}
+.chat-row-user{align-self:flex-end;flex-direction:row-reverse;}
+.chat-row-assistant,.chat-row-error{align-self:flex-start;}
+@keyframes nt-msg-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.chat-avatar{width:26px;height:26px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:10px;font-weight:500;}
+.chat-avatar-assistant{background:linear-gradient(135deg,rgba(170,221,0,0.25),rgba(170,221,0,0.05));border:1px solid var(--nt-border-strong);}
+.chat-avatar-assistant svg{width:14px;height:14px;}
+.chat-avatar-error{background:rgba(255,80,80,0.12);border:1px solid rgba(255,80,80,0.3);color:#f88;}
+.chat-msg{padding:12px 16px;border-radius:16px;font-size:14.5px;line-height:1.6;font-weight:300;white-space:pre-wrap;word-wrap:break-word;}
+.chat-msg-user{background:linear-gradient(135deg,var(--nt-green),#8FC400);color:#000;font-weight:500;border-bottom-right-radius:5px;box-shadow:0 2px 12px rgba(170,221,0,0.18);}
+.chat-msg-assistant{background:#1D1D1D;color:rgba(255,255,255,0.88);border:1px solid rgba(255,255,255,0.05);border-bottom-left-radius:5px;}
+.chat-msg-error{background:#2A1414;color:#f88;border:1px solid rgba(255,80,80,0.25);border-bottom-left-radius:5px;}
+.chat-map-cta{margin-top:10px;background:none;border:1px solid var(--nt-green);color:var(--nt-green);font-size:12.5px;font-weight:500;padding:8px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-body);transition:background .15s,color .15s,box-shadow .15s;}
+.chat-map-cta:hover{background:var(--nt-green);color:#000;box-shadow:0 0 16px rgba(170,221,0,0.3);}
+.chat-typing{align-self:flex-start;display:flex;gap:4px;padding:14px 16px;background:#1D1D1D;border:1px solid rgba(255,255,255,0.05);border-radius:16px;border-bottom-left-radius:5px;margin-left:34px;}
+.chat-typing span{width:6px;height:6px;border-radius:50%;background:var(--nt-green);animation:nt-bounce 1.2s infinite ease-in-out;}
+.chat-typing span:nth-child(2){animation-delay:.15s;}
+.chat-typing span:nth-child(3){animation-delay:.3s;}
+@keyframes nt-bounce{0%,80%,100%{transform:scale(0.7);opacity:.4;}40%{transform:scale(1);opacity:1;}}
+.chat-foot{border-top:1px solid var(--nt-border);padding:16px 20px;display:flex;gap:10px;align-items:flex-end;flex-shrink:0;background:linear-gradient(0deg,#131313 0%,#101010 100%);}
+.chat-input{flex:1;resize:none;background:#1A1A1A;border:1px solid var(--nt-border-strong);border-radius:12px;padding:12px 14px;color:#fff;font-family:var(--font-body);font-size:14px;max-height:140px;min-height:46px;line-height:1.4;transition:border-color .15s,box-shadow .15s;}
+.chat-input:focus{outline:none;border-color:var(--nt-green);box-shadow:0 0 0 3px rgba(170,221,0,0.12);}
+.chat-input::placeholder{color:var(--nt-muted);}
+.chat-send{width:46px;height:46px;border-radius:12px;background:var(--nt-green);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .15s,transform .1s,box-shadow .15s;}
+.chat-send:hover{background:#99CC00;box-shadow:0 0 16px rgba(170,221,0,0.35);}
+.chat-send:active{transform:scale(0.94);}
+.chat-send:disabled{background:#2A2A2A;cursor:not-allowed;box-shadow:none;}
+.chat-send:disabled svg{stroke:#666;}
+.chat-send svg{width:19px;height:19px;}
+
+.chat-gate{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 24px;position:relative;z-index:1;}
+.chat-gate-mark{width:56px;height:56px;border-radius:16px;margin:0 auto 18px;background:linear-gradient(135deg,rgba(170,221,0,0.18),rgba(170,221,0,0.02));border:1px solid var(--nt-border-strong);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(170,221,0,0.08);}
+.chat-gate-mark svg{width:26px;height:26px;}
+.chat-gate-title{font-family:var(--font-display);font-size:28px;color:var(--nt-white);margin-bottom:10px;}
+.chat-gate-sub{font-size:14px;color:var(--nt-muted);margin-bottom:22px;max-width:360px;}
+@media (max-width:600px){
+  .chat-row{max-width:90%;}
+  .chat-body{padding:20px 14px;}
+  .chat-head{padding:14px 16px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo"><img src="/nexttierlogo.png" alt="Next Tier" style="height:40px;width:auto;"></a>
+  <div class="nav-links">
+    <a href="/#features">Features</a>
+    <a href="/#tiers">Pricing</a>
+    <a href="/coverage">Coverage</a>
+    <a href="pathway-advisor" class="current">Pathway Advisor</a>
+    <a href="login" id="navLoginLink">Login</a>
+  </div>
+  <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false" onclick="var n=this.closest('nav'); var open=n.classList.toggle('nav-open'); this.setAttribute('aria-expanded', open);">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="chat-page" id="chatPage" style="display:none;">
+  <div class="chat-head">
+    <div class="chat-head-id">
+      <div class="chat-head-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div>
+        <div class="chat-head-title">Pathway Advisor</div>
+        <div class="chat-head-sub">Where to play next</div>
+      </div>
+    </div>
+    <div class="chat-head-ctrls">
+      <button class="chat-new" id="chatNew" onclick="startNewChat()" aria-label="Start a new chat">New chat</button>
+    </div>
+  </div>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="chat-foot">
+    <textarea class="chat-input" id="chatInput" placeholder="Ask about your next move…" rows="1"></textarea>
+    <button class="chat-send" id="chatSend" onclick="sendChat()" aria-label="Send message">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="chat-gate" id="chatGate" style="display:none;">
+  <div>
+    <div class="chat-gate-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5z"/><path d="M9 12l2 2 4-4"/></svg></div>
+    <div class="chat-gate-title">Sign in to talk to the Pathway Advisor</div>
+    <div class="chat-gate-sub">The advisor uses your Player Card and report data to give personalized advice.</div>
+    <a href="login?redirect=%2Fpathway-advisor" class="nav-cta">Log in</a>
+  </div>
+</div>
+
+<script>
+// ── Pathway Advisor chat (standalone full-page version; recommendations open the
+// coverage map in a new tab rather than navigating away from the conversation) ──
+let _chatLoaded  = false;
+let _chatSending = false;
+let chatConversationId = null;
+
+// Convention/kiosk mode: loaded once with ?kiosk=1 on a booth device logged into one
+// shared demo account, so many back-to-back visitors don't bleed context/facts into
+// each other, and the device can sit unattended for hours without sleeping or drifting
+// into a single unbounded conversation. Regular players never opt into this — no URL
+// param, no auto-reset, no wake lock.
+const KIOSK_MODE = new URLSearchParams(window.location.search).get('kiosk') === '1';
+const KIOSK_IDLE_MS = 5 * 60 * 1000;
+// Even a busy booth staffer chatting continuously (never idle) should get a fresh
+// conversation periodically, so a single thread's history/DOM/tokens don't grow
+// unbounded across an 8-hour day — this fires independent of the idle timer.
+const KIOSK_MAX_CONVERSATION_MS = 30 * 60 * 1000;
+let lastChatActivityAt = Date.now();
+let chatStartedAt = Date.now();
+
+// Booth laptops left on this page for hours will otherwise let the display sleep.
+// Screen Wake Lock only holds while the tab is visible and releases itself on
+// tab-hide, so it's re-acquired on visibilitychange. Silently a no-op where unsupported.
+let _wakeLock = null;
+async function acquireWakeLock() {
+  if (!KIOSK_MODE || !('wakeLock' in navigator)) return;
+  try {
+    _wakeLock = await navigator.wakeLock.request('screen');
+  } catch (e) {
+    console.error('[chat] wake lock request failed', e);
+  }
+}
+if (KIOSK_MODE) {
+  acquireWakeLock();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') acquireWakeLock();
+  });
+}
+
+const CHAT_MAX_RENDERED_MSGS = 60;
+
+const CHAT_SUGGESTIONS = [
+  'Am I ready to try out for AJHL this year?',
+  'What should I focus on to move up a tier?',
+  'Is it too early to think about NCAA or USports?',
+];
+
+function renderChatEmpty() {
+  const body = document.getElementById('chatBody');
+  body.innerHTML = `
+    <div class="chat-empty">
+      <div class="chat-empty-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div class="chat-empty-title">Where should you play next?</div>
+      <div class="chat-empty-sub">Ask about your PDS report, pathway fit, or what it'll take to move up a level.</div>
+      <div class="chat-suggest" id="chatSuggest"></div>
+    </div>`;
+  const suggestEl = document.getElementById('chatSuggest');
+  CHAT_SUGGESTIONS.forEach(q => {
+    const btn = document.createElement('button');
+    btn.className   = 'chat-suggest-btn';
+    btn.textContent = q;
+    btn.onclick = () => { document.getElementById('chatInput').value = q; sendChat(); };
+    suggestEl.appendChild(btn);
+  });
+}
+
+const DEST_MARKER_RE = /\n?<!--DEST:([\s\S]*?)-->\s*$/;
+
+function parseDest(content) {
+  const m = content.match(DEST_MARKER_RE);
+  if (!m) return { text: content, destinations: null };
+  let destinations = null;
+  try { destinations = JSON.parse(m[1]); } catch (_) { destinations = null; }
+  return { text: content.slice(0, m.index), destinations };
+}
+
+const CHAT_AVATAR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5z"/><path d="M9 12l2 2 4-4"/></svg>';
+const CHAT_ERROR_ICON  = '<svg viewBox="0 0 24 24" fill="none" stroke="#f88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+function appendChatMsg(role, content) {
+  const body  = document.getElementById('chatBody');
+  const empty = body.querySelector('.chat-empty');
+  if (empty) empty.remove();
+
+  const row = document.createElement('div');
+  row.className = 'chat-row ' + (role === 'user' ? 'chat-row-user' : role === 'error' ? 'chat-row-error' : 'chat-row-assistant');
+
+  if (role !== 'user') {
+    const avatar = document.createElement('div');
+    avatar.className = 'chat-avatar ' + (role === 'error' ? 'chat-avatar-error' : 'chat-avatar-assistant');
+    avatar.innerHTML = role === 'error' ? CHAT_ERROR_ICON : CHAT_AVATAR_ICON;
+    row.appendChild(avatar);
+  }
+
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + (role === 'user' ? 'chat-msg-user' : role === 'error' ? 'chat-msg-error' : 'chat-msg-assistant');
+
+  if (role === 'assistant') {
+    const { text, destinations } = parseDest(content);
+    div.textContent = text;
+    if (destinations && destinations.length) {
+      const flattened = destinations.flatMap(d => d.teams.map(t => ({ league: d.league, team: t.team })));
+      const cta = document.createElement('button');
+      cta.type      = 'button';
+      cta.className = 'chat-map-cta';
+      cta.textContent = 'View recommended teams on the map →';
+      cta.onclick = () => {
+        // localStorage (not sessionStorage) so the payload survives into a brand-new
+        // tab — opening the coverage map here keeps this conversation alive instead
+        // of navigating away from it.
+        try { localStorage.setItem('nt_coverage_dest', JSON.stringify(flattened)); } catch (_e) {}
+        window.open('/coverage', '_blank', 'noopener');
+      };
+      div.appendChild(document.createElement('br'));
+      div.appendChild(cta);
+    }
+  } else {
+    div.textContent = content;
+  }
+
+  row.appendChild(div);
+  body.appendChild(row);
+  // Cap DOM nodes kept on screen — protects memory on a tab left open for hours
+  // (kiosk or not); the server-side conversation history is untouched, this is
+  // purely a display trim of the oldest rendered bubbles.
+  while (body.children.length > CHAT_MAX_RENDERED_MSGS) body.removeChild(body.firstChild);
+  body.scrollTop = body.scrollHeight;
+  return row;
+}
+
+function showChatTyping() {
+  const body = document.getElementById('chatBody');
+  const div  = document.createElement('div');
+  div.className = 'chat-typing';
+  div.id        = 'chatTyping';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function hideChatTyping() {
+  const el = document.getElementById('chatTyping');
+  if (el) el.remove();
+}
+
+async function loadChatHistory() {
+  if (_chatLoaded) return;
+  _chatLoaded = true;
+  try {
+    const res = await NT.api({ type: 'getChatHistory', conversationId: chatConversationId });
+    if (res.status === 'ok') {
+      chatConversationId = res.conversationId || null;
+      if (res.messages.length) {
+        const body = document.getElementById('chatBody');
+        body.innerHTML = '';
+        res.messages.forEach(m => appendChatMsg(m.role, m.content));
+      } else {
+        renderChatEmpty();
+      }
+    } else {
+      renderChatEmpty();
+    }
+  } catch (_) {
+    renderChatEmpty();
+  }
+
+  // Carried over from a "View recommended teams on the map" round-trip, or a direct
+  // link — prefill (not auto-send) whatever question sent the player here.
+  const prefill = new URLSearchParams(window.location.search).get('prefill');
+  if (prefill) {
+    const input = document.getElementById('chatInput');
+    if (input) { input.value = prefill; input.focus(); }
+  }
+}
+
+async function sendChat() {
+  if (_chatSending) return;
+  const input   = document.getElementById('chatInput');
+  const message = input.value.trim();
+  if (!message) return;
+
+  lastChatActivityAt = Date.now();
+  _chatSending = true;
+  document.getElementById('chatSend').disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+  appendChatMsg('user', message);
+  showChatTyping();
+
+  let settled = false;
+  await NT.streamChat(message, chatConversationId, {
+    // Deltas arrive as raw text that may still contain the trailing <!--DEST:...-->
+    // marker mid-stream, so keep the typing indicator up and render the final,
+    // fully-assembled message on 'done' rather than flashing partial/marker text.
+    onDone: ({ conversationId, reply }) => {
+      settled = true;
+      chatConversationId = conversationId || chatConversationId;
+      lastChatActivityAt = Date.now();
+      hideChatTyping();
+      appendChatMsg('assistant', reply.content);
+    },
+    onError: (message) => {
+      settled = true;
+      hideChatTyping();
+      appendChatMsg('error', message || 'Something went wrong. Try again.');
+    },
+  });
+  if (!settled) {
+    hideChatTyping();
+    appendChatMsg('error', 'Something went wrong. Try again.');
+  }
+
+  _chatSending = false;
+  document.getElementById('chatSend').disabled = false;
+}
+
+// Manual reset — available to everyone (a player resetting their own chat is harmless
+// and generally useful), and the primitive the kiosk timers below also call. `silent`
+// is set by the kiosk timers so no extra UI happens beyond the fresh empty state.
+async function startNewChat(silent) {
+  try {
+    const [convRes] = await Promise.all([
+      NT.api({ type: 'createConversation' }),
+      NT.api({ type: 'updatePlayerFacts', facts: {} }),
+    ]);
+    if (convRes.status === 'ok') chatConversationId = convRes.conversation.id;
+  } catch (e) {
+    console.error('[chat] startNewChat failed', e);
+  }
+  const body = document.getElementById('chatBody');
+  body.innerHTML = '';
+  renderChatEmpty();
+  _chatLoaded = true;
+  lastChatActivityAt = Date.now();
+  chatStartedAt = Date.now();
+}
+
+if (KIOSK_MODE) {
+  setInterval(() => {
+    const now = Date.now();
+    if (now - lastChatActivityAt >= KIOSK_IDLE_MS || now - chatStartedAt >= KIOSK_MAX_CONVERSATION_MS) {
+      startNewChat(true);
+    }
+  }, 30 * 1000);
+}
+
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+});
+document.getElementById('chatInput').addEventListener('input', function () {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+  lastChatActivityAt = Date.now();
+});
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const user = await NT.validate().catch(() => null);
+  if (user && (user.role === 'player' || user.role === 'admin')) {
+    document.getElementById('chatPage').style.display = 'flex';
+    lastChatActivityAt = Date.now();
+    loadChatHistory();
+  } else {
+    document.getElementById('chatGate').style.display = 'flex';
+  }
+});
+</script>
+
+</body>
+</html>
