@@ -83,6 +83,9 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .chat-msg-error{background:#2A1414;color:#f88;border:1px solid rgba(255,80,80,0.25);border-bottom-left-radius:5px;}
 .chat-map-cta{margin-top:10px;background:none;border:1px solid var(--nt-green);color:var(--nt-green);font-size:12.5px;font-weight:500;padding:8px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-body);transition:background .15s,color .15s,box-shadow .15s;}
 .chat-map-cta:hover{background:var(--nt-green);color:#000;box-shadow:0 0 16px rgba(170,221,0,0.3);}
+.chat-followups{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0 34px;max-width:80%;}
+.chat-followup-chip{background:#1A1A1A;border:1px solid var(--nt-border-strong);color:var(--nt-slate);font-size:12.5px;text-align:left;padding:8px 14px;border-radius:20px;cursor:pointer;font-family:var(--font-body);transition:border-color .15s,background .15s,color .15s;}
+.chat-followup-chip:hover{border-color:var(--nt-green);background:#1E1E1E;color:#fff;}
 .chat-typing{align-self:flex-start;display:flex;gap:4px;padding:14px 16px;background:#1D1D1D;border:1px solid rgba(255,255,255,0.05);border-radius:16px;border-bottom-left-radius:5px;margin-left:34px;}
 .chat-typing span{width:6px;height:6px;border-radius:50%;background:var(--nt-green);animation:nt-bounce 1.2s infinite ease-in-out;}
 .chat-typing span:nth-child(2){animation-delay:.15s;}
@@ -99,11 +102,6 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 .chat-send:disabled svg{stroke:#666;}
 .chat-send svg{width:19px;height:19px;}
 
-.chat-gate{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 24px;position:relative;z-index:1;}
-.chat-gate-mark{width:56px;height:56px;border-radius:16px;margin:0 auto 18px;background:linear-gradient(135deg,rgba(170,221,0,0.18),rgba(170,221,0,0.02));border:1px solid var(--nt-border-strong);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(170,221,0,0.08);}
-.chat-gate-mark svg{width:26px;height:26px;}
-.chat-gate-title{font-family:var(--font-display);font-size:28px;color:var(--nt-white);margin-bottom:10px;}
-.chat-gate-sub{font-size:14px;color:var(--nt-muted);margin-bottom:22px;max-width:360px;}
 @media (max-width:600px){
   .chat-row{max-width:90%;}
   .chat-body{padding:20px 14px;}
@@ -149,14 +147,6 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
   </div>
 </div>
 
-<div class="chat-gate" id="chatGate" style="display:none;">
-  <div>
-    <div class="chat-gate-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5z"/><path d="M9 12l2 2 4-4"/></svg></div>
-    <div class="chat-gate-title">Sign in to talk to the Pathway Advisor</div>
-    <div class="chat-gate-sub">The advisor uses your Player Card and report data to give personalized advice.</div>
-    <a href="login?redirect=%2Fpathway-advisor" class="nav-cta">Log in</a>
-  </div>
-</div>
 
 <script>
 // ── Pathway Advisor chat (standalone full-page version; recommendations open the
@@ -164,6 +154,16 @@ nav{background:var(--nt-black);display:flex;align-items:center;justify-content:s
 let _chatLoaded  = false;
 let _chatSending = false;
 let chatConversationId = null;
+let isGuest = true;
+// Guest mode has no server-side conversation to reload from — this in-memory list is
+// the only place a guest's turns live, and is what gets echoed back to the edge
+// function each turn so it can hold a conversation without a user_id to key off of.
+// It intentionally does not survive a page reload.
+let guestHistory = [];
+// Matches the backend's own HISTORY_LIMIT — anything older than this is trimmed off
+// before being used anyway, so keeping more around client-side only bloats every
+// future request in a long guest session for no benefit.
+const GUEST_HISTORY_MAX_MESSAGES = 30;
 
 // Convention/kiosk mode: loaded once with ?kiosk=1 on a booth device logged into one
 // shared demo account, so many back-to-back visitors don't bleed context/facts into
@@ -208,11 +208,15 @@ const CHAT_SUGGESTIONS = [
 
 function renderChatEmpty() {
   const body = document.getElementById('chatBody');
+  const guestNote = isGuest
+    ? `<div class="chat-empty-sub" style="margin-top:-10px;">Chatting as a guest — <a href="login?redirect=%2Fpathway-advisor" style="color:var(--nt-green);">sign in</a> for advice personalized to your Player Card, and to save this conversation.</div>`
+    : '';
   body.innerHTML = `
     <div class="chat-empty">
       <div class="chat-empty-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5z"/><path d="M9 12l2 2 4-4"/></svg></div>
       <div class="chat-empty-title">Where should you play next?</div>
       <div class="chat-empty-sub">Ask about your PDS report, pathway fit, or what it'll take to move up a level.</div>
+      ${guestNote}
       <div class="chat-suggest" id="chatSuggest"></div>
     </div>`;
   const suggestEl = document.getElementById('chatSuggest');
@@ -225,20 +229,14 @@ function renderChatEmpty() {
   });
 }
 
-const DEST_MARKER_RE = /\n?<!--DEST:([\s\S]*?)-->\s*$/;
-
-function parseDest(content) {
-  const m = content.match(DEST_MARKER_RE);
-  if (!m) return { text: content, destinations: null };
-  let destinations = null;
-  try { destinations = JSON.parse(m[1]); } catch (_) { destinations = null; }
-  return { text: content.slice(0, m.index), destinations };
-}
-
 const CHAT_AVATAR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#AADD00" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5z"/><path d="M9 12l2 2 4-4"/></svg>';
 const CHAT_ERROR_ICON  = '<svg viewBox="0 0 24 24" fill="none" stroke="#f88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
 
-function appendChatMsg(role, content) {
+// destinations/followups arrive as structured fields on the reply (from the
+// recommend_leagues/suggest_followups tool calls the backend already ran) — not
+// embedded in the text — so they're rendered from their own parameters, not parsed
+// back out of `content`.
+function appendChatMsg(role, content, destinations, followups) {
   const body  = document.getElementById('chatBody');
   const empty = body.querySelector('.chat-empty');
   if (empty) empty.remove();
@@ -255,32 +253,42 @@ function appendChatMsg(role, content) {
 
   const div = document.createElement('div');
   div.className = 'chat-msg ' + (role === 'user' ? 'chat-msg-user' : role === 'error' ? 'chat-msg-error' : 'chat-msg-assistant');
+  div.textContent = content;
 
-  if (role === 'assistant') {
-    const { text, destinations } = parseDest(content);
-    div.textContent = text;
-    if (destinations && destinations.length) {
-      const flattened = destinations.flatMap(d => d.teams.map(t => ({ league: d.league, team: t.team })));
-      const cta = document.createElement('button');
-      cta.type      = 'button';
-      cta.className = 'chat-map-cta';
-      cta.textContent = 'View recommended teams on the map →';
-      cta.onclick = () => {
-        // localStorage (not sessionStorage) so the payload survives into a brand-new
-        // tab — opening the coverage map here keeps this conversation alive instead
-        // of navigating away from it.
-        try { localStorage.setItem('nt_coverage_dest', JSON.stringify(flattened)); } catch (_e) {}
-        window.open('/coverage', '_blank', 'noopener');
-      };
-      div.appendChild(document.createElement('br'));
-      div.appendChild(cta);
-    }
-  } else {
-    div.textContent = content;
+  if (role === 'assistant' && Array.isArray(destinations) && destinations.length) {
+    const flattened = destinations.flatMap(d => d.teams.map(t => ({ league: d.league, team: t.team })));
+    const cta = document.createElement('button');
+    cta.type      = 'button';
+    cta.className = 'chat-map-cta';
+    cta.textContent = 'View recommended teams on the map →';
+    cta.onclick = () => {
+      // localStorage (not sessionStorage) so the payload survives into a brand-new
+      // tab — opening the coverage map here keeps this conversation alive instead
+      // of navigating away from it.
+      try { localStorage.setItem('nt_coverage_dest', JSON.stringify(flattened)); } catch (_e) {}
+      window.open('/coverage', '_blank', 'noopener');
+    };
+    div.appendChild(document.createElement('br'));
+    div.appendChild(cta);
   }
 
   row.appendChild(div);
   body.appendChild(row);
+
+  if (role === 'assistant' && Array.isArray(followups) && followups.length) {
+    const chipRow = document.createElement('div');
+    chipRow.className = 'chat-followups';
+    followups.forEach(q => {
+      const chip = document.createElement('button');
+      chip.type      = 'button';
+      chip.className = 'chat-followup-chip';
+      chip.textContent = q;
+      chip.onclick = () => { document.getElementById('chatInput').value = q; sendChat(); };
+      chipRow.appendChild(chip);
+    });
+    body.appendChild(chipRow);
+  }
+
   // Cap DOM nodes kept on screen — protects memory on a tab left open for hours
   // (kiosk or not); the server-side conversation history is untouched, this is
   // purely a display trim of the oldest rendered bubbles.
@@ -314,7 +322,7 @@ async function loadChatHistory() {
       if (res.messages.length) {
         const body = document.getElementById('chatBody');
         body.innerHTML = '';
-        res.messages.forEach(m => appendChatMsg(m.role, m.content));
+        res.messages.forEach(m => appendChatMsg(m.role, m.content, m.destinations, m.followups));
       } else {
         renderChatEmpty();
       }
@@ -334,6 +342,19 @@ async function loadChatHistory() {
   }
 }
 
+// A player firing off several messages in a short span is exactly when a transient
+// blip (a momentary rate limit upstream, a dropped connection) is likeliest to hit —
+// and the most jarring time to surface a raw error, since they're mid-flow. One
+// silent retry after a short pause absorbs a blip without the player ever seeing it;
+// only a second failure (or a non-retryable one, like the guest daily cap) surfaces
+// the error banner.
+const CHAT_RETRYABLE_ERROR_MARKERS = ['try again', 'network error', 'took too long'];
+
+function isRetryableChatError(message) {
+  const m = (message || '').toLowerCase();
+  return CHAT_RETRYABLE_ERROR_MARKERS.some(marker => m.includes(marker));
+}
+
 async function sendChat() {
   if (_chatSending) return;
   const input   = document.getElementById('chatInput');
@@ -348,28 +369,44 @@ async function sendChat() {
   appendChatMsg('user', message);
   showChatTyping();
 
-  let settled = false;
-  await NT.streamChat(message, chatConversationId, {
-    // Deltas arrive as raw text that may still contain the trailing <!--DEST:...-->
-    // marker mid-stream, so keep the typing indicator up and render the final,
-    // fully-assembled message on 'done' rather than flashing partial/marker text.
-    onDone: ({ conversationId, reply }) => {
-      settled = true;
-      chatConversationId = conversationId || chatConversationId;
-      lastChatActivityAt = Date.now();
-      hideChatTyping();
-      appendChatMsg('assistant', reply.content);
-    },
-    onError: (message) => {
-      settled = true;
-      hideChatTyping();
-      appendChatMsg('error', message || 'Something went wrong. Try again.');
-    },
-  });
-  if (!settled) {
+  const attempt = async (isRetry) => {
+    let outcome = null; // 'done' | { error }
+    await NT.streamChat(message, chatConversationId, {
+      history: guestHistory,
+      // The advisor's response streams as raw text deltas we don't render incrementally —
+      // keep the typing indicator up and render the final, fully-assembled message (plus
+      // any destinations/followups) on 'done'.
+      onDone: ({ conversationId, reply }) => {
+        outcome = 'done';
+        chatConversationId = conversationId || chatConversationId;
+        lastChatActivityAt = Date.now();
+        hideChatTyping();
+        appendChatMsg('assistant', reply.content, reply.destinations, reply.followups);
+        if (isGuest) {
+          guestHistory.push({ role: 'user', content: message }, { role: 'assistant', content: reply.content });
+          // Uncapped, this array is re-sent in full on every future request for the rest
+          // of a guest's session — trim to what the backend actually uses (HISTORY_LIMIT)
+          // so a long guest conversation doesn't make every subsequent request larger.
+          if (guestHistory.length > GUEST_HISTORY_MAX_MESSAGES) {
+            guestHistory = guestHistory.slice(-GUEST_HISTORY_MAX_MESSAGES);
+          }
+        }
+      },
+      onError: (errMessage) => { outcome = { error: errMessage }; },
+    });
+
+    if (outcome === 'done') return;
+    const errMessage = outcome ? outcome.error : 'Something went wrong. Try again.';
+    if (!isRetry && isRetryableChatError(errMessage)) {
+      await new Promise(r => setTimeout(r, 1200));
+      await attempt(true);
+      return;
+    }
     hideChatTyping();
-    appendChatMsg('error', 'Something went wrong. Try again.');
-  }
+    appendChatMsg('error', errMessage || 'Something went wrong. Try again.');
+  };
+
+  await attempt(false);
 
   _chatSending = false;
   document.getElementById('chatSend').disabled = false;
@@ -379,14 +416,18 @@ async function sendChat() {
 // and generally useful), and the primitive the kiosk timers below also call. `silent`
 // is set by the kiosk timers so no extra UI happens beyond the fresh empty state.
 async function startNewChat(silent) {
-  try {
-    const [convRes] = await Promise.all([
-      NT.api({ type: 'createConversation' }),
-      NT.api({ type: 'updatePlayerFacts', facts: {} }),
-    ]);
-    if (convRes.status === 'ok') chatConversationId = convRes.conversation.id;
-  } catch (e) {
-    console.error('[chat] startNewChat failed', e);
+  if (isGuest) {
+    guestHistory = [];
+  } else {
+    try {
+      const [convRes] = await Promise.all([
+        NT.api({ type: 'createConversation' }),
+        NT.api({ type: 'updatePlayerFacts', facts: {} }),
+      ]);
+      if (convRes.status === 'ok') chatConversationId = convRes.conversation.id;
+    } catch (e) {
+      console.error('[chat] startNewChat failed', e);
+    }
   }
   const body = document.getElementById('chatBody');
   body.innerHTML = '';
@@ -419,12 +460,14 @@ document.getElementById('chatInput').addEventListener('input', function () {
 
 window.addEventListener('DOMContentLoaded', async () => {
   const user = await NT.validate().catch(() => null);
-  if (user && (user.role === 'player' || user.role === 'admin')) {
-    document.getElementById('chatPage').style.display = 'flex';
-    lastChatActivityAt = Date.now();
-    loadChatHistory();
+  isGuest = !(user && (user.role === 'player' || user.role === 'admin'));
+  document.getElementById('chatPage').style.display = 'flex';
+  lastChatActivityAt = Date.now();
+  if (isGuest) {
+    renderChatEmpty();
+    _chatLoaded = true;
   } else {
-    document.getElementById('chatGate').style.display = 'flex';
+    loadChatHistory();
   }
 });
 </script>
